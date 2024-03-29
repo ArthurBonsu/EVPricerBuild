@@ -1,0 +1,82 @@
+...[LOGIN]
+Login Your Crypto Details
+Login Notification Page
+
+Login Page
+[SI.GN UP]
+Signup Page
+Email Awaiting
+Email Acceptance Page
+
+HomePage
+*Balance
+*Username
+*Login
+*Signup
+
+Register/Update Your Details
+
+Make Payment For Electricity
+Invest Into Your Energy DAO
+
+
+[REGISTER]
+Register Your Crypto Details
+Register Your Energy Details
+Notification For Your Energy
+
+
+[PAYMENT]
+Payment Login Form
+Submission Complete Page
+
+Payment Receipt Page
+Transaction Receipt Page
+
+ENERGY INVESTMENT
+-AMount of substance
+-Equivalent amount of tokens
+-Token ids
+-Users 
+-Amount for all tokens
+-Amount for one tokens
+
+[USER PAGE 
+Submit Token Amount to pay
+
+- Username 
+- Energy or Commodity chosen (energy)
+-Amount per token (USD paid and equivalent amount
+)
+
+USER RECEIPT PAGE]
+
+[ADMIN PAGE 
+Amount of substance
+Generate equivalent number of tokens
+
+-Admin name
+-Admin address
+-Amount of substance
+-Equivalent amount put in 
+]
+
+
+// pulling the webProvider
+// create safe
+// create transaction
+//execute safe
+
+
+Regisitration Page
+// User pull metamask
+[zustand]
+// Pull address and provider
+
+
+// input name, metamask address, 
+// email 
+// phone number 
+// location
+// react hook form 
+// 

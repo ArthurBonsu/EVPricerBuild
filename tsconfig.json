@@ -1,0 +1,70 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    // Other compiler options...
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".",
+    "types": [
+      "heroicons__react"
+    ], // Added types option
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./app/*"
+      ],
+      "theme": [
+        "./node_modules/theme"
+      ],
+      "@config/*": [
+        "./config/*"
+      ],
+      "@components/*": [
+        "./components/*"
+      ],
+      "@chakra-ui/react": [
+        "node_modules/@chakra-ui/react"
+      ],
+      "next-auth/react": [
+        "node_modules/next-auth/react"
+      ],
+      "react-query": [
+        "node_modules/react-query"
+      ],
+      "react-query/*": [
+        "node_modules/react-query/*"
+      ],
+      "@types/react-query": [
+        "node_modules/@types/react-query"
+      ]
+    },
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
