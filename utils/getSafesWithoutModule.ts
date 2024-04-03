@@ -12,12 +12,12 @@ declare let window: any
 
 
 //get the safes that dont have modules here 
-
+  
 export const getSafesWithoutModule = async () => {
   const web3Provider = window.ethereum
   const provider = new ethers.providers.Web3Provider(web3Provider)
   const owner = provider.getSigner(0)
-  const [signer] = await hre.ethers.getSigners();
+  const signer = owner;
 const ethAdapter = new EthersAdapter({ ethers, signerOrProvider: owner });
 const safeService = new SafeServiceClient({ txServiceUrl, ethAdapter });
   const signedUser = await owner.getAddress()

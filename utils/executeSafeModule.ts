@@ -1,4 +1,5 @@
-
+// name should be create transactions and and proposes themm. Thus we then have a safe address
+//execute will then have finished it oof. However we have the enable safe doing everything already 
 import { ethers } from 'ethers'
 const hre = require ("hardhat")
 import EthersAdapter from '@gnosis.pm/safe-ethers-lib'
@@ -36,6 +37,7 @@ export const executeModule = async (safeAddress: string): Promise<ReturnType> =>
   const [signer] = await hre.ethers.getSigners();
   const ethAdapter = new EthersAdapter({ ethers,  signerOrProvider: owner});
   const safeService = new SafeServiceClient({ txServiceUrl, ethAdapter });
+  // create safe with the adapter 
   const safe = await Safe.create({ ethAdapter, safeAddress });
   const { threshold }: SafeInfoResponse = await safeService.getSafeInfo(safeAddress)
   // create transaction object
@@ -44,7 +46,7 @@ export const executeModule = async (safeAddress: string): Promise<ReturnType> =>
     value: '0',
     data,
   })
-
+   // create multisig transactions 
   const multisigTransactions = await safeService.getMultisigTransactions(safeAddress)
   const sameTransaction = multisigTransactions.results.find(
     ({ data: transactionItem }) => transactionItem === ENABLE_MODULE_SIG

@@ -1,9 +1,10 @@
+//the name is confusing a bit, it should be set up safe, transactions, propose and execute transactions 
 import { ethers } from 'ethers'
 const hre = require ("hardhat")
 import EthersAdapter from '@gnosis.pm/safe-ethers-lib'
 import {ethAdaptername} from 'utils/ethadapters'
 
-
+//
 import Safe, { SafeFactory, SafeAccountConfig,EthSignSignature } from '@gnosis.pm/safe-core-sdk';
 
 import SafeServiceClient, { SafeInfoResponse } from '@gnosis.pm/safe-service-client'
@@ -16,6 +17,7 @@ const txServiceUrl = "https://safe-transaction.rinkeby.gnosis.io"
 
 let transactionDataExtract;
 
+// this name should be different 
 const iface = new ethers.utils.Interface(moduleAbi)
 const data = iface.encodeFunctionData('enableModule', [MODULE_ADDRESS])
 
