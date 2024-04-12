@@ -20,7 +20,7 @@
     "incremental": true,
     "baseUrl": ".",
     "types": [
-      "heroicons__react"
+      "react-icons"
     ], // Added types option
     "plugins": [
       {
