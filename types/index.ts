@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import { ComponentType, FC } from 'react'
 import { dateAtTime,  timeAgo,   dateFormat, DateType } from 'utils/formatDate'
-
+import NextAuth, { DefaultSession } from "next-auth";
 export interface TransfersType {
   count: Number
   countUniqueNonce: Number
@@ -334,3 +334,16 @@ export type SafeTransacTransactionData = {
   refundReceiver: string 
   nonce: number 
 }
+
+ declare module "next-auth" {
+  export interface Session {
+    user: {
+      id: string;
+    } & DefaultSession["user"];
+   
+  }
+  export interface  User {
+    id: string;
+
+   }
+  }

@@ -1,3 +1,4 @@
+// pages/HomePage.tsx
 import { FC, useState } from 'react';
 import { FaChevronUp, FaClone, FaLock, FaSignInAlt, FaUserPlus, FaPlus, FaBookOpen, FaCube } from 'react-icons/fa';
 import { BsInfoCircle, BsGithub, BsTwitter, BsGoogle } from 'react-icons/bs';
@@ -7,9 +8,8 @@ import Services from '@components/Services';
 import Footer from '@components/Footer';
 import { Flex, Center, HStack, Heading, Button } from '@chakra-ui/react';
 
-import { useSession, signIn } from 'next-auth/react';  // Updated import
+import { useSession, signIn, signOut } from 'next-auth/react';
 import { useEthersStore } from 'stores/ethersStore';
-import { signOut } from 'next-auth/react';
 
 // Assuming your state has a property named 'address'
 type EthersStoreState = {
@@ -42,16 +42,15 @@ const HomePage: FC = () => {
               <div className="min-h-screen">
                 <div className='gradient-bg-welcome'>
                   <Heading> You are signed in as {session?.user?.email} </Heading>
-                  <NavBar title={'Dao Page For Blockchain'} address={'blockchain address'} />
-                  <Button> Sign Out</Button>
-                  <Button onClick={async () => await handleSignOut()}>SignIn </Button>
+                  <NavBar title={'Dao Page For Blockchain'} address={address} />
+                  <Button onClick={async () => await handleSignOut()}>Sign Out</Button>
                 </div>
                 <Services
-           color={'blue'}
-          title={'BlockDaO Services'}
-           icon={<BsInfoCircle />}
-           subtitle={'We deliver multiple services such as DAO and Crowdsource funds for you and your partners'}
-             />
+                  color={'blue'}
+                  title={'BlockDaO Services'}
+                  icon={<BsInfoCircle />}
+                  subtitle={'We deliver multiple services such as DAO and Crowdsource funds for you and your partners'}
+                />
                 <Footer
                   message={'Please join us as we make this world a better place'}
                   community={'Community'}

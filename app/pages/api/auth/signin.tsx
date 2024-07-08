@@ -31,7 +31,7 @@ import { useSession, signIn, signOut } from 'next-auth/react';
 import { BsGithub, BsTwitter, BsGoogle } from 'react-icons/bs';
 import { signInWithPopup } from 'firebase/auth';
 import { GoogleAuthProvider, TwitterAuthProvider } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import { auth, db } from 'firebaseConfig';
 
 const providers = [
   { name: 'github', Icon: BsGithub },

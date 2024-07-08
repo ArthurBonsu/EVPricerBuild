@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 const  {Heading} =require ('@chakra-ui/react');
 const Protected  = ( ) => {
     const {push} = useRouter()
+         // router.push can also be used 
     const {data:session, status }  = useSession({
         required:true,
         onUnauthenticated: () => {

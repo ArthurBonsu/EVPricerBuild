@@ -1,0 +1,2 @@
+File = [...nextauth].js in pages/api/auth
+\dynamic route handler fo

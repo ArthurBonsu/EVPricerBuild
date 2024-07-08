@@ -1,4 +1,5 @@
-//the name is confusing a bit, it should be set up safe, transactions, propose and execute transactions 
+//the name is confusing a bit, it should be set up safe, transactions, propose and execute transactions
+// execute only creates transactions and execute directly  
 import { ethers } from 'ethers'
 const hre = require ("hardhat")
 import EthersAdapter from '@gnosis.pm/safe-ethers-lib'
