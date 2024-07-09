@@ -34,7 +34,7 @@ import { GoogleAuthProvider, TwitterAuthProvider } from 'firebase/auth';
 import { auth, db } from 'firebaseConfig';
 
 const providers = [
-  { name: 'github', Icon: BsGithub },
+  { name: 'github',   Icon: BsGithub },
   { name: 'twitter', Icon: BsTwitter },
   { name: 'google', Icon: BsGoogle },
 ];
