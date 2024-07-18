@@ -3,7 +3,6 @@
     "next/core-web-vitals"
   ],
   "rules": {
-    "react/display-name": ["error", { "ignoreTranspilerName": false }],
-    // ... other rules
+    "react/display-name": ["error", { "ignoreTranspilerName": false }]
   }
 }

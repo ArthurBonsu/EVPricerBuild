@@ -1,4 +1,3 @@
-// /pages/api/auth/[...nextauth].ts
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import GithubProvider from 'next-auth/providers/github';
 import TwitterProvider from 'next-auth/providers/twitter';
@@ -57,6 +56,8 @@ const options: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
 };
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const authHandler = async (req: NextApiRequest, res: NextApiResponse) => {
   return NextAuth(req, res, options);
 };
+
+export default authHandler;

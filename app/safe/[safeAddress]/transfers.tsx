@@ -1,18 +1,23 @@
 // File: ./app/safe/[safeAddress]/transfers.tsx
 
+import React, { ReactNode } from 'react';
 import { Box, Spinner, Table, Thead, Th, Tbody, Tr, Td } from '@chakra-ui/react';
 import { useQuery } from 'react-query';
 import { useRouter } from 'next/router';
-import { useForm, SubmitHandler } from 'react-hook-form'; // Import React Hook Form
-import { useEthersStore, EtherStore } from 'stores/ethersStore'; // Import EtherStore
-import PageSelection from '@components/PageSelection';
-import { getLayout, WithPageLayout } from '@components/Layout';
-import queries from 'services/queries';
-import { ErrorType, TransfersType, ExtendedTransferType } from 'types/index';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { useEthersStore, EtherStore } from '../../../stores/ethersStore'; // Adjusted import path
+import PageSelection from '../../../components/PageSelection'; // Adjusted import path
+import { getLayout } from '../../../components/Layout/Layout'; // Adjusted import path
+import queries from '../../../services/queries'; // Adjusted import path
+import { ErrorType, TransfersType, ExtendedTransferType } from '../../../types'; // Adjusted import path
 
 interface FormData {
   // Define your form fields here
 }
+
+export type WithPageLayout = React.FC & {
+  getLayout?: (title: string) => (page: ReactNode) => ReactNode;
+};
 
 const Transfers: WithPageLayout = () => {
   const { query } = useRouter();
@@ -39,7 +44,6 @@ const Transfers: WithPageLayout = () => {
     }
   );
 
-  // Your form submit function
   const onSubmit: SubmitHandler<FormData> = (data) => {
     console.log(data);
     // Handle your form submission logic here
@@ -81,7 +85,7 @@ const Transfers: WithPageLayout = () => {
       {isError && (
         <Box>
           <span>
-            Error: {Object.values(errors).map((error) => error.message).join(', ') ||  'An unexpected error occurred'}
+            Error: {Object.values(errors).map((error) => error.message).join(', ') || 'An unexpected error occurred'}
           </span>
         </Box>
       )}
@@ -95,5 +99,8 @@ const Transfers: WithPageLayout = () => {
   );
 };
 
-Transfers.getLayout = getLayout('Transfers');
+Transfers.getLayout = function (title: string) {
+  return (page: ReactNode) => getLayout(title)({ page });
+};
+
 export default Transfers;

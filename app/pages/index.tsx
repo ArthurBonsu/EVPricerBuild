@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { Button, Grid } from '@chakra-ui/react';
 import { useSession, signOut } from 'next-auth/react';
 import { useEthersStore } from 'stores/ethersStore';
+import SignUpPage from './SignUpPage';
 
 const Home: FC = () => {
   const [isCurrentPage, setisCurrentPage] = useState(false);
@@ -39,6 +40,7 @@ const Home: FC = () => {
   return (
     <Grid placeItems="center" h="100vh">
       <Button onClick={handleConnect}>Connect</Button>
+      <SignUpPage />
     </Grid>
   );
 };

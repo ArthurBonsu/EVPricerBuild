@@ -1,3 +1,5 @@
+// Layout.tsx
+
 import React, { FC, PropsWithChildren, ReactNode, useEffect } from 'react';
 import {
   Box,
@@ -20,9 +22,9 @@ import getHiddenVersion from 'utils/getHiddenName';
 import { useEthersStore } from 'stores/ethersStore';
 import { BasicAuth } from './BasicAuth';
 
-interface LayoutProps extends PropsWithChildren {
+interface LayoutProps extends PropsWithChildren<{
   title: string;
-}
+}> {}
 
 const Layout: FC<LayoutProps> = React.memo(({ children, title }) => {
   const toast = useAppToast();
@@ -100,5 +102,15 @@ const Layout: FC<LayoutProps> = React.memo(({ children, title }) => {
 
 Layout.displayName = 'Layout'; // Set display name for the component
 
-const getLayout = (title: string) => (page: ReactNode) => <Layout title={title}>{page}</Layout>;
-export default getLayout;
+// Export the getLayout function properly
+export const getLayout = (title: string) => {
+  const WrappedLayout: FC<{ page: ReactNode }> = ({ page }) => (
+    <Layout title={title}>{page}</Layout>
+  );
+
+  WrappedLayout.displayName = `getLayout(${title})`; // Set display name for the wrapped component
+
+  return WrappedLayout;
+};
+
+export default Layout;

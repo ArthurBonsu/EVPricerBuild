@@ -1,14 +1,19 @@
-// File: ./app/safe/[safeAddress]/assets.tsx
+// ./app/safe/[safeAddress]/assets.tsx
 
 import { Box, Spinner, Table, Thead, Th, Tbody, Tr, Td } from '@chakra-ui/react';
 import { useQuery } from 'react-query';
 import { useRouter } from 'next/router';
 
+import React, { ReactNode } from 'react';
 import PageSelection from '@components/PageSelection';
-import { getLayout, WithPageLayout } from '@components/Layout';
+import { getLayout } from '../../../components/Layout/Layout';
 import queries from 'services/queries';
 import { limitDecimals } from 'utils/tokenUtils';
 import { ErrorType, AssetType } from 'types'; // Import the ErrorType and AssetType interfaces
+
+export type WithPageLayout = React.FC & {
+  getLayout?: (title: string) => (pageProps: { page: ReactNode }) => ReactNode;
+};
 
 const Assets: WithPageLayout = () => {
   const { query } = useRouter();
@@ -83,5 +88,8 @@ const Assets: WithPageLayout = () => {
   );
 };
 
-Assets.getLayout = getLayout('Assets');
+Assets.getLayout = function (title: string) {
+  return getLayout(title);
+};
+
 export default Assets;

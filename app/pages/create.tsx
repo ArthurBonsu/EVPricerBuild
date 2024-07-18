@@ -1,8 +1,6 @@
+// Create.tsx
 
-// Update the import statement in create.tsx
-import { createSafe } from 'utils/createSafe'; // Use the correct relative path
-
-
+import React, { ReactNode } from 'react';
 import {
   Flex,
   Grid,
@@ -19,42 +17,45 @@ import {
   NumberDecrementStepper,
   InputGroup,
   InputRightAddon,
-} from '@chakra-ui/react'
+} from '@chakra-ui/react';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { getLayout, WithPageLayout } from '@components/Layout';
+import { createSafe } from 'utils/createSafe';
+import { getLayout } from '../../components/Layout/Layout';// Adjust the import path if needed
 
-//require ("../hardhat.config")
+type Address = {
+  value: string;
+};
 
-type address = {
-  value: string
-}
+type FormData = {
+  threshold: number;
+  address: Address[];
+};
 
-type formData = {
-  treshold: number
-  address: address[]
-}
+// Define a type for components that use a custom layout
+export type WithPageLayout = React.FC & {
+  getLayout?: (title: string) => (pageProps: { page: ReactNode }) => ReactNode;
+};
 
-export const Create: WithPageLayout = () => {
+const Create: WithPageLayout = () => {
   const {
     control,
     register,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm<formData>()
+  } = useForm<FormData>();
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'address',
-  
-  })
+  });
 
-  const submit = async ({ address, treshold }: formData) => {
-    const filteredAddresses = address.map(({ value }) => value)
-    if (filteredAddresses.length < treshold) {
-      alert('Treshold is greater than the number of owners')
+  const submit = async ({ address, threshold }: FormData) => {
+    const filteredAddresses = address.map(({ value }) => value);
+    if (filteredAddresses.length < threshold) {
+      alert('Threshold is greater than the number of owners');
     } else {
-      await createSafe( treshold,filteredAddresses)
+      await createSafe(threshold, filteredAddresses);
     }
-  }
+  };
 
   return (
     <Grid placeItems="center" w="full" h="100vh">
@@ -65,47 +66,45 @@ export const Create: WithPageLayout = () => {
             gap: '20px',
           }}
         >
-         
           <form onSubmit={handleSubmit(submit)}>
-            {Boolean(fields.length === 0) && <Text>Please add owners..</Text>}
+            {fields.length === 0 && <Text>Please add owners..</Text>}
             {fields.map((field, index) => (
-            
-            <>
-            <InputGroup key={field.id} size="sm">
-                <Input {...register(`address.${index}.value`,  { required: true })} mb="5px" bg="white" />
+              <InputGroup key={field.id} size="sm" mb="5px">
+                <Input
+                  {...register(`address.${index}.value`, { required: true })}
+                  bg="white"
+                />
                 <InputRightAddon>
-                  <Text onClick={() => remove(index)} _hover={{ cursor: 'pointer' }}>
+                  <Text
+                    onClick={() => remove(index)}
+                    _hover={{ cursor: 'pointer' }}
+                  >
                     Remove
                   </Text>
                 </InputRightAddon>
               </InputGroup>
-
-
-              <Flex justifyContent="space-between" alignItems="center">
-            <Text>Address  </Text>
-            <Button bg="blue.200" _hover={{ bg: 'blue.300' }} textColor="white" onClick={() =>{ 
-               append({value:'append'});
-           }}>
-              Add
-            </Button>
-          </Flex>
-          
-              </>
-            ))
-            
-            
-            
-            }
+            ))}
+            <Flex justifyContent="space-between" alignItems="center" mb="5px">
+              <Text>Address</Text>
+              <Button
+                bg="blue.200"
+                _hover={{ bg: 'blue.300' }}
+                textColor="white"
+                onClick={() => append({ value: '' })}
+              >
+                Add
+              </Button>
+            </Flex>
             <Flex flexDirection="column" mt="20px">
               <FormControl>
-                <FormLabel htmlFor="amount" fontWeight="normal">
-                  Treshold
+                <FormLabel htmlFor="threshold" fontWeight="normal">
+                  Threshold
                 </FormLabel>
                 <NumberInput max={fields.length} min={1} w="90px">
                   <NumberInputField
-                    id="treshold"
-                    key="treshold"
-                    {...register(`treshold`, { required: true })}
+                    id="threshold"
+                    key="threshold"
+                    {...register(`threshold`, { required: true })}
                     bg="white"
                   />
                   <NumberInputStepper>
@@ -115,7 +114,6 @@ export const Create: WithPageLayout = () => {
                 </NumberInput>
               </FormControl>
             </Flex>
-
             <Button
               bg="blue.200"
               _hover={{ bg: 'blue.300' }}
@@ -131,8 +129,12 @@ export const Create: WithPageLayout = () => {
         </Flex>
       </Box>
     </Grid>
-  )
-}
+  );
+};
 
-Create.getLayout = getLayout('Create Safe')
-export default Create
+// Assign the getLayout function to the Create component
+Create.getLayout = function (title: string) {
+  return getLayout(title);
+};
+
+export default Create;
