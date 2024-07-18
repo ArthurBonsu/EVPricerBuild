@@ -18,8 +18,10 @@
     "clean": "rimraf ./cache && rimraf ./artifacts",
     "prettier": "prettier --write 'contracts/**/*.sol'",
     "test-clean": "yarn clean && yarn test",
-    "list-files": "ls -R C:\\Users\\iscf\\my-next-js-app\\peeapp\\app",
-    "generate:route": "ts-node generateRoute.ts"
+    "list-files": "tree /F /A > project_structure.txt",
+    "generate:route": "ts-node generateRoute.ts",
+    "generate-structure": "tree -L 2 -I 'node_modules|.next|*.log|*.json|*.lock|public|static'"
+
   },
   "lint-staged": {
     "{**/*,*}.{json,css,md}": [

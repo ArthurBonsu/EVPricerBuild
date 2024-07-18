@@ -1,0 +1,142 @@
+C:\Users\iscf\my-next-js-app\peeapp
+├── @ensdomains
+├── app
+│   ├── api
+│   │   ├── auth
+│   │   │   ├── error.tsx
+│   │   │   ├── new-user.tsx
+│   │   │   ├── signin.tsx
+│   │   │   ├── signout.tsx
+│   │   │   ├── signup.tsx
+│   │   │   ├── welcome.tsx
+│   │   │   └── [...nextauth].ts
+│   │   └── users
+│   │       └── [user].ts
+│   ├── pages
+│   │   ├── favicon.ico
+│   │   ├── global.css
+│   │   ├── HomePage.tsx
+│   │   ├── index.tsx
+│   │   ├── layout.tsx
+│   │   ├── LoginPage.tsx
+│   │   ├── originaltokenswap.tsx
+│   │   ├── page.tsx
+│   │   ├── _app.tsx
+│   │   ├── create.tsx
+│   │   ├── Crowdsource.tsx
+│   │   ├── DAO.tsx
+│   │   ├── SecuredSwap.tsx
+│   │   ├── SignUpPage.tsx
+│   │   ├── SimpleTransferPage.tsx
+│   │   ├── SwapTransfer.tsx
+│   │   ├── useSession.tsx
+│   └── layout.tsx
+├── components
+│   ├── AppAlertDialog
+│   │   └── AppAlertDialog.tsx
+│   ├── AppModal
+│   │   └── AppModal.tsx
+│   ├── ApproveTransfer
+│   │   └── ApproveTransfer.tsx
+│   ├── AppSidebar
+│   │   └── AppSidebar.tsx
+│   ├── AppSignUP
+│   │   └── AppSignUP.tsx
+│   ├── CreateTransfer
+│   │   └── CreateTransfer.tsx
+│   ├── CrowdSource
+│   │   └── CrowdSource.tsx
+│   ├── CSV
+│   │   └── CSV.tsx
+│   ├── DAO
+│   │   └── DAO.tsx
+│   ├── ExecuteTransfer
+│   │   └── ExecuteTransfer.tsx
+│   ├── Footer
+│   │   └── Footer.tsx
+│   ├── Layout
+│   │   └── Layout.tsx
+│   ├── Loader
+│   │   └── Loader.tsx
+│   ├── LoadSafeTransfer
+│   │   └── LoadSafeTransfer.tsx
+│   ├── NavBar
+│   │   └── NavBar.tsx
+│   ├── PaymentTransfer
+│   │   └── PaymentTransfer.tsx
+│   ├── RejectTransfer
+│   │   └── RejectTransfer.tsx
+│   ├── SecureSwap
+│   │   └── SecureSwap.tsx
+│   ├── Services
+│   │   └── Services.tsx
+│   ├── SimpleTransfer
+│   │   └── SimpleTransfer.tsx
+│   ├── SwapTransfer
+│   │   └── SwapTransfer.tsx
+│   ├── Transaction
+│   │   └── Transaction.tsx
+│   ├── AppSignIn
+│   │   └── AppSignIn.tsx
+│   ├── MetaTags
+│   │   └── MetaTags.tsx
+│   ├── PageSelection
+│   │   └── PageSelection.tsx
+├── config
+│   └── index.ts
+├── constants
+│   └── index.ts
+├── context
+│   └── AuthContext.tsx
+├── contracts
+│   └── MyContract.sol
+├── database
+│   └── connection.ts
+├── deploy
+│   └── deploy.js
+├── dynamic route handler.txt
+├── etherspackagejsonmarch302024.txt
+├── firebaseConfig.tsx
+├── ganache-cli
+├── ganache-core
+├── generateRoute.ts
+├── hooks
+│   └── useAuth.ts
+├── images
+│   └── logo.png
+├── next-env.d.ts
+├── next.config.js
+├── node_modules
+│   ├── [many directories and files]
+├── package-lock.json
+├── package.json
+├── packagejson.txt
+├── Page Layout.txt
+├── postcss.config.js
+├── Project Algorithm.txt
+├── project_structure.txt
+├── public
+│   ├── favicon.ico
+│   └── vercel.svg
+├── README.md
+├── services
+│   └── authService.ts
+├── stores
+│   └── store.ts
+├── structure.txt
+├── styles
+│   └── globals.css
+├── tailwind.config.ts
+├── test
+│   └── app.test.ts
+├── theme
+│   └── index.ts
+├── tsconfig.json
+├── types
+│   └── next-auth.d.ts
+├── utils
+│   └── helpers.ts
+├── validation.ts
+└── yarn.lock
+
+directory: 22 file: 20

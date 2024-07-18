@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Next.js: Full-stack",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/peeapp", // Correct directory path
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["dev"],
+      "port": 9229,
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/peeapp/.next/**/*.js"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "Next.js: Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/peeapp", // Correct directory path
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack://_N_E/./*": "${webRoot}/*"
+      }
+    }
+  ]
+}

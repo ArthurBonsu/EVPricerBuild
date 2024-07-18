@@ -1,0 +1,49 @@
+
+C:\Users\iscf\my-next-js-app\peeapp
+├── @ensdomains
+├── app
+├── components
+├── config
+├── constants
+├── context
+├── contracts
+├── database
+├── deploy
+├── dynamic route handler.txt
+├── etherspackagejsonmarch302024.txt
+├── firebaseConfig.tsx
+├── ganache-cli
+├── ganache-core
+├── generateRoute.ts
+├── hooks
+├── images
+├── next-env.d.ts
+├── next.config.js
+├── node_modules
+├── package-lock.json
+├── package.json
+├── packagejson.txt
+├── Page Layout.txt
+├── postcss.config.js
+├── Project Algorithm.txt
+├── project_structure.txt
+├── public
+├── README.md
+├── services
+├── stores
+├── structure.txt
+├── styles
+├── tailwind.config.ts
+├── test
+├── theme
+├── tsconfig.json
+├── types
+├── utils
+├── validation.ts
+└── yarn.lock
+
+directory: 22 file: 19
+
+
+
+[2K[1G
