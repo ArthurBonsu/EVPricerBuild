@@ -1,28 +1,28 @@
+import React, { ReactNode } from 'react';
 import { Box, Button, Spinner, VStack } from '@chakra-ui/react';
 import Router from 'next/router';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
 import { ethers } from 'ethers';
 import queries from 'services/queries';
-import { getLayout, WithPageLayout } from '@components/Layout';
+import { getLayout } from '../../components/Layout/Layout'; // Adjusted import path
 import { useEthersStore, EtherStore } from 'stores/ethersStore';
 import getSafesWithoutModule from 'utils/getSafesWithoutModule';
 
-// Instead of destructuring, import the 'utils' namespace directly from ethers
-//import utils from 'ethers'; // Import utils directly
-
-const walletAddress = '0x1234567890123456789012345678901234567890'; // Replace with your actual wallet address
-
 // Ensure the wallet address is valid before calling utils.getAddress
+const walletAddress = '0x1234567890123456789012345678901234567890'; // Replace with your actual wallet address
 const walletCheckSumAddress = walletAddress ? ethers.utils.getAddress(walletAddress) : '';
 console.log('Checksum address:', walletCheckSumAddress); // Example usage
+
+export type WithPageLayout = React.FC & {
+  getLayout?: (title: string) => (page: ReactNode) => ReactNode;
+};
 
 const Safe: WithPageLayout = () => {
   const walletAddress = useEthersStore((state: EtherStore) => state.address);
   
-
-// Ensure the wallet address is valid before calling utils.getAddress
-const walletCheckSumAddress = walletAddress ? ethers.utils.getAddress(walletAddress) : '';
+  // Ensure the wallet address is valid before calling utils.getAddress
+  const walletCheckSumAddress = walletAddress ? ethers.utils.getAddress(walletAddress) : '';
 
   const [selectedSafe, setSelectedSafe] = useState<string | undefined>();
   const { data, isLoading } = useQuery(`safe-${walletCheckSumAddress}`, queries.getSafe(walletCheckSumAddress), {
@@ -80,5 +80,9 @@ const walletCheckSumAddress = walletAddress ? ethers.utils.getAddress(walletAddr
   );
 };
 
-Safe.getLayout = getLayout('Safes');
+Safe.getLayout = function (title: string) {
+  return (page: ReactNode) => getLayout(title)({ page });
+};
+
+
 export default Safe;

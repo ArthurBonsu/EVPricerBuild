@@ -7,6 +7,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { useEthersStore } from 'stores/ethersStore';
 import SignUpPage from './SignUpPage';
 
+
 const Home: FC = () => {
   const [isCurrentPage, setisCurrentPage] = useState(false);
   const [isRegistration, setIsRegistration] = useState(false);
