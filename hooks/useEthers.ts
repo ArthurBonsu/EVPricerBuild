@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { ethers } from 'ethers'
-const hre = require("hardhat");
 import Web3Modal from 'web3modal'
 import { useEthersStore, INITIAL_STATE } from 'stores/ethersStore'
 import { getChainDetails, isChainSupported } from 'utils/etherUtils'
@@ -49,7 +48,6 @@ const useEthers = () => {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const subscribeWalletEvents = async (walletProvider: any, supportedNetwork: boolean) => {
     if (!walletProvider.on) return
 

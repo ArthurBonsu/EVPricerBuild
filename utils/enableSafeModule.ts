@@ -1,113 +1,115 @@
-//the name is confusing a bit, it should be set up safe, transactions, propose and execute transactions
-// execute only creates transactions and execute directly  
-import { ethers } from 'ethers'
-const hre = require ("hardhat")
-import EthersAdapter from '@gnosis.pm/safe-ethers-lib'
-import {ethAdaptername} from 'utils/ethadapters'
+import Web3 from 'web3';
+import EthersAdapter from '@gnosis.pm/safe-ethers-lib';
+import Safe, { SafeFactory, SafeAccountConfig, EthSignSignature } from '@gnosis.pm/safe-core-sdk';
+import SafeServiceClient, { SafeInfoResponse } from '@gnosis.pm/safe-service-client';
+import { moduleAbi } from 'constants/abi';
 
-//
-import Safe, { SafeFactory, SafeAccountConfig,EthSignSignature } from '@gnosis.pm/safe-core-sdk';
-
-import SafeServiceClient, { SafeInfoResponse } from '@gnosis.pm/safe-service-client'
-import { moduleAbi } from 'constants/abi'
-import { SiZazzle } from 'react-icons/si';
-
-const MODULE_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string
-const txServiceUrl = "https://safe-transaction.rinkeby.gnosis.io"
-//const safeService = new SafeServiceClient('https://safe-transaction.rinkeby.gnosis.io',)
+const MODULE_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string;
+const txServiceUrl = "https://safe-transaction.rinkeby.gnosis.io";
 
 let transactionDataExtract;
 
-// this name should be different 
-const iface = new ethers.utils.Interface(moduleAbi)
-const data = iface.encodeFunctionData('enableModule', [MODULE_ADDRESS])
+// ABI encoding function data
+const iface = new Web3().eth.abi;
+const data = iface.encodeFunctionCall(
+  {
+    name: 'enableModule',
+    type: 'function',
+    inputs: [
+      {
+        type: 'address',
+        name: 'module'
+      }
+    ]
+  },
+  [MODULE_ADDRESS]
+);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare let window: any
+declare let window: any;
 
 type ReturnType = {
-  status: 'waiting' | 'success'
-}
+  status: 'waiting' | 'success';
+};
 
-
-//Nuance problem, a transaction must be created on the blockchain for us to do a Gnosis safe to it .
-
-// function for enablinng module, creates transactions and sends multiple transactions
-// We could create several modules and create them with
-
-// so for creating transactions and for executing transactions 
 export const enableModule = async (safeAddress: string): Promise<ReturnType> => {
+  // Initialize Web3 with the provider injected by MetaMask
+  const web3Provider = window.ethereum;
+  const web3 = new Web3(web3Provider);
+  const accounts = await web3.eth.getAccounts();
+  const owner = accounts[0];
 
-  const web3Provider = window.ethereum
-  const provider = new hre.ethers.providers.Web3Provider(web3Provider)
-  const owner = provider.getSigner(0)
+  // Initialize the EthersAdapter with the Web3 provider and signer
+  const ethAdapter = new EthersAdapter({
+    web3,
+    signerOrProvider: owner,
+  });
 
-
-  const [signer] = await hre.ethers.getSigners();
-  const ethAdapter = new EthersAdapter({  ethers,
-    signerOrProvider: owner, });
-  const safeService = new SafeServiceClient({ txServiceUrl, ethAdapter });
+  const safeService = new SafeServiceClient({
+    txServiceUrl,
+    ethAdapter,
+  });
 
   const safe = await Safe.create({
-ethAdapter: new EthersAdapter({
-          ethers,
-          signerOrProvider: owner,
-    }),
+    ethAdapter,
     safeAddress,
-  })
-  const signedUser = await owner.getAddress()
-  const { threshold }: SafeInfoResponse = await safeService.getSafeInfo(safeAddress)
-  // create transaction object
+  });
+
+  const signedUser = owner;
+  const { threshold }: SafeInfoResponse = await safeService.getSafeInfo(safeAddress);
+
+  // Create transaction object
   const transaction = await safe.createTransaction({
     to: safeAddress,
     value: '0',
     data,
-  })
+  });
 
-  const { data: transactionData } = transaction
-  transactionDataExtract=transactionData;
-  const multisigTransactions = await safeService.getMultisigTransactions(safeAddress)
+  const { data: transactionData } = transaction;
+  transactionDataExtract = transactionData;
+  const multisigTransactions = await safeService.getMultisigTransactions(safeAddress);
   const sameTransaction = multisigTransactions.results.find(
     ({ data: transactionItem }) => transactionItem === transactionData.data
-  )
+  );
+
   const isCurrentUserAlreadySigned = sameTransaction?.confirmations?.some(
     ({ owner: ownerItem }) => ownerItem === signedUser
-  )
+  );
 
   if (isCurrentUserAlreadySigned) {
-    return { status: 'waiting' }
+    return { status: 'waiting' };
   }
 
-  // sign, shows modal
-  await safe.signTransaction(transaction).catch((err) => err)
+  // Sign the transaction
+  await safe.signTransaction(transaction).catch((err) => err);
 
-  // gets txhas
-  const safeTxHash = await safe.getTransactionHash(transaction)
-  const senderSignature = await safe.signTransactionHash(safeTxHash)
+  // Get the transaction hash
+  const safeTxHash = await safe.getTransactionHash(transaction);
+  const senderSignature = await safe.signTransactionHash(safeTxHash);
 
-  // sends transaction offchain
+  // Propose the transaction offchain
   await safeService.proposeTransaction({
     safeAddress,
     safeTransactionData: transactionDataExtract,
     safeTxHash,
     senderAddress: signedUser,
     senderSignature: senderSignature.data,
-  
-  })
+  });
 
-  // confirm that transactions have been created and execute the model 
+  // Confirm and execute the transaction if threshold is reached
   if (sameTransaction?.confirmations?.length) {
     if (threshold - sameTransaction.confirmations.length <= 1) {
       sameTransaction.confirmations.forEach((confirmation) => {
-        const signature = new EthSignSignature(confirmation.owner, confirmation.signature)
-        transaction.addSignature(signature)
-      })
-      const { transactionResponse } = await safe.executeTransaction(transaction)
-      await transactionResponse?.wait()
-      return { status: 'success' }
+        const signature = new EthSignSignature(confirmation.owner, confirmation.signature);
+        transaction.addSignature(signature);
+      });
+      const { transactionResponse } = await safe.executeTransaction(transaction);
+      await transactionResponse?.wait();
+      return { status: 'success' };
     }
   }
-  return { status: 'waiting' }
-}
 
-export default enableModule
+  return { status: 'waiting' };
+};
+
+export default enableModule;

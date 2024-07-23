@@ -7,16 +7,15 @@ import { useSession, signOut } from 'next-auth/react';
 import { useEthersStore } from 'stores/ethersStore';
 import SignUpPage from './SignUpPage';
 
-
 const Home: FC = () => {
-  const [isCurrentPage, setisCurrentPage] = useState(false);
+  const [isCurrentPage, setIsCurrentPage] = useState(false);
   const [isRegistration, setIsRegistration] = useState(false);
   const [isTransaction, setIsTransaction] = useState(false);
   const [isSwapping, setIsSwapping] = useState(false);
 
   const { push } = useRouter();
   const { data: session, status } = useSession();
-  const address = useEthersStore((state: { address: string }) => state.address);
+  const address = useEthersStore(state => state.address);
 
   useEffect(() => {
     if (address) {

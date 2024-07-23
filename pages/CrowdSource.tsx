@@ -1,6 +1,6 @@
 // Import necessary modules and components
 import { FC, useState } from 'react';
-import { useSession, signOut, signIn } from 'next-auth/react'; // Make sure to import signIn
+import { useSession, signOut, signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useEthersStore } from 'stores/ethersStore';
 import NavBar from '@components/NavBar';
@@ -13,7 +13,7 @@ const Crowdsource: FC = () => {
   const { data: session } = useSession();
   
   // State for different sections of the page
-  const [isCurrentPage, setisCurrentPage] = useState(false);
+  const [isCurrentPage, setIsCurrentPage] = useState(false);
   const [isRegistration, setIsRegistration] = useState(false);
   const [isTransaction, setIsTransaction] = useState(false);
 
@@ -32,18 +32,18 @@ const Crowdsource: FC = () => {
   };
 
   return (
-    <Flex color='white'>
-      <Center w='100px' bg='green.500'>
-        <HStack spacing='24px'>
+    <Flex color='white' direction="column" minH="100vh">
+      <Center w="full" bg="green.500" py={6}>
+        <HStack spacing="24px">
           {/* Display different content based on user session */}
           {session ? (
             <>
               <div className="min-h-screen">
                 <div className='gradient-bg-welcome'>
-                  <Heading > You are signed in as {session.user?.email} </Heading>
+                  <Heading mb={4}>You are signed in as {session.user?.email}</Heading>
                   <NavBar title={'Dao Page For Blockchain'} address={address} />
                   <SimpleTransfer />
-                  <Button onClick={handleSignOut}>Sign Out</Button>
+                  <Button onClick={handleSignOut} mt={4}>Sign Out</Button>
                 </div>
                 {/* Other components */}
                 <Footer
@@ -52,17 +52,17 @@ const Crowdsource: FC = () => {
                   copyright={'Trademark Policy'}
                   blog={'Blog'}
                   FAQ={'FAQ'}
-                  Contact={'blockdao@gmail.com'}
-                  Githuburl={'https://github.com/ArthurBonsu'}
-                  Twitterurl={'https://twitter.com/home'}
-                  Discordurl={'https://uniswap.org/blog/uniswap-v3'}
+                  contact={'blockdao@gmail.com'}
+                  githubUrl={'https://github.com/ArthurBonsu'}
+                  twitterUrl={'https://twitter.com/home'}
+                  discordUrl={'https://uniswap.org/blog/uniswap-v3'}
                 />
               </div>
             </>
           ) : (
             <>
-              <Heading > You are not signed in </Heading>
-              <Button onClick={() => signIn()}> Sign In </Button> {/* Use signIn as a function */}
+              <Heading mb={4}>You are not signed in</Heading>
+              <Button onClick={() => signIn()}>Sign In</Button>
             </>
           )}
         </HStack>

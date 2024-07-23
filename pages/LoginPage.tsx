@@ -1,3 +1,5 @@
+// pages/LoginPage.tsx
+
 import { useRouter } from 'next/router';
 import {
   Avatar,
@@ -31,7 +33,7 @@ import { useSession, signIn, signOut } from 'next-auth/react';
 import { BsGithub, BsTwitter, BsGoogle } from 'react-icons/bs';
 import { signInWithPopup } from 'firebase/auth';
 import { GoogleAuthProvider, TwitterAuthProvider } from 'firebase/auth';
-import { auth } from '../../firebaseConfig';
+import { auth } from '../firebaseConfig';
 
 const providers = [
   { name: 'github', Icon: BsGithub },
@@ -63,11 +65,16 @@ const SignIn: FC<LoginProps> = ({ isCollapsed = false, username, email, password
     }
   }, [hasCopied, toast]);
 
+  useEffect(() => {
+    if (session) {
+      setTimeout(() => {
+        router.push('/');
+      }, 5000);
+    }
+  }, [session, router]);
+
   if (status === 'loading') return <Heading>Checking Authentication ...</Heading>;
   if (session) {
-    setTimeout(() => {
-      router.push('/');
-    }, 5000);
     return <Heading>You are already signed in</Heading>;
   }
 

@@ -1,4 +1,4 @@
-// Create.tsx
+// pages/create.tsx
 
 import React, { ReactNode } from 'react';
 import {
@@ -20,7 +20,8 @@ import {
 } from '@chakra-ui/react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { createSafe } from 'utils/createSafe';
-import { getLayout } from '../../components/Layout/Layout';// Adjust the import path if needed
+import { getLayout } from '../components/Layout/Layout'; // Adjust the import path if needed
+import Web3 from 'web3';
 
 type Address = {
   value: string;
