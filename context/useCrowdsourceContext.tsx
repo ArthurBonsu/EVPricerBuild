@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 
 //import { contractABI, contractAddress } from '../constants/constants';
 import {Transactions} from 'types/ethers'
-
+import { BigNumberish } from 'ethers';
 const contractABI = "";
 const contractAddress = "";
 const { ethereum } = window;
@@ -42,7 +42,6 @@ const useCrowdsourceContext = () => {
   // Pull transaction
   // Using options 1
   // Using Option 2 for Etherscan
-  
   const getAllTransactions = async () => {
     try {
       if (ethereum) {
@@ -51,10 +50,10 @@ const useCrowdsourceContext = () => {
         const structuredTransactions = availableTransactions.map((transaction: BlockchainTransaction) => ({
           addressTo: transaction.receiver,
           addressFrom: transaction.sender,
-          timestamp: new Date(ethers.BigNumber.from(transaction.timestamp).toNumber() * 1000).toLocaleString(),
+          timestamp: new Date(Number(transaction.timestamp.valueOf()) * 1000).toLocaleString(),
           message: transaction.message,
           keyword: transaction.keyword,
-          amount: parseInt(ethers.BigNumber.from(transaction.amount)._hex) / (10 ** 18)
+          amount: parseInt(transaction.amount.valueOf().toString()) / (10 ** 18)
         }));
         console.log(structuredTransactions);
         setTransactions(structuredTransactions);
@@ -65,7 +64,7 @@ const useCrowdsourceContext = () => {
       console.log(error);
     }
   };
-
+  
   const checkIfWalletIsConnect = async () => {
     try {
       if (!ethereum) return alert("Please install MetaMask.");
@@ -87,11 +86,11 @@ const useCrowdsourceContext = () => {
    const checkIfTransactionsExists = async () => {
     try {
       if (ethereum) {
-        const transactionsContract = createEthereumContract();
+        const transactionsContract = await createEthereumContract();
         const currentTransactionCount = await transactionsContract.getTransactionCount();
-
         window.localStorage.setItem("transactionCount", currentTransactionCount);
       }
+      
     } catch (error) {
       console.log(error);
 
@@ -118,7 +117,7 @@ const useCrowdsourceContext = () => {
     try {
       if (ethereum) {
         const { addressTo, amount, keyword, message } = formData;
-        const transactionsContract = createEthereumContract();
+        const transactionsContract = await createEthereumContract();
         const parsedAmount = ethers.parseEther(amount);
 
         await ethereum.request({
@@ -127,7 +126,7 @@ const useCrowdsourceContext = () => {
             from: currentAccount,
             to: addressTo,
             gas: "0x5208",
-            value: parsedAmount._hex,
+            value: ethers.formatEther(parsedAmount),
           }],
         });
 
@@ -173,3 +172,4 @@ const useCrowdsourceContext = () => {
 
 
     export default useCrowdsourceContext;
+ 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { Button, Grid } from '@chakra-ui/react';
 import { useSession, signOut } from 'next-auth/react';
 import { useEthersStore } from 'stores/ethersStore';
-import SignUpPage from './SignUpPage';
+import SignUpPage from '../pages/signuppage';
 
 const Home: FC = () => {
   const [isCurrentPage, setIsCurrentPage] = useState(false);

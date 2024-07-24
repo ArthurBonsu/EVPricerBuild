@@ -31,7 +31,7 @@ contract Safe {
     event TransactionApproved(uint256 indexed txId, address indexed owner);
     event TransactionExecuted(uint256 indexed txId);
     event ExecutionFailure(uint256 indexed txId);
-
+    event ConfirmTransaction(uint256 indexed txId);
     // Modifier to check if the caller is an owner
     modifier onlyOwner() {
         require(owners[msg.sender] > 0, "Only owners can call this function");
@@ -106,9 +106,8 @@ contract Safe {
             approvals: 0,
             executed: false
         }));
-
         emit Transferred(destination, value);
-        confirmTransaction(transactionId);
+        emit ConfirmTransaction(transactionId);
     }
 
     // Approve a transaction

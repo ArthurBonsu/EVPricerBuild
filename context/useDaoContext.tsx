@@ -12,10 +12,11 @@ const { ethereum } = window;
 
 const useDaoContext = () => {
     
- const createEthereumContract = () => {
-  const provider = new ethers.providers.Web3Provider(ethereum);
-  const signer = provider.getSigner();
-  const transactionsContract = new ethers.Contract(contractAddress, contractABI, signer);
+  const createEthereumContract = async () => {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    const transactionsContract = new ethers.Contract(contractAddress, contractABI, signer);
+
 
   return transactionsContract;
 };
@@ -37,11 +38,10 @@ const useDaoContext = () => {
   // Using options 1
   // Using Option 2 for Etherscan
   
- const getAllTransactions = async () => {
+  const getAllTransactions = async () => {
     try {
       if (ethereum) {
-        const transactionsContract = createEthereumContract();
-
+        const transactionsContract = await createEthereumContract();
         const availableTransactions = await transactionsContract.getAllTransactions();
 
         const structuredTransactions = availableTransactions.map((transaction:BlockchainTransaction) => ({
@@ -85,7 +85,7 @@ const useDaoContext = () => {
    const checkIfTransactionsExists = async () => {
     try {
       if (ethereum) {
-        const transactionsContract = createEthereumContract();
+        const transactionsContract = await createEthereumContract();
         const currentTransactionCount = await transactionsContract.getTransactionCount();
 
         window.localStorage.setItem("transactionCount", currentTransactionCount);
@@ -116,8 +116,8 @@ const useDaoContext = () => {
     try {
       if (ethereum) {
         const { addressTo, amount, keyword, message } = formData;
-        const transactionsContract = createEthereumContract();
-        const parsedAmount = ethers.utils.parseEther(amount);
+        const transactionsContract = await createEthereumContract();
+        const parsedAmount = ethers.parseEther(amount);
 
         await ethereum.request({
           method: "eth_sendTransaction",
@@ -125,7 +125,7 @@ const useDaoContext = () => {
             from: currentAccount,
             to: addressTo,
             gas: "0x5208",
-            value: parsedAmount._hex,
+            value: ethers.formatEther(parsedAmount),
           }],
         });
 

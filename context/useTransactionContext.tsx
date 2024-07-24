@@ -1,339 +1,261 @@
 import React, { useEffect, useState } from "react";
-import { ContractFactory, ethers, Signer, BigNumber,Contract } from "ethers";
+import { ethers, Signer, BigNumberish, Contract, BrowserProvider } from "ethers";
+import { PaymentTransactions, SimpleTransferTranscations, Receipients } from 'types/index';
+import { TransactionRequest } from "@ethersproject/abstract-provider";
+import { Provider } from "@ethersproject/providers";
+import chai from "chai";
+import BN from "bn.js";
+import "chai-as-promised";
+import { contractAddress } from '../constants/constants';
 
-//import { contractABI, contractAddress,FileTokenUpgradeableABI,  FileTokenUpgradeableV2ABI, FileTokenUpgradeableAddress,
- // FileTokenUpgradeableV2Address } from "../constants/constants";
+chai.use(require("chai-bn")(BN));
+
+const { ethereum } = window;
+
 let contractABI = "";
 let contractAddress = "";
- import { PaymentTransactions,   } from 'types/index'
-import { SimpleTransferTranscations, Receipients  } from 'types/index'
-const chai  = require("chai");
-const BN =require('bn.js')
-chai.use(require('chai-bn')(BN));
-const chaiaspromised = require("chai-as-promised");
-const { Wallet } = require("ethers");
-const { ethereum } = window;
-require("@nomiclabs/hardhat-web3")
-import {Provider} from "@ethersproject/providers"
 
-import   { TransactionRequest }  from "@ethersproject/abstract-provider";
-//import { contractABI, contractAddress } from '../constants/constants';
-
-
-interface transactionParams {
-  username?: string 
-  address: string 
-  amount: number 
-  comment?: string 
-  timestamp: Date
-  receipient:string,
-  receipients?: Array<string>
-  
-  txhash: string 
-  USDprice?:  number 
-  paymenthash?: string 
-  owneraddress?:string
-  newcontract?: Contract
-  }
-
-  interface simpleTransferParams {
-    username?: string 
-    address: string 
-    amount: number 
-    comment?: string 
-    timestamp: Date
-    receipient:string 
-    receipients?: Array<string>
-    txhash: string 
-    USDprice?:  number 
-    paymenthash?: string 
-    owneraddress?:string
-    newcontract?: Contract
-
-    }
-  
-
-interface sendTransactionProp {
- signer: Signer 
-provider: Provider 
-transactionObject?:PaymentTransactions
-transactionRequest?:TransactionRequest
-newcontract?: Contract
+interface TransactionParams {
+  username?: string;
+  contractaddress: string;
+  amount: number;
+  comment?: string;
+  timestamp: Date;
+  receipient: string;
+  receipients?: Array<string>;
+  txhash: string;
+  USDprice?: number;
+  paymenthash?: string;
+  owneraddress: string;
+  newcontract?: Contract;
 }
 
-  let receipient = " "; 
- let _theowneraddress= "0x06Da25591CdF58758C4b3aBbFf18B092e4380B65";
- const transferobjectAArray:  Array<Object> = [{}]; 
+interface SimpleTransferParams {
+  username?: string;
+  contractaddress: string;
+  amount: number;
+  comment?: string;
+  timestamp: Date;
+  receipient: string;
+  receipients?: Array<string>;
+  txhash: string;
+  USDprice?: number;
+  paymenthash?: string;
+  owneraddress: string;
+  newcontract?: Contract;
+}
+
+interface SendTransactionProps {
+  signer: Signer;
+  provider:BrowserProvider;
+  transactionObject?: PaymentTransactions;
+  transactionRequest?: TransactionRequest;
+  newcontract?: Contract;
+}
 
 const useTransactionContext = () => {
-    
- const createEthereumContract = () => {
-  // Also like passing API key to infura this is normally done for wallet cases and things that work like Infura
-  const provider = new ethers.providers.Web3Provider(ethereum);
-   
-  // is it calling this thhing Wallet now (since API is passed)
-  //FOR SIGNERS
-  const signer = provider.getSigner();
-    
-  // And making the signer the active we can retrieve the address inside
-  let thisaccount = signer.connect(provider);
-  thisaccount.getAddress();
+  const createEthereumContract = async () => {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    const SimpleTransfer = new ethers.Contract(contractAddress, contractABI, signer);
+    return { SimpleTransfer, signer, provider };
+  };
 
-  // WE USE THE REQUEST PROCESS
+  const [PaymentformData, setPaymentFormData] = useState<TransactionParams>({
+    username: "",
+    contractaddress: "",
+    amount: 0,
+    comment: "",
+    timestamp: new Date(),
+    receipient: "",
+    receipients: [],
+    txhash: "",
+    USDprice: 0,
+    paymenthash: "",
+    owneraddress: ""
+  });
 
-
-
-  const SimpleTransfer: Contract = new ethers.Contract(contractAddress, contractABI, signer);
-  SimpleTransfer.connect(signer);
-  return {SimpleTransfer, signer, provider, thisaccount} ;
-};
-
-  let accounts:Array<string> ;
-// Provides transaction information here 
-// Picking these values from the form 
-  const [PaymentformData, setformData] = useState<transactionParams>({username: "", address:"", amount:0, comment:"", timestamp:new Date("2019-05-27"),  
-  receipient:"", receipients: [],txhash:"" , USDprice:0, paymenthash: "", owneraddress:"" });
-
-  const [transferformData, setTransferformData] = useState<transactionParams>({username: "", address:"", amount:0, comment:"", timestamp:new Date("2019-05-27"),  
-  receipient:"", receipients: ['0x'],txhash:"" , USDprice:0, paymenthash: "", owneraddress:"" });
+  const [transferformData, setTransferFormData] = useState<TransactionParams>({
+    username: "",
+    contractaddress: "",
+    amount: 0,
+    comment: "",
+    timestamp: new Date(),
+    receipient: "",
+    receipients: ["0x"],
+    txhash: "",
+    USDprice: 0,
+    paymenthash: "",
+    owneraddress: ""
+  });
 
   const [currentAccount, setCurrentAccount] = useState("");
-
-  const [transactionCount, setTransactionCount] = useState(localStorage.getItem("transactionCount"));
-
-
-  const [paymenttransactionreceipt,setPayment ] = useState({});
-
-  const [transfertransaction,setTransfer ] = useState({});
-  
+  const [transactionCount, setTransactionCount] = useState(localStorage.getItem("transactionCount") || "0");
+  const [paymentTransactionReceipt, setPayment] = useState({});
+  const [transferTransaction, setTransfer] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
+  const [tokenTxReceipt, setTokenTxReceipt] = useState({});
+  const [transferredTokenAmount, setTransferredTokenAmount] = useState(0);
+  const [paidTokenAmount, setPaidTokenAmount] = useState(0);
+  const [ourUSDPrice, setUSDPrice] = useState(0);
+  const [accountsProvided, setAccountsProvided] = useState<string[]>([]);
+  const [paymentTransactionRequest, setPaymentTransactionRequest] = useState<TransactionRequest>({});
+  const [transferTransactionRequest, setTransferTransactionRequest] = useState<TransactionRequest>({});
 
-  const [tokentxreceipt,setTokentxReceipt ] = useState({});
-  const [token]  = useState({})
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
+    setPaymentFormData((prevState) => ({ ...prevState, [name]: e.target.value }));
+  };
 
-
-  const [fullpaymentx, setfullPaymenttx] = useState({});
-  const [fulltransfertx, setfullTransafertx] =useState({});
-  
- //  const [amount, setTokenAmount] = useState(localStorage.getItem("TokenSwapAmount"));
-
- const [transferredtokenamount, setTransferredTokenAmount] = useState(0);  
- const [paidTokenamount, setPaidTokenAmount] = useState(0);  
- const [ourUSDPrice, setUSDprice] = useState(0)
- const [accountsprovided, setAccounts ] = useState([]);
- const [paymentransactionRequest, setPaymenttransactionRequest] = useState({})
- const [transfertransactionRequest, setTransfertransactionRequest] = useState({})
-
-
-
- 
-
- const handleChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
-  setformData((prevState) => ({ ...prevState, [name]: e.target.value }));
-};
-  // Connecting to the Smart Contract
-  // Pull transaction
-  // Using options 1
-  // Using Option 2 for Etherscan
-  
-  
-  const sendPayment = async ({ username, amount, address, USDprice, txhash, paymenthash, owneraddress, newcontract, timestamp, receipients }: transactionParams) => {
-   setIsPaid(false);
-    const paymentcounter: number =0;
-try {
-  if (ethereum) {
-    const {SimpleTransfer, signer, provider} = createEthereumContract();
-    setIsPaid(true);
-    
-    // passing in value here
-    const amountoftokens =  ethers.BigNumber.from(amount);
- 
-    console.log("This is the amount of tokens",amountoftokens );
-    
-   
-    const paymentamounttx = await SimpleTransfer.attach(address).payfee(USDprice) ;
-    
-   const paymentreceipt =     paymentamounttx.wait();
-   
-      console.log ("Payment Fee", paymentreceipt);
-
-      console.log ('Payment fee hash' +  await paymentreceipt.hash);
-    
-  
-    paymentcounter +1;
-     
-    const filter = SimpleTransfer.filters.payfeeevent( address, USDprice);
-    const results = await SimpleTransfer.queryFilter(filter) ;
-
-    
-    console.log(results); 
-   
-     const paymentreceiptaddress:string = paymentreceipt.events[0].args.sender.toString();
-     const paymentpriceevented:number = paymentreceipt.events[0].args.amount.toNumber();
-     
-     console.log('paymentaddress',paymentreceiptaddress); 
-     console.log('paymentpriceevented',paymentpriceevented); 
-     
-     newcontract = SimpleTransfer;
-
-    const  transactionObject: PaymentTransactions  = {
-      username: username || "", 
-      address:address, 
-      amount:amount, 
-      comment:"",
-      timestamp:new Date("2019-05-27"), 
-      receipient:"",
-      receipients: [""],
-      txhash:txhash, 
-      USDprice: USDprice || 0, // Provide a default value of 0
-      paymenthash: paymenthash || "", // Provide a default value of an empty string
-      owneraddress: _theowneraddress 
-     }
-
-     const transactionRequest : TransactionRequest= {
-      to: _theowneraddress,
-      from: address,
-      nonce: SimpleTransfer.getTransactionCount(),        
-      data: paymentreceipt.data,
-      value:amount
-        
-    }
-     
-     setformData(transactionObject); 
-     
-     
-     
-   
-     setPaidTokenAmount(amount);
-    
-     setPayment(paymentreceipt);
-     
-  
-     setfullPaymenttx(paymentamounttx);
-     setPaymenttransactionRequest(transactionRequest);
-
-
-    sendTransaction({signer,provider,transactionObject, transactionRequest, newcontract});
-    setIsPaid(true);
-  } else {
-    console.log("Ethereum is not present");
-  }
-} catch (error) {
-  console.log(error);
-}
-};
-
-
- const sendSimpleTransfer = async ({ username, address, amount, comment, timestamp,  
- receipient, receipients,txhash, USDprice, paymenthash, owneraddress, newcontract}: simpleTransferParams) => {
-  const simpletransfercounter: number =0;
-  try {
+  const sendPayment = async ({ username, amount, contractaddress, receipient, USDprice, txhash, paymenthash, owneraddress, timestamp }: TransactionParams) => {
+    setIsPaid(false);
+    try {
       if (ethereum) {
-        const {SimpleTransfer, signer, provider, thisaccount} = createEthereumContract();
-        const amountoftokens =  ethers.BigNumber.from(amount);
-     
-        console.log("This is the amount of tokens",amountoftokens );
-      
-        if (receipients != null ) {
-        receipients
-        .map((item, index) => {
-          receipient = receipients[index];
+        const { SimpleTransfer, signer, provider } = await createEthereumContract();
+        setIsPaid(true);
 
-        });
-      
- 
-        const submitokentx  = await SimpleTransfer.transferFrom(address,receipient, amountoftokens) ;
-     
-        const tokensubmittxreipt =        submitokentx.wait();
-        setTokentxReceipt(tokensubmittxreipt);
-        
-        const filter = SimpleTransfer.filters.transfer(simpletransfercounter );
-        const results = await SimpleTransfer.queryFilter(filter) ;
+        const amountOfTokens = ethers.parseEther(amount.toString());
 
-        
-        console.log(results); 
-       
-        newcontract = SimpleTransfer;
-         const addressretrieved:number = submitokentx.events[0].args.address.toString();
-         const receipientretrieved:number = submitokentx.events[0].args.receipient.toString();
-         const newtokenamount:number = submitokentx.events[0].args.amount.toNumber();
-         console.log('addressretrieved',addressretrieved); 
-         console.log('receipientretrieved',receipientretrieved); 
-         console.log('newtokenamount',newtokenamount); 
-         
-     
-        simpletransfercounter+1;
-        
-        owneraddress = _theowneraddress;
-     
-        const transactionObject = {
-      
-            username: username , 
-            address:address, 
-            amount:amount , 
-            comment:comment ,
-            timestamp:timestamp, 
-            receipient:receipient ,
-            receipients: receipients ,
-            txhash:txhash , 
-            USDprice:USDprice,
-            paymenthash: paymenthash,
-            owneraddress: _theowneraddress
-           
-           
-       }
-       const transactionRequest :TransactionRequest =  {
-        from: address,
-        to: receipient ,
-        value:amountoftokens,
-        nonce:  SimpleTransfer.getTransactionCount(),
-      
+        console.log("This is the amount of tokens", amountOfTokens);
 
-       }
-      
-       setfullTransafertx(submitokentx);
-    
-      simpletransfercounter+1;
-   
-    
-      setTransferformData({ 
-        username: username || '', // Ensure username is always a string
-        address: address, 
-        amount: amount, 
-        comment: comment || '', // Ensure comment is always a string
-        timestamp: timestamp, 
-        receipient: receipient, 
-        receipients: receipients, 
-        txhash: txhash, 
-        USDprice: USDprice, 
-        paymenthash: paymenthash || '', // Ensure paymenthash is always a string
-        owneraddress: _theowneraddress
-      }); 
-      sendTransaction({signer, provider,  transactionRequest, newcontract});
-      setTransferredTokenAmount(amount);
-      setTransfertransactionRequest(transactionRequest);
-     transferobjectAArray.push(transactionObject);
-    }
+        const paymentAmountTx = await SimpleTransfer.payfee(USDprice);
+        const paymentReceipt = await paymentAmountTx.wait();
+
+        console.log("Payment Fee", paymentReceipt);
+        console.log("Payment fee hash", paymentReceipt.transactionHash);
+
+        const filter = SimpleTransfer.filters.payfeeevent(receipient, USDprice);
+        const results = await SimpleTransfer.queryFilter(filter);
+
+        console.log(results);
+
+        const paymentReceiptAddress = paymentReceipt.events[0].args.sender.toString();
+        const paymentPriceEvented = paymentReceipt.events[0].args.amount.toNumber();
+
+        console.log('paymentAddress', paymentReceiptAddress);
+        console.log('paymentPriceEvented', paymentPriceEvented);
+
+        const transactionObject: PaymentTransactions = {
+          username: username || "",
+          address: contractaddress,
+          amount: amount,
+          comment: "",
+          timestamp: new Date(),
+          receipient: "",
+          receipients: [""],
+          txhash: txhash,
+          USDprice: USDprice || 0,
+          paymenthash: paymenthash || "",
+          owneraddress: owneraddress
+        };
+
+        const transactionRequest: TransactionRequest = {
+          to: owneraddress,
+          from: contractaddress,
+          nonce: await SimpleTransfer.getTransactionCount(),
+          data: paymentReceipt.transactionHash,
+          value: amountOfTokens
+        };
+
+        setPaymentFormData(transactionObject);
+        setPaidTokenAmount(amount);
+        setPayment(paymentReceipt);
+        setPaymentTransactionRequest(transactionRequest);
+
+        await sendTransaction({ signer, provider, transactionObject, transactionRequest, newcontract: SimpleTransfer });
+        setIsPaid(true);
       } else {
         console.log("Ethereum is not present");
       }
     } catch (error) {
       console.log(error);
     }
- 
   };
 
+  const sendSimpleTransfer = async ({ username, contractaddress, amount, comment, timestamp, receipient, receipients, txhash, USDprice, paymenthash, owneraddress }: SimpleTransferParams) => {
+    try {
+      if (ethereum) {
+        const { SimpleTransfer, signer, provider } = await createEthereumContract();
+        const amountOfTokens = ethers.parseEther(amount.toString());
 
-  const checkIfWalletIsConnect = async () => {
+        console.log("This is the amount of tokens", amountOfTokens);
+
+        if (receipients) {
+          receipients.forEach((item, index) => {
+            receipient = receipients[index];
+          });
+
+          const submitTokenTx = await SimpleTransfer.transferFrom(contractaddress, receipient, amountOfTokens);
+          const tokenSubmitTxReceipt = await submitTokenTx.wait();
+          setTokenTxReceipt(tokenSubmitTxReceipt);
+
+          const filter = SimpleTransfer.filters.transfer(0);
+          const results = await SimpleTransfer.queryFilter(filter);
+
+          console.log(results);
+
+          const addressRetrieved = tokenSubmitTxReceipt.events[0].args.address.toString();
+          const receipientRetrieved = tokenSubmitTxReceipt.events[0].args.receipient.toString();
+          const newTokenAmount = tokenSubmitTxReceipt.events[0].args.amount.toNumber();
+
+          console.log('addressRetrieved', addressRetrieved);
+          console.log('receipientRetrieved', receipientRetrieved);
+          console.log('newTokenAmount', newTokenAmount);
+
+          const transactionObject: SimpleTransferParams = {
+            username: username || "",
+            contractaddress: contractaddress,
+            amount: amount,
+            comment: comment || "",
+            timestamp: timestamp,
+            receipient: receipient,
+            receipients: receipients || [],
+            txhash: txhash,
+            USDprice: USDprice || 0,
+            paymenthash: paymenthash || "",
+            owneraddress: owneraddress
+          };
+
+          const transactionRequest: TransactionRequest = {
+            from: contractaddress,
+            to: receipient,
+            value: amountOfTokens,
+            nonce: await SimpleTransfer.getTransactionCount(),
+          };
+
+          setTransferFormData({
+            username: username || '',
+            contractaddress: contractaddress,
+            amount: amount,
+            comment: comment || '',
+            timestamp: timestamp,
+            receipient: receipient,
+            receipients: receipients || [],
+            txhash: txhash,
+            USDprice: USDprice || 0,
+            paymenthash: paymenthash || '',
+            owneraddress: owneraddress
+          });
+          await sendTransaction({ signer, provider, transactionRequest, newcontract: SimpleTransfer });
+          setTransferredTokenAmount(amount);
+          setTransferTransactionRequest(transactionRequest);
+        }
+      } else {
+        console.log("Ethereum is not present");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const checkIfWalletIsConnected = async () => {
     try {
       if (!ethereum) return alert("Please install MetaMask.");
 
-      accounts = await ethereum.request({ method: "eth_accounts" });
-     
+      const accounts = await ethereum.request({ method: "eth_accounts" });
+
       if (accounts.length) {
         setCurrentAccount(accounts[0]);
-
         useTransactionContext();
       } else {
         console.log("No accounts found");
@@ -343,101 +265,82 @@ try {
     }
   };
 
-   const checkIfTransactionsExists = async () => {
+  const checkIfTransactionsExist = async () => {
     try {
       if (ethereum) {
-        const {SimpleTransfer, signer, provider, thisaccount} = createEthereumContract();
+        const { SimpleTransfer } = await createEthereumContract();
         const SimpleTransferCount = await SimpleTransfer.getTransactionCount();
-
-        // transaction confirmation to know transaction signature
-
-        window.localStorage.setItem("transactionCount", SimpleTransferCount);
+        window.localStorage.setItem("transactionCount", SimpleTransferCount.toString());
       }
     } catch (error) {
       console.log(error);
-
       throw new Error("No ethereum object");
     }
   };
 
- const connectWallet = async () => {
+  const connectWallet = async () => {
     try {
       if (!ethereum) return alert("Please install MetaMask.");
 
-        // the blockchain accounts here
-     let  accounts = await ethereum.request({ method: "eth_requestAccounts", });
-     setAccounts(accounts)
-      // the specific account
+      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+      setAccountsProvided(accounts);
       setCurrentAccount(accounts[0]);
       window.location.reload();
       return accounts;
-
     } catch (error) {
       console.log(error);
-
       throw new Error("No ethereum object");
     }
-  
-};
+  };
 
-  const sendTransaction = async ({signer,provider, transactionRequest,newcontract} :sendTransactionProp) => {
+  const sendTransaction = async ({ signer, provider, transactionRequest, newcontract }: SendTransactionProps) => {
     try {
-      if (ethereum) {     
-        const accounts = connectWallet();
+      if (ethereum) {
+        await connectWallet();
         if (transactionRequest) {
-          signer.connect(provider).sendTransaction(transactionRequest);
+          await signer.sendTransaction(transactionRequest);
         }
 
         if (newcontract) {
           const transactionsCount = await newcontract.getTransactionCount();
           setTransactionCount(transactionsCount.toNumber());
         }
-        
+
         window.location.reload();
       } else {
         console.log("No ethereum object");
       }
     } catch (error) {
       console.log(error);
-
       throw new Error("No ethereum object");
     }
   };
 
-
   useEffect(() => {
-    checkIfWalletIsConnect();
-    checkIfTransactionsExists();
+    checkIfWalletIsConnected();
+    checkIfTransactionsExist();
   }, [transactionCount]);
 
   return {
-        transferobjectAArray, 
-       fullpaymentx,
-       fulltransfertx,
-        sendPayment ,
-        sendSimpleTransfer,
-        transactionCount,
-        connectWallet,   
-        currentAccount,
-        isLoading,
-        sendTransaction,
-        handleChange,
-        PaymentformData,
-        transferformData,
-      
-        paymenttransactionreceipt,
-        transfertransaction,        
-        isPaid,
-        tokentxreceipt,
-        transferredtokenamount,
-        paidTokenamount,
-        ourUSDPrice,
-       accountsprovided
-        
+    sendPayment,
+    sendSimpleTransfer,
+    transactionCount,
+    connectWallet,
+    currentAccount,
+    isLoading,
+    sendTransaction,
+    handleChange,
+    PaymentformData,
+    transferformData,
+    paymentTransactionReceipt,
+    transferTransaction,
+    isPaid,
+    tokenTxReceipt,
+    transferredTokenAmount,
+    paidTokenAmount,
+    ourUSDPrice,
+    accountsProvided
+  };
+};
 
-     
-      }
-}
-
-
-    export default useTransactionContext;
+export default useTransactionContext;

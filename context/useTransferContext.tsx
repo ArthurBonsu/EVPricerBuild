@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ethers } from "ethers";
+import { ethers, BigNumberish } from 'ethers';
 import { BlockchainTransaction } from "types/ethers";
 
 let contractABI = "";
@@ -9,8 +9,8 @@ const { ethereum } = window;
 
 const useTransactionContext = () => {
   const createEthereumContract = () => {
-    const provider = new ethers.providers.Web3Provider(ethereum);
-    const signer = provider.getSigner();
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
     const transactionsContract = new ethers.Contract(
       contractAddress,
       contractABI,
@@ -53,12 +53,12 @@ const useTransactionContext = () => {
             sender: transaction.sender,
             addressTo: transaction.receiver,
             addressFrom: transaction.sender,
-            timestamp: ethers.BigNumber.from(
+            timestamp: Number(ethers.parseEther(
               transaction.timestamp.toNumber() * 1000
-            ),
+            )),
             message: transaction.message,
             keyword: transaction.keyword,
-            amount: ethers.BigNumber.from(transaction.amount.toString()),
+            amount: ethers.parseEther(transaction.amount.toString()),
           }));
 
         console.log(structuredTransactions);
