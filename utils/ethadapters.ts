@@ -1,8 +1,12 @@
-import Web3 from 'web3';
-import EthersAdapter from '@gnosis.pm/safe-ethers-lib';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+import Web3 from 'web3';
+import EthersAdapter from 'ethers';
+import * as ethers from 'ethers';
+
 declare let window: any;
+let owner :string;
+let ethAdapter: EthersAdapter.ethers.BrowserProvider;
+let  amount: Number;
 
 // Create adapter to capture the provider and the signer
 export const ethAdaptername = async () => {
@@ -12,17 +16,106 @@ export const ethAdaptername = async () => {
 
   // Get accounts and set the first account as the signer
   const accounts = await web3.eth.getAccounts();
-  const owner = accounts[0];
+  owner = accounts[0];
+ 
 
   // Initialize the EthersAdapter with the Web3 provider and signer
-  const ethAdapter = new EthersAdapter({
-    web3,
-    signerOrProvider: owner,
+ ethAdapter = new ethers.BrowserProvider(web3Provider, {
+    name: 'Metamask',
+    chainId: 1,
   });
 
-  return {
-    ethAdapter,
-  };
+  return { ethAdapter, owner };
 };
 
+// Function to sign a transaction
+export const signTransactionBrowserProvider = async (
+  ethAdapter: ethers.BrowserProvider,
+  owner: string,
+  toAddress: string,
+  amount: Number
+) => {
+  const signer = await ethAdapter.getSigner();
+  const txCount = await ethAdapter.getTransactionCount(owner);
+  const tx = await signer.sendTransaction({
+    from: owner,
+    to: toAddress,
+    value: ethers.parseEther(amount.toString()),
+    nonce: txCount,
+  });
+  return tx;
+// Signing implementation saved just in case we need to sign in the future
+  /*
+  const txsendbrowser = await signer.signTransaction({
+    from: owner,
+    to: toAddress,
+    value: ethers.parseEther(amount.toString()),
+    nonce: txCount,
+  });
+  return txsendbrowser;
+*/
+  };
+
+export const signTransactionSigner = async (
+  ethAdapter: ethers.JsonRpcProvider,
+  owner: string,
+  toAddress: string,
+  amount: Number
+) => {
+  const signer = await ethAdapter.getSigner(owner);
+  const txCount = await ethAdapter.getTransactionCount(owner);
+  /*const tx = await signer.signTransaction({
+    from: owner,
+    to: toAddress,
+    value: ethers.parseEther(amount.toString()),
+    nonce: txCount,
+  });
+  return tx;
+*/
+  const txsend = await signer.sendTransaction({
+    from: owner,
+    to: toAddress,
+    value: ethers.parseEther(amount.toString()),
+    nonce: txCount,
+  });
+  return txsend;
+};
+
+// Function to interact with a smart contract
+export const interactWithContract = async (
+  ethAdapter: ethers.JsonRpcProvider | ethers.BrowserProvider,
+  contractAddress: string,
+  contractABI: string,
+  functionName: string,
+  ...args: any[]
+) => {
+  const contract = new ethers.Contract(contractAddress, contractABI, ethAdapter);
+  const result = await contract[functionName](...args);
+  return result;
+};
+// Function to get the balance of the owner address
+export const getBalance = async (
+  ethAdapter: ethers.JsonRpcProvider | ethers.BrowserProvider,
+  owner: string
+) => {
+  const balance = await ethAdapter.getBalance(owner);
+  return ethers.formatEther(balance);
+};
+
+
 export default ethAdaptername;
+
+
+//Now you can call each function separately to perform the desired task:
+
+
+//const { ethAdapter, owner } = await ethAdaptername();
+
+// Sign a transaction
+//const tx = await signTransaction(ethAdapter, owner, '0x...', 1.0);
+
+// Interact with a smart contract
+//const result = await interactWithContract(ethAdapter, '0x...', [...], 'myFunction', ...args);
+
+// Get the balance of the owner address
+//const balance = await getBalance(ethAdapter, owner);

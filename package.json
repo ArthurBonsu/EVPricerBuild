@@ -21,8 +21,6 @@
     "list-files": "tree /F /A > project_structure.txt",
     "generate:route": "ts-node generateRoute.ts",
     "generate-structure": "tree -L 2 -I 'node_modules|.next|*.log|*.json|*.lock|public|static'"
-
-
   },
   "lint-staged": {
     "{**/*,*}.{json,css,md}": [
@@ -229,7 +227,6 @@
   "devDependencies": {
     "@ethersproject/abi": "5.7.0",
     "@ethersproject/providers": "5.7.2",
-  
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@types/chai": "^4.3.4",
     "@types/mocha": "^10.0.1",
@@ -241,7 +238,6 @@
     "eslint-config-next": "^12.3.4",
     "ethereum-waffle": "^4.0.10",
     "file-loader": "^6.2.0",
- 
     "husky": "^8.0.3",
     "raw-loader": "^4.0.2",
     "ts-node": "^10.9.2",

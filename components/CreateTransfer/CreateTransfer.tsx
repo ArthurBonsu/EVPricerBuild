@@ -4,23 +4,23 @@ import { ethers } from 'ethers';
 import EthersAdapter from '@gnosis.pm/safe-ethers-lib';
 import SafeServiceClient from '@gnosis.pm/safe-service-client';
 
-const { InfuraProvider, JsonRpcProvider } = ethers.providers;
-
 const CreateTransfer: React.FC = () => {
-  const [signer, setSigner] = useState<any>(null);
+  const [signer, setSigner] = useState<ethers.Signer | null>(null);
 
   useEffect(() => {
     const web3Provider = (window as any).ethereum;
 
     const connectSigner = async () => {
       try {
-        let provider: ethers.providers.JsonRpcProvider | ethers.providers.InfuraProvider | undefined;
         if (web3Provider) {
-          provider = new JsonRpcProvider(web3Provider); // Pass web3Provider to JsonRpcProvider constructor
-          const signer = provider.getSigner(); // Get the signer from JsonRpcProvider
+          await web3Provider.request({ method: 'eth_requestAccounts' });
+          const provider = new ethers.BrowserProvider(window.ethereum)
+                           
+          const signer = await provider.getSigner();
           setSigner(signer);
         } else {
-          provider = new InfuraProvider('ropsten', 'YourInfuraProjectId');
+          const provider = new ethers.InfuraProvider('ropsten', 'YourInfuraProjectId');
+          console.log('Connected to Infura provider');
           // Infura does not manage accounts, so we cannot get a signer from it
         }
       } catch (error) {
@@ -28,12 +28,8 @@ const CreateTransfer: React.FC = () => {
       }
     };
 
-    if (web3Provider) {
-      connectSigner();
-    } else {
-      console.error('No web3Provider found.');
-    }
-  }, []); // Removed signer from dependencies to prevent infinite loop
+    connectSigner();
+  }, []);
 
   const onSubmit = async () => {
     if (!signer) {
@@ -62,4 +58,4 @@ const CreateTransfer: React.FC = () => {
   );
 };
 
-export default CreateTransfer;
+
