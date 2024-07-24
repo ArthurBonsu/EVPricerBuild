@@ -103,7 +103,7 @@ export const getBalance = async (
 };
 
 
-export default ethAdaptername;
+export default ethAdaptername ;
 
 
 //Now you can call each function separately to perform the desired task:

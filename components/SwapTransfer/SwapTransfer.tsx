@@ -307,7 +307,7 @@ const disclosureProps  = getDisclosureProps()
    const setHashTransactionSigner = useHashTransactionStore((state) => state.setTransactionSigner)
    const setHashTransactionTxLogoUri = useHashTransactionStore((state) => state.setTransactionTxLogoUri)
    const walletAddress = useEthersStore((state) => state.address)
-   const walletCheckSumAddress = walletAddress ? ethers.utils.getAddress(walletAddress) : ''
+   const walletCheckSumAddress = walletAddress ? ethers.getAddress(walletAddress) : ''
 
    setHashTransaction(txhash)       
    setHashTransactionData(txdata)   

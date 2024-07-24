@@ -11,20 +11,20 @@ const { ethereum } = window;
 interface BlockchainTransaction {
   receiver: string;
   sender: string;
-  timestamp: ethers.BigNumber;
+  timestamp: ethers.BigNumberish;
   message: string;
   keyword: string;
-  amount: ethers.BigNumber;
+  amount: ethers.BigNumberish;
 }
 const useCrowdsourceContext = () => {
     
- const createEthereumContract = () => {
-  const provider = new ethers.providers.Web3Provider(ethereum);
-  const signer = provider.getSigner();
-  const transactionsContract = new ethers.Contract(contractAddress, contractABI, signer);
-
-  return transactionsContract;
-};
+  const createEthereumContract = async () => {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner(); // await the signer promise
+    const transactionsContract = new ethers.Contract(contractAddress, contractABI, signer);
+    return transactionsContract;
+  };
+  
 
 // Provides transaction information here 
 
@@ -43,24 +43,20 @@ const useCrowdsourceContext = () => {
   // Using options 1
   // Using Option 2 for Etherscan
   
- const getAllTransactions = async () => {
+  const getAllTransactions = async () => {
     try {
       if (ethereum) {
-        const transactionsContract = createEthereumContract();
-
+        const transactionsContract = await createEthereumContract();
         const availableTransactions = await transactionsContract.getAllTransactions();
-
-        const structuredTransactions = availableTransactions.map((transaction:BlockchainTransaction) => ({
+        const structuredTransactions = availableTransactions.map((transaction: BlockchainTransaction) => ({
           addressTo: transaction.receiver,
           addressFrom: transaction.sender,
-          timestamp: new Date(transaction.timestamp.toNumber() * 1000).toLocaleString(),
+          timestamp: new Date(ethers.BigNumber.from(transaction.timestamp).toNumber() * 1000).toLocaleString(),
           message: transaction.message,
           keyword: transaction.keyword,
-          amount: parseInt(transaction.amount._hex) / (10 ** 18)
+          amount: parseInt(ethers.BigNumber.from(transaction.amount)._hex) / (10 ** 18)
         }));
-
         console.log(structuredTransactions);
-
         setTransactions(structuredTransactions);
       } else {
         console.log("Ethereum is not present");
@@ -123,7 +119,7 @@ const useCrowdsourceContext = () => {
       if (ethereum) {
         const { addressTo, amount, keyword, message } = formData;
         const transactionsContract = createEthereumContract();
-        const parsedAmount = ethers.utils.parseEther(amount);
+        const parsedAmount = ethers.parseEther(amount);
 
         await ethereum.request({
           method: "eth_sendTransaction",

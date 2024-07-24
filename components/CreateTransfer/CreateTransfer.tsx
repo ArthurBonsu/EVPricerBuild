@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Box } from '@chakra-ui/react';
 import { ethers } from 'ethers';
-import EthersAdapter from '@gnosis.pm/safe-ethers-lib';
+//import EthersAdapter from '@gnosis.pm/safe-ethers-lib';
 import SafeServiceClient from '@gnosis.pm/safe-service-client';
+import { ethAdaptername, signTransactionBrowserProvider, signTransactionSigner, interactWithContract, getBalance } from 'utils/ethadapters';
+
 
 const CreateTransfer: React.FC = () => {
   const [signer, setSigner] = useState<ethers.Signer | null>(null);
@@ -32,20 +34,37 @@ const CreateTransfer: React.FC = () => {
   }, []);
 
   const onSubmit = async () => {
+    
+  const { ethAdapter, owner } = await ethAdaptername();
+  const tx = await signTransactionBrowserProvider(ethAdapter, owner, '0x...', 1.0);
+  // const result = await interactWithContract(ethAdapter, '0x...', [...], 'myFunction', ...args);
+  const balance = await getBalance(ethAdapter, owner);
     if (!signer) {
       console.error('Signer not connected.');
       return;
     }
 
-    const ethAdapter = new EthersAdapter({
-      ethers: ethers,
-      signerOrProvider: signer
-    });
+   
+// Set up the Safe contract ABI and address
+const safeAbi = ['']; // ABI of the Safe contract
+const safeAddress = '0x...'; // Address of the Safe contract
 
-    const safeService = new SafeServiceClient({
-      txServiceUrl: 'https://safe-transaction.gnosis.io/ropsten',
-      ethAdapter
-    });
+// Create an ethers provider
+const provider = new ethers.BrowserProvider(window.ethereum);
+
+// Create a Safe contract instance
+const safeContract = new ethers.Contract(safeAddress, safeAbi, provider);
+
+// Implement Safe functionality (e.g., sending assets)
+async function sendAsset(amount:Number, recipient:string ) {
+  const tx = await safeContract.transfer(
+    recipient,
+    ethers.parseEther(amount.toString())
+  );
+  const sentTx = (await provider.getSigner()).sendTransaction(tx);
+ // await provider.sendTransaction(signedTx);
+}
+    
     // Perform transfer logic using safeService
     // Example: await safeService.transfer();
   };
@@ -58,4 +77,4 @@ const CreateTransfer: React.FC = () => {
   );
 };
 
-
+export default CreateTransfer
