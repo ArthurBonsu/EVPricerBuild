@@ -1,65 +1,31 @@
-
-import { 
-  ethers, 
-  Signer, 
-  ContractFactory, 
-  Contract 
-} from "ethers";
-import { 
-  useState, 
-  useEffect, 
-  useCallback 
-} from 'react';
-import { 
-  enableModule 
-} from 'utils/enableSafeModule';
-import { 
-  executeModule 
-} from 'utils/executeSafeModule';
+import { ethers, Signer, ContractFactory, Contract } from "ethers";
+import { useState, useEffect, useCallback } from 'react';
+import { enableModule } from 'utils/enableSafeModule';
+import { executeModule } from 'utils/executeSafeModule';
 import EthersAdapter from '@safe-global/safe-ethers-lib';
-import { 
-  createSafe 
-} from 'utils/createSafe';
-import SafeServiceClient, { 
-  SafeInfoResponse 
-} from '@safe-global/api-kit';
+import { createSafe } from 'utils/createSafe';
+import SafeServiceClient, { SafeInfoResponse } from '@safe-global/api-kit';
 import Web3 from 'web3';
-import { 
-  useSafeDetailsAndSetup 
-} from '../hooks/useSafeDetails.ts';
-
-import { 
-  isTxnExecutable, 
-  proposeTransaction, 
-  approveTransfer, 
-  rejectTransfer 
-} from '../hooks/useSafeDetails.ts';
+import { useSafeDetailsAndSetup, SafeInfoParam, executeTransParam } from '../hooks/useSafeDetails.ts';
+import { isTxnExecutable, proposeTransaction, approveTransfer, rejectTransfer } from '../hooks/useSafeDetails.ts';
 
 let safeAddressKeyList: string[];
 let contractDeployedAddress = "0xF117D1a20aaAE476Df7e00d9aA81F59b22c93F90";
 let provider: ethers.providers.Web3Provider;
 let ethAdapter: any;
+
 provider = new ethers.providers.Web3Provider(window.ethereum);
 const owner = provider.getSigner(0);
 let signer = new ethers.Wallet(String(process.env.RINKEBY_MNEMONIC), provider);
 
-const { 
-  setUpMultiSigSafeAddress, 
-  addAddressToSafe, 
-  getSafeInfo, 
-  executeTransaction, 
-  getAllTransactions 
-} = useSafeDetailsAndSetup;
+const { setUpMultiSigSafeAddress, addAddressToSafe, getSafeInfo, executeTransaction, getAllTransactions } = useSafeDetailsAndSetup;
 
 interface UseSafeProps {
   safeAddress: string;
   userAddress: string;
 }
 
-export const useLoadSafe = ({ 
-  safeAddress, 
-  userAddress 
-}: UseSafeProps) => {
+export const useLoadSafe = ({ safeAddress, userAddress }: UseSafeProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [safe, setSafe] = useState<SafeInfoResponse | null>(null);
   const [isCurrentUserAlreadySigned, setIsUserAlreadySigned] = useState<boolean>(false);
@@ -79,7 +45,11 @@ export const useLoadSafe = ({
   const getSafeInfoUsed = useCallback(async () => {
     setIsLoading(true);
     if (safeAddress) {
-      const safeInfo = await getSafeInfo(safeAddress);
+      const safeInfoParam: SafeInfoParam = {
+        safeAddress,
+        contractaddress: contractDeployedAddress,
+      };
+      const safeInfo = await getSafeInfo(safeInfoParam);
       setSafe(safeInfo);
     }
     setIsLoading(false);
@@ -87,7 +57,11 @@ export const useLoadSafe = ({
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      const txs = await getAllTransactions(safeAddress);
+      const safeInfoParam: SafeInfoParam = {
+        safeAddress,
+        contractaddress: contractDeployedAddress,
+      };
+      const txs = await getAllTransactions(safeInfoParam);
       setTransactions(txs);
     };
     fetchTransactions();
@@ -95,24 +69,35 @@ export const useLoadSafe = ({
 
   const checkIsSigned = useCallback(async (transactionHash: string) => {
     setIsLoading(true);
-    const txs = await getAllTransactions(safeAddress);
-    const retrievedTransaction = txs.results.find((tx) => tx.data.hash === transactionHash);
+    const safeInfoParam: SafeInfoParam = {
+      safeAddress,
+      contractaddress: contractDeployedAddress,
+    };
+    const txs = await getAllTransactions(safeInfoParam);
+    const retrievedTransaction = txs.results.find((tx: any) => tx.data.hash === transactionHash);
+
     const isSigned = retrievedTransaction?.isSigned;
     setIsUserAlreadySigned(isSigned);
     setIsLoading(false);
   }, [safeAddress, userAddress]);
+  
 
   useEffect(() => {
     safeAddress && checkIsSigned('0x...transactionHash...');
   }, [userAddress, safe, safeAddress, checkIsSigned]);
-
+  
   useEffect(() => {
-    getSafeInfoUsed();
-  }, [getSafeInfoUsed]);
-
+    const asyncFunction = async () => {
+      if (safeAddress) {
+        await checkIsSigned('0x...transactionHash...');
+      }
+    };
+    asyncFunction();
+  }, [userAddress, safe, safeAddress, checkIsSigned]);
   useEffect(() => {
     checkIsSigned('0x...transactionHash...');
   }, [checkIsSigned, safeAddress]);
+  
 
   const checkIfTxnExecutable = async (transaction: any) => {
     const executable = await isTxnExecutable({ safeAddress, transaction });
@@ -139,10 +124,17 @@ export const useLoadSafe = ({
     const transaction = { /* transaction data */ };
     const executable = await checkIfTxnExecutable(transaction);
     if (executable) {
-      
       const proposedTxn = await proposeTxn(transaction);
       const approvedTxn = await approveTxn(proposedTxn.hash);
-      const response = await executeTransaction(safeAddress);
+      const executeTransParam: executeTransParam = {
+        safeAddress,
+        provider: provider,
+        signer: owner._address,
+        transaction: transaction,
+        hashtxn: transaction.hash,
+      };
+      
+      const response = await executeTransaction(executeTransParam);
       setIsLoading(false);
       return response;
     } else {

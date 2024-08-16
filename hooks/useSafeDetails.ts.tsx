@@ -21,20 +21,22 @@ const contractBytecode: string = '0x...'; // Replace with the actual bytecode
 const addresses: string[] = [];
 
 // Define the interfaces
-interface SafeInfoParam {
+export interface SafeInfoParam {
   provider?: Web3Provider;
   signer?: string;
   safeAddress: string;
   contractaddress: string;
 }
 
-interface executeTransParam {
+export interface executeTransParam {
   provider?: Web3Provider;
   signer?: string;
   safeAddress: string;
   transaction: PaymentTransactions;
   hashtxn: string;
 }
+
+
 
 export const useSafeDetailsAndSetup = {
   setUpMultiSigSafeAddress: async (address: string) => {
@@ -152,3 +154,6 @@ export {
 };
 
 export default useSafeDetailsAndSetup;
+
+
+ 
