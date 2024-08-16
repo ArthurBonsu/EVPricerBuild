@@ -16,38 +16,18 @@ let executeTxResponse: any;
 let safeTxHash: string | undefined;
 let nonce: number | undefined;
 
+// appoval and execution 
+
 const useSafeSdk = () => {
   const { query } = useRouter();
   const safeAddress = typeof query.safeAddress === 'string' ? query.safeAddress : '';
   const [signer, setSigner] = useState<Web3.eth.Contract | null>(null);
-  
-  useEffect(() => {
-    const createSdk = async () => {
-      const web3 = new Web3(window.ethereum);
-      const accounts = await web3.eth.getAccounts();
-      const signerData = accounts[0];
-      
-      ethAdapter = new EthersAdapter({
-        web3,
-        signerAddress: signerData,
-      });
+ 
 
-      safeSdkInstance = await Safe.create({
-        ethAdapter,
-        safeAddress,
-        isL1SafeMasterCopy: true,
-      });
-
-      setSigner(signerData);
-      safeService = new SafeServiceClient({
-        txServiceUrl: SAFE_TXN_URL,
-        ethAdapter,
-      });
-    };
-
-    createSdk();
-    return () => {};
-  }, [safeAddress]);
+// isTxnExecutable
+// proposetransaction
+// approvetransfer 
+// rejecttransfer 
 
   const isTxnExecutable = useCallback(
     (safeThreshold: number, transaction: SafeMultisigTransactionResponse) => {

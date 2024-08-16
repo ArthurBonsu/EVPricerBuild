@@ -1,168 +1,175 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { ethers, Signer, ContractFactory, Contract } from "ethers";
-import { useState, useEffect, useCallback } from 'react'
-import { enableModule } from 'utils/enableSafeModule'
-import { executeModule } from 'utils/executeSafeModule'
-import EthersAdapter from '@safe-global/safe-ethers-lib'
-import Safe, { SafeFactory, SafeAccountConfig, EthSignSignature } from '@gnosis.pm/safe-core-sdk'
-import { createSafe } from 'utils/createSafe'
-import SafeServiceClient, { SafeInfoResponse } from '@safe-global/api-kit'
+
+import { 
+  ethers, 
+  Signer, 
+  ContractFactory, 
+  Contract 
+} from "ethers";
+import { 
+  useState, 
+  useEffect, 
+  useCallback 
+} from 'react';
+import { 
+  enableModule 
+} from 'utils/enableSafeModule';
+import { 
+  executeModule 
+} from 'utils/executeSafeModule';
+import EthersAdapter from '@safe-global/safe-ethers-lib';
+import { 
+  createSafe 
+} from 'utils/createSafe';
+import SafeServiceClient, { 
+  SafeInfoResponse 
+} from '@safe-global/api-kit';
 import Web3 from 'web3';
+import { 
+  useSafeDetailsAndSetup 
+} from '../hooks/useSafeDetails.ts';
 
-let { TransactionRequest, TransactionResponse, TransactionReceipt } = require("@ethersproject/abstract-provider");
+import { 
+  isTxnExecutable, 
+  proposeTransaction, 
+  approveTransfer, 
+  rejectTransfer 
+} from '../hooks/useSafeDetails.ts';
 
-let safeaddresskeylist: string[];
-let ContractDeployedAddress = "0xF117D1a20aaAE476Df7e00d9aA81F59b22c93F90";
-
+let safeAddressKeyList: string[];
+let contractDeployedAddress = "0xF117D1a20aaAE476Df7e00d9aA81F59b22c93F90";
 let provider: ethers.providers.Web3Provider;
 let ethAdapter: any;
-
 provider = new ethers.providers.Web3Provider(window.ethereum);
-
 const owner = provider.getSigner(0);
 let signer = new ethers.Wallet(String(process.env.RINKEBY_MNEMONIC), provider);
 
-ethAdapter = new EthersAdapter({
-  ethers,
-  signerOrProvider: owner
-});
+const { 
+  setUpMultiSigSafeAddress, 
+  addAddressToSafe, 
+  getSafeInfo, 
+  executeTransaction, 
+  getAllTransactions 
+} = useSafeDetailsAndSetup;
 
-const safeService = new SafeServiceClient({
-  txServiceUrl: 'https://safe-transaction.gnosis.io/ropsten',
-  chainId: 3n // Use bigint literal by appending 'n' to the number
-});
-
-const ENABLE_MODULE_SIG = '0x610b59250000000000000000000000001a8cd04ad268b1dc580f6162083cedfc1a76818e'
-
-interface useSafeProps {
-  safeAddress: string
-  userAddress: string
+interface UseSafeProps {
+  safeAddress: string;
+  userAddress: string;
 }
 
-let addresslisttx: typeof TransactionRequest;
-let receipt: typeof TransactionResponse;
-let transactionalreceipt: typeof TransactionReceipt;
+export const useLoadSafe = ({ 
+  safeAddress, 
+  userAddress 
+}: UseSafeProps) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [safe, setSafe] = useState<SafeInfoResponse | null>(null);
+  const [isCurrentUserAlreadySigned, setIsUserAlreadySigned] = useState<boolean>(false);
+  const [hasReachedThreshold, setHasReachedThreshold] = useState<boolean>(false);
+  const [userAddresses, setUserAddresses] = useState({});
+  const [usedSafeAddress, setUsedSafeAddress] = useState<String>();
+  const [transactions, setTransactions] = useState([]);
 
-export const useLoadSafe = ({ safeAddress, userAddress }: useSafeProps) => {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [safe, setSafe] = useState<SafeInfoResponse | null>(null)
-  const [isCurrentUserAlreadySigned, setIsUserAlreadySigned] = useState<boolean>(false)
-  const [hasReachedThreshold, setHasReachedThreshold] = useState<boolean>(false)
-  let [safeaddresses, setAllSafeAddressees] = useState({});
+  const userAddToSafe = async () => {
+    setIsLoading(true);
+    const addressAdded = await addAddressToSafe(safeAddress, userAddress);
+    setUserAddresses(addressAdded);
+    setIsLoading(false);
+    return addressAdded;
+  };
 
-  const getSafeInfo = useCallback(async () => {
-    setIsLoading(true)
+  const getSafeInfoUsed = useCallback(async () => {
+    setIsLoading(true);
     if (safeAddress) {
-      const safeInfo = await safeService.getSafeInfo(safeAddress)
-      setSafe(safeInfo)
+      const safeInfo = await getSafeInfo(safeAddress);
+      setSafe(safeInfo);
     }
-    setIsLoading(false)
-  }, [safeAddress])
-
-  const checkIsSigned = useCallback(async () => {
-    setIsLoading(true)
-    const multisigTransactions = await safeService.getMultisigTransactions(safeAddress)
-    const sameTransaction = multisigTransactions.results.find(
-      ({ data: transactionItem }) => transactionItem === ENABLE_MODULE_SIG
-    )
-    const isSigned =
-      sameTransaction?.confirmations?.some(
-        ({ owner: ownerItem }) => ownerItem.toLowerCase() === userAddress.toLowerCase()
-      ) || false
-
-    setIsUserAlreadySigned(isSigned)
-    setIsLoading(false)
-  }, [safeAddress, userAddress])
+    setIsLoading(false);
+  }, [safeAddress]);
 
   useEffect(() => {
-    safeAddress && checkIsSigned()
-  }, [userAddress, safe, safeAddress, checkIsSigned])
+    const fetchTransactions = async () => {
+      const txs = await getAllTransactions(safeAddress);
+      setTransactions(txs);
+    };
+    fetchTransactions();
+  }, [safeAddress]);
+
+  const checkIsSigned = useCallback(async (transactionHash: string) => {
+    setIsLoading(true);
+    const txs = await getAllTransactions(safeAddress);
+    const retrievedTransaction = txs.results.find((tx) => tx.data.hash === transactionHash);
+    const isSigned = retrievedTransaction?.isSigned;
+    setIsUserAlreadySigned(isSigned);
+    setIsLoading(false);
+  }, [safeAddress, userAddress]);
 
   useEffect(() => {
-    getSafeInfo()
-  }, [getSafeInfo])
+    safeAddress && checkIsSigned('0x...transactionHash...');
+  }, [userAddress, safe, safeAddress, checkIsSigned]);
 
   useEffect(() => {
-    checkIsSigned()
-  }, [checkIsSigned, safeAddress])
+    getSafeInfoUsed();
+  }, [getSafeInfoUsed]);
 
-  const enableSafeModule = async () => {
-    setIsLoading(true)
-    const response = await enableModule(safeAddress)
-    setIsLoading(false)
-    return response
-  }
+  useEffect(() => {
+    checkIsSigned('0x...transactionHash...');
+  }, [checkIsSigned, safeAddress]);
 
-  const executeSafeModule = async () => {
-    setIsLoading(true)
-    const response = await executeModule(safeAddress)
-    setIsLoading(false)
-    return response
-  }
+  const checkIfTxnExecutable = async (transaction: any) => {
+    const executable = await isTxnExecutable({ safeAddress, transaction });
+    return executable;
+  };
 
-  const userLoadSafeAddresses = async () => {
-    setIsLoading(true)
+  const proposeTxn = async (transaction: any) => {
+    const proposedTxn = await proposeTransaction({ safeAddress, transaction });
+    return proposedTxn;
+  };
 
-    if (typeof window.ethereum !== 'undefined' || (typeof window.web3 !== 'undefined')) {
-      let provider = new ethers.providers.Web3Provider(window.ethereum);
-      let myprovider: typeof provider = provider;
+  const approveTxn = async (transactionHash: string) => {
+    const approvedTxn = await approveTransfer({ safeAddress, transactionHash });
+    return approvedTxn;
+  };
 
-      console.log(myprovider)
-      let signer = myprovider.getSigner(0)
-      let mysigner: typeof signer = signer;
-      console.log(mysigner);
+  const rejectTxn = async (transactionHash: string) => {
+    const rejectedTxn = await rejectTransfer({ safeAddress, transactionHash });
+    return rejectedTxn;
+  };
 
-      let GnosisSafeContractInstance: ContractFactory = await ethers.getContractFactory("GnosisSafeGetAddresses", mysigner);
-      let GnosisSafeContractActual: Contract = await GnosisSafeContractInstance.deploy();
-      await GnosisSafeContractActual.deployed();
-
-      let GnosisContractAddress: string = await GnosisSafeContractActual.address;
-      let GnosisSafeContractInstanceSigned = GnosisSafeContractActual.connect(myprovider);
-
-      addresslisttx = await GnosisSafeContractActual.getSafeAddresses(userAddress);
-      receipt = await addresslisttx.wait();
-
-      let filter = GnosisSafeContractActual.filters.getSafeAddressListEvent(userAddress);
-
-      GnosisSafeContractActual.on(filter, (safeaddresskeylist, event) => {
-        console.log("SafeAdressList", safeaddresskeylist);
-      })
-
-      transactionalreceipt = await provider.getTransactionReceipt(addresslisttx.hash);
-
-      let gnosissafeandinterface = new ethers.utils.Interface(["event getSafeAddressListEvent(string[] safeaddresskey)"]);
-      const data = transactionalreceipt.logs[0].data;
-      const topics = transactionalreceipt.logs[0].topics;
-      const event = gnosissafeandinterface.decodeEventLog("getSafeAddressListEvent", data, topics);
-      safeaddresses = event.safeaddresskey;
-      setIsLoading(false)
-      return safeaddresses
+  const executeSafeTransaction = async () => {
+    setIsLoading(true);
+    const transaction = { /* transaction data */ };
+    const executable = await checkIfTxnExecutable(transaction);
+    if (executable) {
+      
+      const proposedTxn = await proposeTxn(transaction);
+      const approvedTxn = await approveTxn(proposedTxn.hash);
+      const response = await executeTransaction(safeAddress);
+      setIsLoading(false);
+      return response;
+    } else {
+      const rejectedTxn = await rejectTxn(transaction.hash);
+      setIsLoading(false);
+      return rejectedTxn;
     }
-  }
-
-  useEffect(() => {
-    userLoadSafeAddresses()
-  }, [userLoadSafeAddresses])
+  };
 
   const refetch = {
     waiting: checkIsSigned,
     success: () => {
-      getSafeInfo()
-      checkIsSigned()
+      getSafeInfoUsed();
+      checkIsSigned('0x...transactionHash...');
     },
-  }
+  };
 
   return {
-    enableSafeModule,
     isLoading,
     safe,
     checkIsSigned,
     isCurrentUserAlreadySigned,
     refetch,
     hasReachedThreshold,
-    userLoadSafeAddresses,
-    executeSafeModule,
-  }
-}
+    userAddToSafe,
+    executeSafeTransaction,
+  };
+};
 
-export default useLoadSafe
+export default useLoadSafe;

@@ -35,12 +35,12 @@ const useEthers = () => {
       const web3Network = await web3Provider.getNetwork()
       const accounts = await web3Provider.listAccounts()
 
-      await subscribeWalletEvents(walletProvider, isChainSupported(web3Network.chainId))
+      await subscribeWalletEvents(walletProvider, isChainSupported(Number(web3Network.chainId)))
 
       setEtherStore({
         provider: web3Provider,
-        chainId: getChainDetails(web3Network.chainId).chainId,
-        address: accounts[0],
+        chainId: getChainDetails(Number(web3Network.chainId)).chainId,
+        address: String(accounts[0]),
       })
     } catch (e: unknown) {
       const typedError = e as ErrorType

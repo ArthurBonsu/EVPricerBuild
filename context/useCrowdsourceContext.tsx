@@ -19,7 +19,7 @@ interface BlockchainTransaction {
 const useCrowdsourceContext = () => {
     
   const createEthereumContract = async () => {
-    const provider = new ethers.BrowserProvider(window.ethereum);
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = await provider.getSigner(); // await the signer promise
     const transactionsContract = new ethers.Contract(contractAddress, contractABI, signer);
     return transactionsContract;
@@ -118,7 +118,7 @@ const useCrowdsourceContext = () => {
       if (ethereum) {
         const { addressTo, amount, keyword, message } = formData;
         const transactionsContract = await createEthereumContract();
-        const parsedAmount = ethers.parseEther(amount);
+        const parsedAmount = ethers.utils.parseEther(amount);
 
         await ethereum.request({
           method: "eth_sendTransaction",
@@ -126,7 +126,7 @@ const useCrowdsourceContext = () => {
             from: currentAccount,
             to: addressTo,
             gas: "0x5208",
-            value: ethers.formatEther(parsedAmount),
+            value: ethers.utils.formatEther(parsedAmount),
           }],
         });
 

@@ -16,9 +16,7 @@ export const GnosiscontractAddress = '0x0E7d2dd5901f10736D51DE67F047c6B1cB0D0A8a
 export const GreetercontractABI =Greeterabi.abi
 export const GreetercontractAddress = '0xbA391281929A7A5e7972dd1883CD5EEa2C186670'
 
-// TokenABC Contract 
-export const TokencontractABI = TokenABCabi.abi
-export const TokencontractAddress = '0xd065dE9F870cb6a6C1A71120f5bF85CaDa2Ef862'
+ 
 
 // TokenBTC Contract 
 
@@ -51,7 +49,9 @@ export const FileTokenUpgradeableV2ABI = FileTokenUpgradeableV2.abi;
 
 
 */
-
+//TokenABC Contract 
+//export const TokencontractABI = TokenABCabi.abi
+export const TokencontractAddress = '0xd065dE9F870cb6a6C1A71120f5bF85CaDa2Ef862'
 export {}
 
 

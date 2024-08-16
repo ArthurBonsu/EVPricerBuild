@@ -13,7 +13,7 @@ const { ethereum } = window;
 const useDaoContext = () => {
     
   const createEthereumContract = async () => {
-    const provider = new ethers.BrowserProvider(window.ethereum);
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = await provider.getSigner();
     const transactionsContract = new ethers.Contract(contractAddress, contractABI, signer);
 
@@ -117,7 +117,7 @@ const useDaoContext = () => {
       if (ethereum) {
         const { addressTo, amount, keyword, message } = formData;
         const transactionsContract = await createEthereumContract();
-        const parsedAmount = ethers.parseEther(amount);
+        const parsedAmount = ethers.utils.parseEther(amount);
 
         await ethereum.request({
           method: "eth_sendTransaction",
@@ -125,7 +125,7 @@ const useDaoContext = () => {
             from: currentAccount,
             to: addressTo,
             gas: "0x5208",
-            value: ethers.formatEther(parsedAmount),
+            value: ethers.utils.formatEther(parsedAmount),
           }],
         });
 

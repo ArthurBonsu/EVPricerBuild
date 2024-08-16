@@ -5,7 +5,7 @@ import * as ethers from 'ethers';
 
 declare let window: any;
 let owner :string;
-let ethAdapter: EthersAdapter.ethers.BrowserProvider;
+let ethAdapter: EthersAdapter.ethers.providers.Web3Provider;
 let  amount: Number;
 
 // Create adapter to capture the provider and the signer
@@ -20,7 +20,7 @@ export const ethAdaptername = async () => {
  
 
   // Initialize the EthersAdapter with the Web3 provider and signer
- ethAdapter = new ethers.BrowserProvider(web3Provider, {
+ ethAdapter = new ethers.providers.Web3Provider(web3Provider, {
     name: 'Metamask',
     chainId: 1,
   });
@@ -30,7 +30,7 @@ export const ethAdaptername = async () => {
 
 // Function to sign a transaction
 export const signTransactionBrowserProvider = async (
-  ethAdapter: ethers.BrowserProvider,
+  ethAdapter: ethers.providers.Web3Provider,
   owner: string,
   toAddress: string,
   amount: Number
@@ -40,7 +40,7 @@ export const signTransactionBrowserProvider = async (
   const tx = await signer.sendTransaction({
     from: owner,
     to: toAddress,
-    value: ethers.parseEther(amount.toString()),
+    value: ethers.utils.parseEther(amount.toString()),
     nonce: txCount,
   });
   return tx;
@@ -57,7 +57,7 @@ export const signTransactionBrowserProvider = async (
   };
 
 export const signTransactionSigner = async (
-  ethAdapter: ethers.JsonRpcProvider,
+  ethAdapter: ethers.providers.JsonRpcProvider,
   owner: string,
   toAddress: string,
   amount: Number
@@ -75,7 +75,7 @@ export const signTransactionSigner = async (
   const txsend = await signer.sendTransaction({
     from: owner,
     to: toAddress,
-    value: ethers.parseEther(amount.toString()),
+    value: ethers.utils.parseEther(amount.toString()),
     nonce: txCount,
   });
   return txsend;
@@ -83,7 +83,7 @@ export const signTransactionSigner = async (
 
 // Function to interact with a smart contract
 export const interactWithContract = async (
-  ethAdapter: ethers.JsonRpcProvider | ethers.BrowserProvider,
+  ethAdapter: ethers.providers.JsonRpcProvider | ethers.providers.Web3Provider,
   contractAddress: string,
   contractABI: string,
   functionName: string,
@@ -95,11 +95,11 @@ export const interactWithContract = async (
 };
 // Function to get the balance of the owner address
 export const getBalance = async (
-  ethAdapter: ethers.JsonRpcProvider | ethers.BrowserProvider,
+  ethAdapter: ethers.providers.JsonRpcProvider | ethers.providers.Web3Provider,
   owner: string
 ) => {
   const balance = await ethAdapter.getBalance(owner);
-  return ethers.formatEther(balance);
+  return ethers.utils.formatEther(balance);
 };
 
 

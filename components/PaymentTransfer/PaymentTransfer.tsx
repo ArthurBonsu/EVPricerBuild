@@ -128,8 +128,7 @@ const TransactionDisplay: React.FC<TransactionDisplayProps> = ({ account, userna
    let myreceipient: string;
 // This is for the execution
 const PaymentTransfer = ({
-  username, address,amount, comment,txhash, USDprice, paymenthash,  owneraddress,timestamp,  receipient, receipients, 
-  onPayTransfer, ...rest}:PaymentTransferProps
+  username, address,amount, comment,txhash, USDprice,  onPayTransfer, ...rest}:PaymentTransferProps
 ) => {
 
 
@@ -145,14 +144,14 @@ const PaymentTransfer = ({
      sendTransaction,    
      PaymentformData,
      transferformData,   
-     paymenttransactionreceipt,
-     transfertransaction,        
+     paymentTransactionReceipt,
+     transferTransaction,       
      isPaid,
-     tokentxreceipt,
-     transferredtokenamount,
-     paidTokenamount,
+     tokenTxReceipt,
+     transferredTokenAmount,
+     paidTokenAmount,
      ourUSDPrice,
-    accountsprovided} = useTransactionContext();
+     accountsProvided,} = useTransactionContext();
 
     const router = useRouter();
     const localDisclosure = useDisclosure()
@@ -211,7 +210,7 @@ const PaymentTransfer = ({
   useEffect(() => {
     onPayTransfer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [PaymentformData.username, PaymentformData.address, PaymentformData.amount]);
+  }, [PaymentformData.username, PaymentformData.contractaddress, PaymentformData.amount]);
 
   const onMultiReceipientOpen = () => {
     setMultiReceipient(!openMultiRecipient);

@@ -16,12 +16,12 @@ const CreateTransfer: React.FC = () => {
       try {
         if (web3Provider) {
           await web3Provider.request({ method: 'eth_requestAccounts' });
-          const provider = new ethers.BrowserProvider(window.ethereum)
+          const provider = new ethers.providers.Web3Provider(window.ethereum)
                            
           const signer = await provider.getSigner();
           setSigner(signer);
         } else {
-          const provider = new ethers.InfuraProvider('ropsten', 'YourInfuraProjectId');
+          const provider = new ethers.providers.InfuraProvider('ropsten', 'YourInfuraProjectId');
           console.log('Connected to Infura provider');
           // Infura does not manage accounts, so we cannot get a signer from it
         }
@@ -50,7 +50,7 @@ const safeAbi = ['']; // ABI of the Safe contract
 const safeAddress = '0x...'; // Address of the Safe contract
 
 // Create an ethers provider
-const provider = new ethers.BrowserProvider(window.ethereum);
+const provider = new ethers.providers.Web3Provider(window.ethereum);
 
 // Create a Safe contract instance
 const safeContract = new ethers.Contract(safeAddress, safeAbi, provider);
@@ -59,7 +59,7 @@ const safeContract = new ethers.Contract(safeAddress, safeAbi, provider);
 async function sendAsset(amount:Number, recipient:string ) {
   const tx = await safeContract.transfer(
     recipient,
-    ethers.parseEther(amount.toString())
+    ethers.utils.parseEther(amount.toString())
   );
   const sentTx = (await provider.getSigner()).sendTransaction(tx);
  // await provider.sendTransaction(signedTx);

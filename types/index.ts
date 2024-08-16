@@ -118,6 +118,7 @@ export type SwapTransactionType = {
 
 
  export type PaymentTransactions = {
+  data: any;
   username: string , 
   address:string, 
   amount:number , 

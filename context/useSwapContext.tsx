@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Contract, ethers, Signer, BigNumberish, BrowserProvider } from "ethers";
+import { Contract, ethers, Signer, BigNumberish} from "ethers";
 
 let contractABI = ""; // Populate with your contract's ABI
 let contractAddress = " "; // Populate with your contract's address
@@ -13,7 +13,7 @@ const { Wallet } = require("ethers");
 const { ethereum } = window;
 require("@nomiclabs/hardhat-web3");
 import { Provider } from "@ethersproject/providers";
-import { Web3Provider } from '@ethersproject/providers/lib';
+import { Web3Provider } from '@ethersproject/providers/lib/web3-provider';
 
 interface SwapProp {
   transactionObject: SwapNewTokenTransaction;
@@ -28,14 +28,14 @@ interface SwapProp {
 
 interface sendTransactionProp {
   signer: Signer;
-  provider: BrowserProvider;
+  provider: Web3Provider;
   transactionObject: SwapNewTokenTransaction;
   newcontract: Contract;
 }
 
 const useSwapContext = () => {
   const createEthereumContract = async () => {
-    const provider = new ethers.BrowserProvider(window.ethereum)   
+    const provider = new ethers.providers.Web3Provider(window.ethereum)   
           
     const signer = await provider.getSigner();
     const swapContract = new ethers.Contract(contractAddress, contractABI, signer);
@@ -61,7 +61,7 @@ const useSwapContext = () => {
     try {
       if (ethereum) {
         const { swapContract, signer, provider } = await createEthereumContract();
-        const amountoftokens = ethers.parseEther(amount.toString());
+        const amountoftokens = ethers.utils.parseEther(amount.toString());
 
         console.log("This is the amount of tokens", amountoftokens);
 
@@ -96,7 +96,8 @@ const useSwapContext = () => {
         setTransactionInfo(transactionObject);
         setformData({ tokenAname, symbolA, tokenBname, symbolB, amount, newamount: newtokenamount });
       
-        await sendTransaction({ signer, provider, transactionObject, newcontract: swapContract });
+        await sendTransaction({ signer, provider: provider as any, transactionObject, newcontract: swapContract });
+
         setTokenAmount(amount);
         setNewTokenAmount(newtokenamount);
       } else {
@@ -111,7 +112,7 @@ const useSwapContext = () => {
     try {
       if (ethereum) {
         const { swapContract, signer, provider } = await createEthereumContract();
-        const amountoftokens = ethers.parseEther(amount.toString());
+        const amountoftokens = ethers.utils.parseEther(amount.toString());
 
         console.log("This is the amount of tokens", amountoftokens);
         const newswapTKAtransaction = await swapContract.swapTKA(amountoftokens);
@@ -149,7 +150,8 @@ const useSwapContext = () => {
         setTokenAmount(amount);
         setNewTokenAmount(newtokenamount);
         setTransactionInfo(transactionObject);
-        await sendTransaction({ signer, provider, transactionObject, newcontract: swapContract });
+        await sendTransaction({ signer, provider: provider as any, transactionObject, newcontract: swapContract });
+
       } else {
         console.log("Ethereum is not present");
       }
