@@ -25,7 +25,7 @@ export interface SafeInfoParam {
   provider?: Web3Provider;
   signer?: string;
   safeAddress: string;
-  contractaddress: string;
+  contractaddress?: string;
 }
 
 export interface executeTransParam {
@@ -33,8 +33,18 @@ export interface executeTransParam {
   signer?: string;
   safeAddress: string;
   transaction: PaymentTransactions;
-  hashtxn: string;
+  hashtxn?: string;
 }
+
+// setUpMultiSigSafeAddress
+// addAddressToSafe
+// getSafeInfo
+// executeTransaction
+// getAllTransactions
+// isTxnExecutable
+// proposeTransaction
+// approveTransfer
+// rejectTransfer
 
 
 
@@ -67,6 +77,8 @@ export const useSafeDetailsAndSetup = {
   getSafeInfo: async ({ safeAddress }: SafeInfoParam) => {
     // Get the Safe contract instance
     const safeContract = new ethers.Contract(safeAddress, contractAbi, provider);
+    // this will be a function within the smart contract that safe address, names of owners, transaction hashes stored and time.
+    // we will retrieve from where storeTransaction in executeTransaction stores it 
     const tx = await safeContract.functions.getModules();
     const modules = await tx.wait();
     // Return the modules
@@ -101,6 +113,7 @@ export const useSafeDetailsAndSetup = {
     // Get the Safe contract instance
     const safeContract = new ethers.Contract(safeAddress, contractAbi, provider);
     // Call the getMultiSigTransactions function on the contract
+    // this could be transaction id and hashes stored in the smart contract 
     const transactions = await safeContract.functions.getMultiSigTransactions();
     // Return the transactions
     return transactions;
@@ -126,32 +139,28 @@ export const useSafeDetailsAndSetup = {
   },
 
   // Approve transfer
-  approveTransfer: async ({ safeAddress, transaction, hashTxn }: executeTransParam) => {
+  approveTransfer: async ({ safeAddress, transaction }: executeTransParam) => {
     // Get the Safe contract instance
     const safeContract = new ethers.Contract(safeAddress, contractAbi, provider);
     // Call the approveTransaction function on the contract
-    const tx = await safeContract.functions.approveTransaction(hashTxn);
+    const tx = await safeContract.functions.approveTransaction(transaction);
     await tx.wait();
     return tx;
   },
 
   // Reject transfer
-  rejectTransfer: async ({ safeAddress, transaction, hashTxn }: executeTransParam) => {
+  rejectTransfer: async ({ safeAddress, transaction }: executeTransParam) => {
     // Get the Safe contract instance
     const safeContract = new ethers.Contract(safeAddress, contractAbi, provider);
     // Call the rejectTransaction function on the contract
-    const tx = await safeContract.functions.rejectTransaction(hashTxn);
+    const tx = await safeContract.functions.rejectTransaction(transaction);
     await tx.wait();
     return tx;
   },
 };
 
-export { 
-  isTxnExecutable, 
-  proposeTransaction, 
-  approveTransfer, 
-  rejectTransfer 
-};
+
+
 
 export default useSafeDetailsAndSetup;
 
