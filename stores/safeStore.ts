@@ -1,16 +1,25 @@
-import create, { State } from 'zustand'
+import create, { State } from 'zustand';
 
-export interface Safe extends State {
-  selectedSafe: string | null
-  isModuleEnabled: boolean
-  setIsModuleEnabled: (isEnabled: boolean) => void
-  // safetransaction id set 
-  // use safe store 
+export interface SafeStore extends State {
+  safeAddress: string;
+  ownersAddress: string[];
+  contractAddress: string;
+  setSafeAddress: (safeAddress: SafeStore['safeAddress']) => void;
+  setOwnersAddress: (ownersAddress: SafeStore['ownersAddress']) => void;
+  setContractAddress: (contractAddress: SafeStore['contractAddress']) => void;
+  setSafeStore: (values: Omit<SafeStore, 'setSafeAddress' | 'setOwnersAddress' | 'setContractAddress' | 'setSafeStore'>) => void;
 }
 
-export const useSafeStore = create<Safe>((set) => ({
-  selectedSafe: null,
-  isModuleEnabled: false,
-  setIsModuleEnabled: (isModuleEnabled) => set({ isModuleEnabled }),
-  // use safe stpre 
-}))
+export const INITIAL_STATE = {
+  safeAddress: '',
+  ownersAddress: [],
+  contractAddress: '',
+};
+
+export const useSafeStore = create<SafeStore>((set) => ({
+  ...INITIAL_STATE,
+  setSafeAddress: (safeAddress) => set({ safeAddress }),
+  setOwnersAddress: (ownersAddress) => set({ ownersAddress }),
+  setContractAddress: (contractAddress) => set({ contractAddress }),
+  setSafeStore: (values) => set(values),
+}));

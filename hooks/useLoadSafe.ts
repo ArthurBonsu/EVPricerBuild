@@ -191,6 +191,7 @@ const proposeTxn = async (transaction: any) => {
     hasReachedThreshold,
     userAddToSafe,
     executeSafeTransaction,
+    getSafeInfoUsed
   };
 };
 

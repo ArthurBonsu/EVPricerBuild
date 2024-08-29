@@ -1,156 +1,81 @@
-import { useRouter } from 'next/router';
-import {
-  Avatar,
-  Button,
-  Flex,
-  Heading,
-  Menu,
-  ButtonProps,
-  useDisclosure,
-  MenuButton,
-  MenuList,
-  Text,
-  useClipboard,
-  Input,
-  Stack,
-  InputGroup,
-  InputLeftElement,
-  InputRightElement,
-  Box,
-  Grid,
-  VStack,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  FormHelperText,
-  chakra,
-} from '@chakra-ui/react';
-import { FC, useState, useEffect } from 'react';
-import { useAppToast } from 'hooks/index';
+import { FC, useState, useCallback, useEffect } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
+import { useLoadSafe } from '../../hooks/useLoadSafe';
+import useSafeDetailsAndSetup from 'hooks/useSafeDetails.ts';
+import { useRouter } from 'next/router';
+import { SafecontractAddress } from 'constants/constants';
+import { useUserStore } from 'stores/userStore';
+import { Avatar, Button, Flex, Heading, Menu, ButtonProps, useDisclosure, MenuButton, MenuList, Text, useClipboard, Input, Stack, InputGroup, InputLeftElement, InputRightElement, Box, Grid, VStack, FormControl, FormLabel, FormErrorMessage, FormHelperText, chakra, } from '@chakra-ui/react';
+import { useAppToast } from 'hooks/index';
 import { BsGithub, BsTwitter, BsGoogle } from 'react-icons/bs';
 import { signInWithPopup } from 'firebase/auth';
 import { GoogleAuthProvider, TwitterAuthProvider } from 'firebase/auth';
 import { auth } from 'firebaseConfig';
+import { useSafeStore } from 'stores/safeStore';
+import { useEthersStore } from 'stores/ethersStore';
 
-const providers = [
-  { name: 'github', Icon: BsGithub },
-  { name: 'twitter', Icon: BsTwitter },
-  { name: 'google', Icon: BsGoogle },
-];
+const { setUpMultiSigSafeAddress } = useSafeDetailsAndSetup;
 
-interface SignupProps {
-  isCollapsed?: boolean;
-  username?: string;
-  email?: string;
-  password?: string;
-}
-
-const CreateSafe: FC<SignupProps> = ({ isCollapsed = false, username, email, password }) => {
+const CreateSafe: FC = () => {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSignedUp, setIsSignedUp] = useState(false);
-  const [authMethod, setAuthMethod] = useState<'oauth' | 'firebase' | null>(null);
-
-  const { hasCopied, onCopy } = useClipboard(username || '');
-  const toast = useAppToast();
-  const stackSpacing = isCollapsed ? 4 : 1;
-
-  const { data: session, status } = useSession();
+  const { replace } = useRouter();
+  const useraddress = useEthersStore((state) => state.address);
 
   useEffect(() => {
-    if (hasCopied) {
-      toast.showToast('Signup details copied', 'info');
+    if (!useraddress) {
+      replace('/');
     }
-  }, [hasCopied, toast]);
+  }, [useraddress, replace]);
 
-  if (status === 'loading') return <Heading>Checking Authentication ...</Heading>;
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { data: session, status } = useSession();
+
+  const safeStore = useSafeStore();
+  const { safeAddress, ownersAddress, contractAddress } = safeStore;
+  const { setSafeAddress, setOwnersAddress, setContractAddress, setSafeStore } = safeStore;
+
+  const [isCreatingSafe, setIsCreatingSafe] = useState(false);
+  const { executeSafeTransaction, userAddToSafe, isLoading } = useLoadSafe({ safeAddress, userAddress: useraddress });
+
+  const handleCreateSafe = async () => {
+    try {
+      setIsCreatingSafe(true);
+      const newSafeAddress = await setUpMultiSigSafeAddress(SafecontractAddress);
+      setSafeAddress(newSafeAddress);
+      setSafeStore({ 
+        safeAddress: newSafeAddress, 
+        ownersAddress: [], 
+        contractAddress: SafecontractAddress 
+      });
+      setIsCreatingSafe(false);
+      console.log(`Safe Address: ${newSafeAddress}`);
+    } catch (error) {
+      console.error(error);
+      // Display an error message to the user, e.g., using `useAppToast`
+    }
+  };
+
   if (session) {
     setTimeout(() => {
       router.push('/');
     }, 5000);
-    return <Heading>You are already signed up</Heading>;
+    return (
+      <Box maxW="md" mx="auto" mt={8}>
+        <Heading mb={6}>You are already signed in</Heading>
+        <Text>Redirecting to home page in 5 seconds...</Text>
+      </Box>
+    );
   }
-
-  const handleOAuthSignUp = (provider: string) => async () => {
-    await signIn(provider);
-  };
-
-  const handleFirebaseGoogleSignUp = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-      router.push('/welcome');
-    } catch (error: any) {
-      console.error(error.message);
-    }
-  };
-
-  const handleFirebaseTwitterSignUp = async () => {
-    const provider = new TwitterAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-      router.push('/welcome');
-    } catch (error: any) {
-      console.error(error.message);
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return false;
-    signIn('email', { email, redirect: false });
-  };
-
-  const setEmail = (email: string) => {
-    return email;
-  };
 
   return (
     <Box maxW="md" mx="auto" mt={8}>
       <Heading mb={6}>Sign Up</Heading>
-      {!authMethod && (
-        <VStack spacing={4}>
-          <Button onClick={() => setAuthMethod('oauth')}>Sign up with OAuth</Button>
-          <Button onClick={() => setAuthMethod('firebase')}>Sign up with Firebase</Button>
-        </VStack>
-      )}
-      {authMethod === 'oauth' && (
-        <>
-          <chakra.form onSubmit={handleSubmit}>
-            <FormControl>
-              <FormLabel>Email Address</FormLabel>
-              <Input type="email" onChange={(e) => setEmail(e.target.value)} />
-            </FormControl>
-            {providers.map((item, index) => (
-              <Box key={index}>
-                <VStack>
-                  <Button
-                    type="submit"
-                    key={item.name}
-                    leftIcon={<item.Icon />}
-                    onClick={handleOAuthSignUp(item.name)}
-                    textTransform="uppercase"
-                    w="100%"
-                  >
-                    Sign up with {item.name}
-                  </Button>
-                </VStack>
-              </Box>
-            ))}
-          </chakra.form>
-        </>
-      )}
-      {authMethod === 'firebase' && (
-        <Stack spacing={4} mt={4}>
-          <Button colorScheme="blue" onClick={handleFirebaseGoogleSignUp}>
-            Sign up with Google
-          </Button>
-          <Button colorScheme="twitter" onClick={handleFirebaseTwitterSignUp}>
-            Sign up with Twitter
-          </Button>
-        </Stack>
-      )}
+      <VStack spacing={4}>
+        <Button onClick={handleCreateSafe} disabled={isCreatingSafe || isLoading}> Create Safe </Button>
+        {safeAddress && (
+          <Text> Safe Address: <code>{safeAddress}</code> </Text>
+        )}
+      </VStack>
     </Box>
   );
 };

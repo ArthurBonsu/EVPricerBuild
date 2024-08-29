@@ -51,7 +51,8 @@ export const FileTokenUpgradeableV2ABI = FileTokenUpgradeableV2.abi;
 */
 //TokenABC Contract 
 //export const TokencontractABI = TokenABCabi.abi
-export const TokencontractAddress = '0xd065dE9F870cb6a6C1A71120f5bF85CaDa2Ef862'
+export const TokencontractAddress = '0xd065dE9F870cb6a6C1A71120f5bF85CaDa2Ef862';
+export const SafecontractAddress = '0xd065dE9F870cb6a6C1A71120f5bF85CaDa2Ef862';
 export {}
 
 
