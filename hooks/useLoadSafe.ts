@@ -127,6 +127,8 @@ export const useLoadSafe = ({ safeAddress, userAddress }: UseSafeProps) => {
     return executable;
   };
 
+
+  
 const proposeTxn = async (transaction: any) => {
   setTransaction(transaction);
   const proposedTxn = await proposeTransaction({ safeAddress, transaction });
@@ -191,7 +193,10 @@ const proposeTxn = async (transaction: any) => {
     hasReachedThreshold,
     userAddToSafe,
     executeSafeTransaction,
-    getSafeInfoUsed
+    getSafeInfoUsed,
+    proposeTransaction: proposeTxn,
+    approveTransfer: approveTxn,
+    rejectTransfer: rejectTxn,
   };
 };
 
