@@ -1,111 +1,131 @@
-import { Button, ButtonProps, Flex, useDisclosure } from '@chakra-ui/react'
-import AppModal from '@components/AppModal'
-import { useSafeSdk } from 'hooks'
-import { loadComponents } from 'next/dist/server/load-components'
-import { useEffect, useState } from 'react'
 
-// For finally making execution on the blockchain 
+// ExecuteTransfer.tsx
+import { FC } from 'react';
+import { useRouter } from 'next/router';
+import { PaymentTransactions } from 'types';
+import { Box, Button, Flex, Heading, List, ListItem, Text, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, } from '@chakra-ui/react';
+import { useLoadSafe } from 'hooks/useLoadSafe';
+import { useTransactionStore } from 'stores/transactionStore';
+import { useEthersStore } from 'stores/ethersStore';
+import { useSafeStore } from 'stores/safeStore';
 
-
-
-interface ExecuteTransferProps  {
-  colorScheme?: string
-  variant?: string 
-  isDisabled?:  boolean
-  safeTxHash: string
-  safeRejectTxHash: string | null
-  threshold: string | number | undefined
-  nonce: number
-  hashTxn?: string 
+interface ExecuteTransferProps {
+  transaction: PaymentTransactions;
 }
 
-// This is for the execution
-// We need to ..
-// get safe address
-// get safetransactions hash
-// enable module 
-// execute module 
+const ExecuteTransfer: FC<ExecuteTransferProps> = ({ transaction }) => {
+  const router = useRouter();
+  const { executeSafeTransaction } = useLoadSafe();
+  const { setTransaction } = useTransactionStore();
+  const { address, provider, chainId } = useEthersStore();
+  const { safeAddress, ownersAddress, contractAddress } = useSafeStore();
 
-const ExecuteTransfer: React.FC<ExecuteTransferProps> = ({
-  safeTxHash,
-  safeRejectTxHash,
-  threshold,
-  
-  nonce,
-  hashTxn,
-  ...rest
-}) => {
-  const [approveExeIsLoading, setApproveExeIsLoading] = useState(false)
-  const [rejectExeIsLoading, setRejectExeIsLoading] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [isApprovalExecutable, setIsApprovalExecutable] = useState(false)
-  const [isRejectionExecutable, setIsRejectionExecutable] = useState(false)
-  const localDisclosure = useDisclosure()
- 
-  const { isTxnExecutable, safeService, approveTransfer, rejectTransfer } = useSafeSdk()
-  // the attribute should be here 
-  useEffect(() => {
-    const getExecutables = async () => {
-      if (safeTxHash && threshold) {
+  const handleExecute = async () => {
+    setIsModalOpen(true);
+  };
 
-   
-        const approvalTx = await safeService.getTransaction(safeTxHash)
-        if (approvalTx && isTxnExecutable(Number(threshold), approvalTx)) {
-          setIsApprovalExecutable(true)
-        }
-      }
+  const handleConfirm = async () => {
+    await executeSafeTransaction(transaction);
+    setTransaction(transaction); // Update the transaction details
+    router.push('/TransferConfirmation');
+  };
 
-      if (safeRejectTxHash) {
-        const rejectionTx = await safeService.getTransaction(safeRejectTxHash)
-        if (rejectionTx && isTxnExecutable(Number(threshold), rejectionTx)) {
-          setIsRejectionExecutable(true)
-        }
-      }
-    }
-
-    getExecutables()
-  }, [isTxnExecutable, safeRejectTxHash, safeService, safeTxHash, threshold])
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
 
   return (
-    <div>
+    <Box>
+      <Heading as="h1" size="lg" mb={4}>
+        Execute Transfer
+      </Heading>
+      <Text mb={4}>
+        Transaction Details:
+      </Text>
+      <List spacing={2}>
+        <ListItem>
+          <Text>
+            <strong>Username:</strong> {transaction.username}
+          </Text>
+        </ListItem>
+        <ListItem>
+          <Text>
+            <strong>Address:</strong> {transaction.address}
+          </Text>
+        </ListItem>
+        <ListItem>
+          <Text>
+            <strong>Amount:</strong> {transaction.amount}
+          </Text>
+        </ListItem>
+        <ListItem>
+          <Text>
+            <strong>Comment:</strong> {transaction.comment}
+          </Text>
+        </ListItem>
+        <ListItem>
+          <Text>
+            <strong>Timestamp:</strong> {transaction.timestamp.toString()}
+          </Text>
+        </ListItem>
+        <ListItem>
+          <Text>
+            <strong>Recipient:</strong> {transaction.receipient}
+          </Text>
+        </ListItem>
+        <ListItem>
+          <Text>
+            <strong>USD Price:</strong> {transaction.USDprice}
+          </Text>
+        </ListItem>
+        <ListItem>
+          <Text>
+            <strong>Payment Hash:</strong> {transaction.paymenthash}
+          </Text>
+        </ListItem>
+        <ListItem>
+          <Text>
+            <strong>Owner Address:</strong> {transaction.owneraddress}
+          </Text>
+        </ListItem>
+      </List>
+      <Flex justify="space-between" mt={4}>
+  <Button colorScheme="blue" onClick={() => router.push('/ProposeTransaction')}>
+    Back to Propose Transaction
+  </Button>
+  <Button colorScheme="blue" onClick={() => router.push('/')}>
+    Back to Homepage
+  </Button>
+  <Button colorScheme="blue" onClick={handleExecute}>
+    Execute Transaction
+  </Button>
+</Flex>
 
-      <Button {...rest} onClick={localDisclosure.onOpen}>
-        Execute
-      </Button>
-      <AppModal disclosure={localDisclosure} title="Execute Transaction" modalSize="sm">
-        <Flex justify="space-between" py={6} alignItems="center" flexDirection="row">
-          {isApprovalExecutable && (
-       <Button
-       isLoading={approveExeIsLoading}
-       isDisabled={approveExeIsLoading}
-       onClick={async () => {
-         setApproveExeIsLoading(true)
-         await approveTransfer({ safeTxHash, execTxn: true, hashTxn: hashTxn || '' })
-         setApproveExeIsLoading(false)
-         localDisclosure.onClose()
-       }}
-     >
-       Execute Approval
-     </Button>
-          )}
-          {isRejectionExecutable && (
-           <Button
-           isLoading={rejectExeIsLoading}
-           isDisabled={rejectExeIsLoading}
-           onClick={async () => {
-             setRejectExeIsLoading(true)
-             await rejectTransfer({ safeTxHash: safeRejectTxHash, execTxn: true, hashTxn: hashTxn || '', nonce })
-             setRejectExeIsLoading(false)
-             localDisclosure.onClose()
-           }}
-         >
-           Execute Rejection
-         </Button>
-          )}
-        </Flex>
-      </AppModal>
-    </div>
-  )
-}
+      <Modal isOpen={isModalOpen} onClose={handleCancel}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            Confirm Execution
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            Are you sure you want to execute this transaction?
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="red" mr={3} onClick={handleCancel}>
+              No
+            </Button>
+            <Button colorScheme="blue" onClick={handleConfirm}>
+              Yes
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </Box>
+  );
+  
+};
 
-export default ExecuteTransfer
+export default ExecuteTransfer;

@@ -19,7 +19,7 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import Blockies from 'react-blockies';
-import CreateTransfer from '@components/CreateTransfer';
+import CreateSafe from '@components/CreateSafe';
 import { useAppToast, useEthers } from 'hooks/index';
 import getHiddenVersion from 'utils/getHiddenName';
 import { Menu, MenuButton, MenuList } from '@chakra-ui/react';
@@ -61,7 +61,7 @@ const AppSidebar: FC<AppSidebarProps> = ({ isCollapsed = false, address }) => {
           )}
         </Flex>
         <VStack px={2} mt={3} spacing={stackSpacing} alignItems="start">
-          <CreateTransfer />
+          <CreateSafe />
           <Menu>
             <MenuButton
               as={Button}

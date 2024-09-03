@@ -5,27 +5,18 @@ import { useLoadSafe } from 'hooks/useLoadSafe';
 import { PaymentTransactions } from 'types';
 import { Button, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, FormControl, FormLabel, Input, NumberInput, NumberInputField, FormErrorMessage, Stack } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
-import { useEthers  } from 'hooks';
-const ProposeTransfer: FC = () => {
-  const { onConnect, onDisconnect, isConnected, walletaddress } = useEthers();
+import { useEthers } from 'hooks';
+import { useRouter } from 'next/router';
 
+const ProposeTransfer: FC = () => {
+  const router = useRouter();
+  const { onConnect, onDisconnect, isConnected, walletaddress } = useEthers();
   const { address } = useEthersStore();
   const { safeAddress, ownersAddress } = useSafeStore();
   const { proposeTransaction, approveTransfer, rejectTransfer } = useLoadSafe({ safeAddress: '0x...', userAddress: '0x...' });
   const { register, handleSubmit, formState: { errors } } = useForm<PaymentTransactions>();
   const [transaction, setTransaction] = useState<PaymentTransactions>({
-    data: null,
-    username: '',
-    address: '',
-    amount: 0,
-    comment: '',
-    timestamp: new Date(),
-    receipient: '',
-    receipients: [],
-    txhash: '',
-    USDprice: 0,
-    paymenthash: '',
-    owneraddress: '',
+    data: null, username: '', address: '', amount: 0, comment: '', timestamp: new Date(), receipient: '', receipients: [], txhash: '', USDprice: 0, paymenthash: '', owneraddress: '',
   });
   const [isProposed, setIsProposed] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
@@ -34,16 +25,19 @@ const ProposeTransfer: FC = () => {
     setTransaction(data);
     await proposeTransaction(data);
     setIsProposed(true);
+    router.push('/ExecuteTransfer'); // Route to ExecuteTransfer page
   };
 
   const handleApprove = async () => {
     await approveTransfer(transaction);
     setIsApproved(true);
+    router.push('/ExecuteTransfer'); // Route to ExecuteTransfer page
   };
 
   const handleReject = async () => {
     await rejectTransfer(transaction);
     setIsApproved(false);
+    // Stay on the same page (ProposeTransfer)
   };
 
   return (
@@ -56,7 +50,7 @@ const ProposeTransfer: FC = () => {
       {address && ownersAddress.includes(address) && (
         <form onSubmit={handleSubmit(handlePropose)}>
           <Stack spacing={4}>
-          <FormControl isInvalid={!!errors.username}>
+            <FormControl isInvalid={!!errors.username}>
               <FormLabel>Username:</FormLabel>
               <Input {...register('username', { required: 'Username is required' })} />
               {errors.username && (
@@ -108,12 +102,12 @@ const ProposeTransfer: FC = () => {
               )}
             </FormControl>
             <FormControl isInvalid={!!errors.txhash}>
-              <FormLabel>Transaction Hash:</FormLabel>
-              <Input {...register('txhash', { required: 'Transaction Hash is required' })} />
-              {errors.txhash && (
-                <FormErrorMessage>{errors.txhash.message}</FormErrorMessage>
-              )}
-            </FormControl>
+        <FormLabel>Transaction Hash:</FormLabel>
+         <Input {...register('txhash', { required: 'Transaction Hash is required' })} />
+             {errors.txhash && errors.txhash.message && (
+          <FormErrorMessage>{errors.txhash.message}</FormErrorMessage>
+          )}
+        </FormControl>
             <FormControl isInvalid={!!errors.USDprice}>
               <FormLabel>USD Price:</FormLabel>
               <NumberInput>
@@ -141,7 +135,7 @@ const ProposeTransfer: FC = () => {
           </Stack>
         </form>
       )}
-       {isProposed && (
+      {isProposed && (
         <Modal isOpen={true} onClose={onDisconnect}>
           <ModalOverlay />
           <ModalContent>
@@ -159,6 +153,6 @@ const ProposeTransfer: FC = () => {
       )}
     </div>
   );
-   
-}
+};
+
 export default ProposeTransfer;

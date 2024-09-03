@@ -5,7 +5,30 @@ import useSafeDetailsAndSetup from 'hooks/useSafeDetails.ts';
 import { useRouter } from 'next/router';
 import { SafecontractAddress } from 'constants/constants';
 import { useUserStore } from 'stores/userStore';
-import { Avatar, Button, Flex, Heading, Menu, ButtonProps, useDisclosure, MenuButton, MenuList, Text, useClipboard, Input, Stack, InputGroup, InputLeftElement, InputRightElement, Box, Grid, VStack, FormControl, FormLabel, FormErrorMessage, FormHelperText, chakra, } from '@chakra-ui/react';
+import { 
+  Box, 
+  Button, 
+  Flex, 
+  Heading, 
+  Menu, 
+  MenuButton, 
+  MenuList, 
+  Text, 
+  useClipboard, 
+  Input, 
+  Stack, 
+  InputGroup, 
+  InputLeftElement, 
+  InputRightElement, 
+  Grid, 
+  VStack, 
+  FormControl, 
+  FormLabel, 
+  FormErrorMessage, 
+  FormHelperText, 
+  chakra, 
+  useToast 
+} from '@chakra-ui/react';
 import { useAppToast } from 'hooks/index';
 import { BsGithub, BsTwitter, BsGoogle } from 'react-icons/bs';
 import { signInWithPopup } from 'firebase/auth';
@@ -20,6 +43,7 @@ const CreateSafe: FC = () => {
   const router = useRouter();
   const { replace } = useRouter();
   const useraddress = useEthersStore((state) => state.address);
+  const toast = useToast();
 
   useEffect(() => {
     if (!useraddress) {
@@ -29,11 +53,9 @@ const CreateSafe: FC = () => {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { data: session, status } = useSession();
-
   const safeStore = useSafeStore();
   const { safeAddress, ownersAddress, contractAddress } = safeStore;
   const { setSafeAddress, setOwnersAddress, setContractAddress, setSafeStore } = safeStore;
-
   const [isCreatingSafe, setIsCreatingSafe] = useState(false);
   const { executeSafeTransaction, userAddToSafe, isLoading } = useLoadSafe({ safeAddress, userAddress: useraddress });
 
@@ -42,22 +64,25 @@ const CreateSafe: FC = () => {
       setIsCreatingSafe(true);
       const newSafeAddress = await setUpMultiSigSafeAddress(SafecontractAddress);
       setSafeAddress(newSafeAddress);
-      setSafeStore({ 
-        safeAddress: newSafeAddress, 
-        ownersAddress: [], 
-        contractAddress: SafecontractAddress 
-      });
+      setSafeStore({ safeAddress: newSafeAddress, ownersAddress: [], contractAddress: SafecontractAddress });
       setIsCreatingSafe(false);
       console.log(`Safe Address: ${newSafeAddress}`);
+      router.push('/AddSafeOwners'); // Route to AddSafeOwners page
     } catch (error) {
       console.error(error);
-      // Display an error message to the user, e.g., using `useAppToast`
+      toast({
+        title: 'Error creating safe',     
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      router.push('/create-safe'); // Route to Create Safe page
     }
   };
 
   if (session) {
     setTimeout(() => {
-      router.push('/');
+      router.push('/'); // Route to Home page
     }, 5000);
     return (
       <Box maxW="md" mx="auto" mt={8}>
@@ -71,9 +96,13 @@ const CreateSafe: FC = () => {
     <Box maxW="md" mx="auto" mt={8}>
       <Heading mb={6}>Sign Up</Heading>
       <VStack spacing={4}>
-        <Button onClick={handleCreateSafe} disabled={isCreatingSafe || isLoading}> Create Safe </Button>
+        <Button onClick={handleCreateSafe} disabled={isCreatingSafe || isLoading}>
+          Create Safe
+        </Button>
         {safeAddress && (
-          <Text> Safe Address: <code>{safeAddress}</code> </Text>
+          <Text>
+            Safe Address: <code>{safeAddress}</code>
+          </Text>
         )}
       </VStack>
     </Box>
