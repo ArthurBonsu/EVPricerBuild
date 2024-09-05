@@ -150,7 +150,7 @@ const proposeTxn = async (transaction: any) => {
     return rejectedTxn;
   };
 
-  const executeSafeTransaction = async () => {
+  const executeSafeTransaction = async (transaction: PaymentTransactions) => {
     setIsLoading(true);
     
     const executable = await checkIfTxnExecutable(transaction);

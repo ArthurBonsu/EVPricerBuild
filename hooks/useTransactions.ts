@@ -8,7 +8,9 @@ import { SwapTokenTransaction } from 'types/ethers';
 import { TokenDepositvalue, TokenType, TokenTypesDetails, SwapTransactionType } from 'types/index';
 import { useSafeStore } from 'stores/safeStore';
 import useSafeSdk from 'hooks/useSafeSdk';
-import useSafeInfo, { useSafe } from 'hooks/useSafe';
+
+const TokenSwapcontractABI:AbiItem | AbiItem[];
+const TokenSwapcontractAddress="";
 
 // Initialize Web3 provider
 let web3: Web3 | null = null;
@@ -51,10 +53,7 @@ const useTransactions = async ({ nonce, amount, tokenname, symbol, logoUri }: Sw
     const setAddress = useEthersStore((state) => state.setAddress);
     const setEtherStore = useEthersStore((state) => state.setEtherStore);
 
-    const selectedSafe = useSafeStore((state) => state.selectedSafe);
-    const isModuleEnabled = useSafeStore((state) => state.isModuleEnabled);
-    const setIsModuleEnabled = useSafeStore((state) => state.setIsModuleEnabled);
-
+   
     const { onConnect, onDisconnect } = useEthers();
     const { signer, safeSdk, safeService, safeAddress, safeTransaction, approveTransfer, rejectTransfer } = useSafeSdk();
     const { enableSafeModule, safe, isCurrentUserAlreadySigned, safeTxHash, status, checkIsSigned, refetch, checkIfWaitingForExecution, hasReachedThreshold, executeSafeModule } = useSafe({ safeAddress, userAddress: address });
