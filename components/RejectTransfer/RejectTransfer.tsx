@@ -1,35 +1,35 @@
 import { Button, ButtonProps, useDisclosure } from '@chakra-ui/react';
 import AppAlertDialog from '@components/AppAlertDialog';
-import useSafeSdk from 'hooks/useSafeSdk';
+import useLoadSafe from 'hooks/useLoadSafe';
 import { FC, useCallback, useState } from 'react';
+import { PaymentTransactions } from "types";
 
-interface RejectTransferProps {
-  safeTxHash: string | null;
-  isDisabled?: boolean;
-  threshold: number;
-  execTxn: boolean; // Change the type from Boolean to boolean
-  nonce: number;
-  hashTxn?: string;
+interface RejectTransferProps extends ButtonProps {
+  transaction: PaymentTransactions;
+  safeAddress: string;
+  userAddress: string;
 }
 
-// reject transfer 
-const RejectTransfer: FC<RejectTransferProps> = ({ safeTxHash, threshold, execTxn, nonce, hashTxn, ...rest }) => {
+const RejectTransfer: FC<RejectTransferProps> = ({
+  transaction,
+  safeAddress,
+  userAddress,
+  ...props
+}) => {
   const [isLoading, setIsLoading] = useState(false);
   const localDisclosure = useDisclosure();
-  const { rejectTransfer } = useSafeSdk();
+  const { rejectTransfer, ...rest } = useLoadSafe({ safeAddress, userAddress });
 
   const handleSubmit = useCallback(async () => {
     setIsLoading(true);
-
-    await rejectTransfer({ safeTxHash, execTxn, nonce, hashTxn: hashTxn || '' });
-
+    await rejectTransfer(transaction);
     setIsLoading(false);
     localDisclosure.onClose();
-  }, [rejectTransfer, safeTxHash, execTxn, nonce, localDisclosure, hashTxn]);
+  }, [rejectTransfer, transaction]);
 
   return (
     <>
-      <Button onClick={localDisclosure.onOpen} {...rest}>
+      <Button colorScheme="red" onClick={localDisclosure.onOpen} {...props}>
         Reject
       </Button>
       <AppAlertDialog
@@ -45,6 +45,6 @@ const RejectTransfer: FC<RejectTransferProps> = ({ safeTxHash, threshold, execTx
       />
     </>
   );
-}
+};
 
 export default RejectTransfer;

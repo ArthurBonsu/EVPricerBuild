@@ -21,8 +21,9 @@ import supportedNetworkOptions from 'constants/supportedNetworkOptions'
 import { useSwapStore  } from 'stores/ContextStores/useSwapStore'
 import { useEthersStore  } from 'stores/ethersStore'
 import { useSafeStore  } from 'stores/safeStore'
-import { useHashTransactionStore  } from 'stores/transactionStore'
-import { useUserStore  } from 'stores/userStore'
+import { useTransactionStore } from 'stores/transactionStore';
+import { useUserStore  } from 'stores/userStore';
+import { PaymentTransactions } from "types";
 
 
 
@@ -30,11 +31,11 @@ import { useUserStore  } from 'stores/userStore'
 import  useEthers   from 'hooks/useEthers'
 import  useFetch   from 'hooks/useFetch'
 import  useLoadSafe   from 'hooks/useLoadSafe'
-import  useSafe   from 'hooks/useSafe'
+
 import useSafeSdk   from 'hooks/useSafeSdk'
 import useTransactions   from 'hooks/useTransactions'
 
-import useSafeInfo from 'hooks/useSafe'
+import getSafeInfo from 'hooks/useLoadSafe'
 //Context 
 import  useCrowdsourceContext   from 'context/useCrowdsourceContext'
 import  useDaoContext   from 'context/useDaoContext'
@@ -291,25 +292,24 @@ const disclosureProps  = getDisclosureProps()
  const setAddress = useEthersStore((state) => state.setAddress)
  const setEtherStore = useEthersStore((state) => state.setEtherStore)
    
- const selectedSafe = useSafeStore((state) => state.selectedSafe)
- const isModuleEnabled = useSafeStore((state) => state.isModuleEnabled)
- const setIsModuleEnabled = useSafeStore((state) => state.setIsModuleEnabled)
+ const setSafeStore = useSafeStore((state) => state.setSafeStore)
+ const setSafeAddress = useSafeStore((state) => state.setSafeAddress)
+ const setIsPendingAddOwner = useSafeStore((state) => state.setIsPendingAddOwner)
 
    // Provider information to be provided
-   const txhash  = useHashTransactionStore((state) => state.txhash)
-   const txdata = useHashTransactionStore((state) => state.txdata)
-   const logouri = useHashTransactionStore((state) => state.txlogoUri)
-   const setHashTransaction = useHashTransactionStore((state) => state.setTransaction)
-   const setHashTransactionData = useHashTransactionStore((state) => state.setTransactionData)
-   const setHashTransactionTokenAmount = useHashTransactionStore((state) => state.setTransactionAmount)
-   const setHashTransactionName = useHashTransactionStore((state) => state.setTransactionName)
-   const setHashTransactionSymbol = useHashTransactionStore((state) => state.setTransactionSymbol)
-   const setHashTransactionSigner = useHashTransactionStore((state) => state.setTransactionSigner)
-   const setHashTransactionTxLogoUri = useHashTransactionStore((state) => state.setTransactionTxLogoUri)
+   const txhash = useTransactionStore((state) => state.txhash) ?? {};
+   const txdata = useTransactionStore((state) => state.txdata)
+   const logouri = useTransactionStore((state) => state.txlogoUri)
+   const setHashTransaction = useTransactionStore((state) => state.setTransaction)
+   const setHashTransactionData = useTransactionStore((state) => state.setTransactionData)
+   const setHashTransactionTokenAmount = useTransactionStore((state) => state.setTransactionAmount)
+   const setHashTransactionName = useTransactionStore((state) => state.setTransactionName)
+   const setHashTransactionSymbol = useTransactionStore((state) => state.setTransactionSymbol)
+   const setHashTransactionSigner = useTransactionStore((state) => state.setTransactionSigner)
+   const setHashTransactionTxLogoUri = useTransactionStore((state) => state.setTransactionSymbol)
    const walletAddress = useEthersStore((state) => state.address)
    const walletCheckSumAddress = walletAddress ? ethers.utils.getAddress(walletAddress) : ''
-
-   setHashTransaction(txhash)       
+   setHashTransaction(txhash as PaymentTransactions);  
    setHashTransactionData(txdata)   
    setHashTransactionTxLogoUri(logouri)
    setHashTransactionSymbol(symbolB)

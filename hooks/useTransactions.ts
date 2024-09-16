@@ -7,7 +7,6 @@ import { useEthersStore } from 'stores/ethersStore';
 import { SwapTokenTransaction } from 'types/ethers';
 import { TokenDepositvalue, TokenType, TokenTypesDetails, SwapTransactionType } from 'types/index';
 import { useSafeStore } from 'stores/safeStore';
-import useSafeSdk from 'hooks/useSafeSdk';
 
 const TokenSwapcontractABI:AbiItem | AbiItem[];
 const TokenSwapcontractAddress="";

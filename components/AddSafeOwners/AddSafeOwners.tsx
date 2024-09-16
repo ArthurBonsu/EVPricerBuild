@@ -5,32 +5,7 @@ import useSafeDetailsAndSetup from 'hooks/useSafeDetails.ts';
 import { useRouter } from 'next/router';
 import { SafecontractAddress } from 'constants/constants';
 import { useUserStore } from 'stores/userStore';
-import { 
-  Avatar, 
-  Button, 
-  Flex, 
-  Heading, 
-  Menu, 
-  ButtonProps, 
-  useDisclosure, 
-  MenuButton, 
-  MenuList, 
-  Text, 
-  useClipboard, 
-  Input, 
-  Stack, 
-  InputGroup, 
-  InputLeftElement, 
-  InputRightElement, 
-  Box, 
-  Grid, 
-  VStack, 
-  FormControl, 
-  FormLabel, 
-  FormErrorMessage, 
-  FormHelperText, 
-  chakra, 
-} from '@chakra-ui/react';
+import { Avatar, Button, Flex, Heading, Menu, ButtonProps, useDisclosure, MenuButton, MenuList, Text, useClipboard, Input, Stack, InputGroup, InputLeftElement, InputRightElement, Box, Grid, VStack, FormControl, FormLabel, FormErrorMessage, FormHelperText, chakra, } from '@chakra-ui/react';
 import { useAppToast } from 'hooks/index';
 import { BsGithub, BsTwitter, BsGoogle } from 'react-icons/bs';
 import { signInWithPopup } from 'firebase/auth';
@@ -53,18 +28,55 @@ const AddOwners: FC = () => {
   const setOwnersAddress = useSafeStore((state) => state.setOwnersAddress);
   const { userAddToSafe, executeSafeTransaction, getSafeInfoUsed } = useLoadSafe({ safeAddress, userAddress });
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
+  const { isPendingAddOwner, pendingAddOwnerData, setIsPendingAddOwner, setPendingAddOwnerData } = useSafeStore();
   const [isAddingOwner, setIsAddingOwner] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { data: session, status } = useSession();
+
   useEffect(() => {
     if (!useraddress) {
       replace('/');
     }
   }, [useraddress, replace]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (session) {
+      setTimeout(() => {
+        router.push('/');
+      }, 5000);
+    }
+  }, [session, router]);
+
+  useEffect(() => {
+    const handleGetSafeInfo = async () => {
+      const safeInfo = await getSafeInfoUsed();
+      console.log(safeInfo);
+      // Update the ownersAddress state with the fetched owners
+      // should be setOwnersAddress(safeInfo.ownerAddress);
+      setOwnersAddress([...ownersAddress, '0x...']);
+    };
+    handleGetSafeInfo();
+  }, [getSafeInfoUsed, ownersAddress, setOwnersAddress]);
+
+  const handleAddOwner = async (data: FormData) => {
+    try {
+      setIsPendingAddOwner(true);
+      const progress = { currentStep: 1, totalSteps: 2 };
+      setPendingAddOwnerData({ status: 'Adding owner...', progress });
+      await userAddToSafe();
+      progress.currentStep++;
+      setPendingAddOwnerData({ status: 'Updating owners list...', progress });
+      setOwnersAddress([...ownersAddress, data.ownerAddress]);
+      console.log(`Owner added: ${data.ownerAddress}`);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsPendingAddOwner(false);
+      setPendingAddOwnerData(null);
+    }
+  };
+
   if (session) {
-    setTimeout(() => {
-      router.push('/');
-    }, 5000);
     return (
       <Box maxW="md" mx="auto" mt={8}>
         <Heading mb={6}>You are already signed in</Heading>
@@ -72,28 +84,7 @@ const AddOwners: FC = () => {
       </Box>
     );
   }
-  const handleAddOwner = async (data: FormData) => {
-    try {
-      setIsAddingOwner(true);
-      await userAddToSafe();
-      setOwnersAddress([...ownersAddress, data.ownerAddress]);
-      console.log(`Owner added: ${data.ownerAddress}`);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsAddingOwner(false);
-    }
-  };
-  const handleGetSafeInfo = async () => {
-    const safeInfo = await getSafeInfoUsed();
-    console.log(safeInfo);
-    // Update the ownersAddress state with the fetched owners
-    // should be setOwnersAddress(safeInfo.ownerAddress);
-    setOwnersAddress([...ownersAddress, '0x...']);
-  };
-  useEffect(() => {
-    handleGetSafeInfo();
-  }, []);
+
   return (
     <Box maxW="md" mx="auto" mt={8}>
       <Heading mb={6}>Add Owners</Heading>
@@ -101,10 +92,7 @@ const AddOwners: FC = () => {
         <form onSubmit={handleSubmit(handleAddOwner)}>
           <FormControl>
             <FormLabel>Owner Address</FormLabel>
-            <Input 
-              {...register('ownerAddress', { required: 'Owner address is required' })} 
-              placeholder="Enter owner address" 
-            />
+            <Input {...register('ownerAddress', { required: 'Owner address is required' })} placeholder="Enter owner address" />
             {errors.ownerAddress && (
               <FormErrorMessage>
                 {errors.ownerAddress.message}
@@ -119,7 +107,18 @@ const AddOwners: FC = () => {
         {ownersAddress.map((owner, index) => (
           <Text key={index}> Owner {index + 1}: {owner} </Text>
         ))}
-       
+        {isPendingAddOwner && <Text>Loading...</Text>}
+        {pendingAddOwnerData && (
+          <Text> 
+            Current Status: {pendingAddOwnerData.status} 
+            <Button onClick={() => { 
+              setPendingAddOwnerData(null); 
+              setIsPendingAddOwner(false); 
+            }} > 
+              Cancel 
+            </Button> 
+          </Text>
+        )}
         <Button onClick={() => router.push('/')}>Go back to homepage</Button>
         <Button onClick={() => router.push('/ProposeTransaction')}>Make a transaction</Button>
       </VStack>

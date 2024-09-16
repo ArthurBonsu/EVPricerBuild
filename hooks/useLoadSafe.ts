@@ -57,7 +57,11 @@ export const useLoadSafe = ({ safeAddress, userAddress }: UseSafeProps) => {
   
   const [transactions, setTransactions] = useState([]);
 
-  
+  const [transactionStatus, setTransactionStatus] = useState({});
+
+  const updateTransactionStatus = async (transaction: PaymentTransactions, status: string) => {
+    setTransactionStatus((prevStatus) => ({ ...prevStatus, [transaction.txhash]: status }));
+  };
   const userAddToSafe = async () => {
     setIsLoading(true);
     const addressAdded = await addAddressToSafe(safeAddress, userAddress);
@@ -127,8 +131,7 @@ export const useLoadSafe = ({ safeAddress, userAddress }: UseSafeProps) => {
     return executable;
   };
 
-
-  
+ 
 const proposeTxn = async (transaction: any) => {
   setTransaction(transaction);
   const proposedTxn = await proposeTransaction({ safeAddress, transaction });
@@ -150,9 +153,9 @@ const proposeTxn = async (transaction: any) => {
     return rejectedTxn;
   };
 
+  
   const executeSafeTransaction = async (transaction: PaymentTransactions) => {
     setIsLoading(true);
-    
     const executable = await checkIfTxnExecutable(transaction);
     setTransaction(transaction);
     if (executable) {
@@ -165,17 +168,18 @@ const proposeTxn = async (transaction: any) => {
         transaction: transaction,
         hashtxn: transaction.txhash,
       };
-      
       const response = await executeTransaction(executeTransParam);
+      setTransactionStatus((prevStatus) => ({ ...prevStatus, [transaction.txhash]: 'complete' }));
       setIsLoading(false);
       return response;
     } else {
       const rejectedTxn = await rejectTxn(transaction.txhash);
+      setTransactionStatus((prevStatus) => ({ ...prevStatus, [transaction.txhash]: 'rejected' }));
       setIsLoading(false);
       return rejectedTxn;
     }
   };
-
+  
   const refetch = {
     waiting: checkIsSigned,
     success: () => {
@@ -188,6 +192,7 @@ const proposeTxn = async (transaction: any) => {
     isLoading,
     safe,
     checkIsSigned,
+    checkIfTxnExecutable,
     isCurrentUserAlreadySigned,
     refetch,
     hasReachedThreshold,
@@ -197,6 +202,7 @@ const proposeTxn = async (transaction: any) => {
     proposeTransaction: proposeTxn,
     approveTransfer: approveTxn,
     rejectTransfer: rejectTxn,
+    updateTransactionStatus,
   };
 };
 

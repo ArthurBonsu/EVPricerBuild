@@ -23,7 +23,7 @@ import supportedNetworkOptions from 'constants/supportedNetworkOptions'
 import { useSwapStore  } from 'stores/ContextStores/useSwapStore'
 import { useEthersStore  } from 'stores/ethersStore'
 import { useSafeStore  } from 'stores/safeStore'
-import { useHashTransactionStore  } from 'stores/transactionStore'
+import { useTransactionStore } from 'stores/transactionStore';
 import { useUserStore  } from 'stores/userStore'
 import {TransactionDisplayProps} from 'types/ethers'
 import { Receipients  } from 'types/index'
@@ -34,11 +34,11 @@ import { Receipients  } from 'types/index'
 import  useEthers   from 'hooks/useEthers'
 import  useFetch   from 'hooks/useFetch'
 import  useLoadSafe   from 'hooks/useLoadSafe'
-import  useSafe   from 'hooks/useSafe'
-import useSafeSdk   from 'hooks/useSafeSdk'
+
+
 import useTransactions   from 'hooks/useTransactions'
 
-import useSafeInfo from 'hooks/useSafe'
+import getSafeInfo from 'hooks/useLoadSafe'
 //Context 
 import  useCrowdsourceContext   from 'context/useCrowdsourceContext'
 import  useDaoContext   from 'context/useDaoContext'

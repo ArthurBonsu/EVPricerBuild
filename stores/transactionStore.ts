@@ -1,4 +1,3 @@
-// stores/transactionStore.ts
 import create, { State } from 'zustand';
 import { PaymentTransactions } from 'types';
 
@@ -11,6 +10,8 @@ export interface TransactionStore extends State {
   txsymbol: string | null;
   txsigner: string | null;
   txlogoUri: string | null;
+  isPendingProposal: boolean;
+  pendingProposalData: any;
   setTransaction: (transaction: PaymentTransactions) => void;
   setTransactionHash: (txhash: TransactionStore['txhash']) => void;
   setTransactionData: (txdata: TransactionStore['txdata']) => void;
@@ -19,7 +20,9 @@ export interface TransactionStore extends State {
   setTransactionSymbol: (txsymbol: TransactionStore['txsymbol']) => void;
   setTransactionSigner: (txsigner: TransactionStore['txsigner']) => void;
   setTransactionLogoUri: (txlogoUri: TransactionStore['txlogoUri']) => void;
-  setTransactionStore: (values: Omit<TransactionStore, 'setTransaction' | 'setTransactionHash' | 'setTransactionData' | 'setTransactionAmount' | 'setTransactionName' | 'setTransactionSymbol' | 'setTransactionSigner' | 'setTransactionLogoUri'>) => void;
+  setIsPendingProposal: (isPendingProposal: TransactionStore['isPendingProposal']) => void;
+  setPendingProposalData: (pendingProposalData: TransactionStore['pendingProposalData']) => void;
+  setTransactionStore: (values: Omit<TransactionStore, 'setTransaction' | 'setTransactionHash' | 'setTransactionData' | 'setTransactionAmount' | 'setTransactionName' | 'setTransactionSymbol' | 'setTransactionSigner' | 'setTransactionLogoUri' | 'setIsPendingProposal' | 'setPendingProposalData'>) => void;
 }
 
 export const INITIAL_TRANSACTION_STATE = {
@@ -44,12 +47,13 @@ export const INITIAL_TRANSACTION_STATE = {
   txsymbol: null,
   txsigner: null,
   txlogoUri: null,
+  isPendingProposal: false,
+  pendingProposalData: null,
 };
 
 export const useTransactionStore = create<TransactionStore>((set) => ({
   ...INITIAL_TRANSACTION_STATE,
-  setTransaction: (transaction: PaymentTransactions) =>
-    set((state) => ({ ...state, transaction })),
+  setTransaction: (transaction: PaymentTransactions) => set((state) => ({ ...state, transaction })),
   setTransactionHash: (txhash) => set({ txhash }),
   setTransactionData: (txdata) => set({ txdata }),
   setTransactionAmount: (txamount) => set({ txamount }),
@@ -57,6 +61,8 @@ export const useTransactionStore = create<TransactionStore>((set) => ({
   setTransactionSymbol: (txsymbol) => set({ txsymbol }),
   setTransactionSigner: (txsigner) => set({ txsigner }),
   setTransactionLogoUri: (txlogoUri) => set({ txlogoUri }),
+  setIsPendingProposal: (isPendingProposal) => set({ isPendingProposal }),
+  setPendingProposalData: (pendingProposalData) => set({ pendingProposalData }),
   setTransactionStore: (values) => set(values),
 }));
 

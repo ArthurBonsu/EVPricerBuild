@@ -4,24 +4,17 @@ import { BlockchainTransaction } from "types/ethers";
 
 let contractABI = "";
 let contractAddress = "";
-
 const { ethereum } = window;
 
+const createEthereumContract = async () => {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = await provider.getSigner();
+  const safeContract = new ethers.Contract(contractAddress, contractABI, signer);
+  return safeContract;
+};
+
 const useSafeContext = () => {
-  const createEthereumContract = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = await provider.getSigner();
-    const safeContract = new ethers.Contract(contractAddress, contractABI, signer);
-    return transactionsContract;
-  };
-
-  const [formData, setFormData] = useState({
-    addressTo: "",
-    amount: "",
-    keyword: "",
-    message: "",
-  });
-
+  const [formData, setFormData] = useState({ addressTo: "", amount: "", keyword: "", message: "", });
   const [currentAccount, setCurrentAccount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [transactionCount, setTransactionCount] = useState(localStorage.getItem("transactionCount"));
@@ -46,7 +39,6 @@ const useSafeContext = () => {
           keyword: transaction.keyword,
           amount: transaction.amount,
         })));
-        
         console.log(structuredTransactions);
         setTransactions(structuredTransactions);
       } else {
@@ -103,7 +95,6 @@ const useSafeContext = () => {
         const { addressTo, amount, keyword, message } = formData;
         const transactionsContract = await createEthereumContract();
         const parsedAmount = ethers.utils.parseEther(amount);
-       
         setIsLoading(true);
         await ethereum.request({
           method: "eth_sendTransaction",
@@ -114,10 +105,8 @@ const useSafeContext = () => {
             value: ethers.utils.parseEther(amount).toString(),
           }],
         });
-
         const transactionHash = await transactionsContract.addToBlockchain(addressTo, parsedAmount, message, keyword);
         setIsLoading(true);
-
         console.log(`Loading - ${transactionHash.hash}`);
         await transactionHash.wait();
         console.log(`Success - ${transactionHash.hash}`);
@@ -151,4 +140,4 @@ const useSafeContext = () => {
   };
 };
 
-export default useTransactionContext;
+export default useSafeContext;

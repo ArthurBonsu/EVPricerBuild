@@ -7,6 +7,7 @@ import { Button, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, 
 import { useForm } from 'react-hook-form';
 import { useEthers } from 'hooks';
 import { useRouter } from 'next/router';
+import { useTransactionStore } from 'stores/transactionStore';
 
 const ProposeTransfer: FC = () => {
   const router = useRouter();
@@ -15,29 +16,42 @@ const ProposeTransfer: FC = () => {
   const { safeAddress, ownersAddress } = useSafeStore();
   const { proposeTransaction, approveTransfer, rejectTransfer } = useLoadSafe({ safeAddress: '0x...', userAddress: '0x...' });
   const { register, handleSubmit, formState: { errors } } = useForm<PaymentTransactions>();
-  const [transaction, setTransaction] = useState<PaymentTransactions>({
-    data: null, username: '', address: '', amount: 0, comment: '', timestamp: new Date(), receipient: '', receipients: [], txhash: '', USDprice: 0, paymenthash: '', owneraddress: '',
-  });
   const [isProposed, setIsProposed] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
 
+  const {
+    transaction,
+    isPendingProposal,
+    pendingProposalData,
+    setTransaction,
+    setIsPendingProposal,
+    setPendingProposalData,
+  } = useTransactionStore();
+
   const handlePropose = async (data: PaymentTransactions) => {
-    setTransaction(data);
-    await proposeTransaction(data);
-    setIsProposed(true);
-    router.push('/ExecuteTransfer'); // Route to ExecuteTransfer page
+    setIsPendingProposal(true);
+    try {
+      setTransaction(data);
+      setPendingProposalData(data);
+      await proposeTransaction(data);
+      setIsProposed(true);
+      router.push('/ExecuteTransfer');
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsPendingProposal(false);
+    }
   };
 
   const handleApprove = async () => {
     await approveTransfer(transaction);
     setIsApproved(true);
-    router.push('/ExecuteTransfer'); // Route to ExecuteTransfer page
+    router.push('/ExecuteTransfer');
   };
 
   const handleReject = async () => {
     await rejectTransfer(transaction);
     setIsApproved(false);
-    // Stay on the same page (ProposeTransfer)
   };
 
   return (
@@ -102,12 +116,12 @@ const ProposeTransfer: FC = () => {
               )}
             </FormControl>
             <FormControl isInvalid={!!errors.txhash}>
-        <FormLabel>Transaction Hash:</FormLabel>
-         <Input {...register('txhash', { required: 'Transaction Hash is required' })} />
-             {errors.txhash && errors.txhash.message && (
-          <FormErrorMessage>{errors.txhash.message}</FormErrorMessage>
-          )}
-        </FormControl>
+              <FormLabel>Transaction Hash:</FormLabel>
+              <Input {...register('txhash', { required: 'Transaction Hash is required' })} />
+              {errors.txhash && (
+                <FormErrorMessage>{errors.txhash.message}</FormErrorMessage>
+              )}
+            </FormControl>
             <FormControl isInvalid={!!errors.USDprice}>
               <FormLabel>USD Price:</FormLabel>
               <NumberInput>
@@ -134,6 +148,9 @@ const ProposeTransfer: FC = () => {
             <Button type="submit">Propose Transaction</Button>
           </Stack>
         </form>
+      )}
+      {isPendingProposal && (
+        <p>Proposal pending...</p>
       )}
       {isProposed && (
         <Modal isOpen={true} onClose={onDisconnect}>

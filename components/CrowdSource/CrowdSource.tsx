@@ -1,91 +1,99 @@
 import { useEffect, useState } from 'react';
 import { Button, ButtonProps, Flex, useDisclosure } from '@chakra-ui/react';
 import AppModal from '../AppModal/AppModal';
-import { useSafeSdk } from 'hooks';
+import useLoadSafe from 'hooks/useLoadSafe';
+import { PaymentTransactions } from "types";
 
 export interface CrowdsourceTransferProps {
-  safeTxHash: string;
-  safeRejectTxHash: string | null;
-  threshold: string | number | undefined;
-  nonce: number;
-  hashTxn?: string;
+  transaction: PaymentTransactions;
+  safeAddress: string;
+  userAddress: string;
 }
 
 export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
-  safeTxHash,
-  safeRejectTxHash,
-  threshold,
-  nonce,
-  hashTxn,
+  transaction,
+  safeAddress,
+  userAddress,
   ...rest
 }) => {
   const [approveExeIsLoading, setApproveExeIsLoading] = useState(false);
   const [rejectExeIsLoading, setRejectExeIsLoading] = useState(false);
-
   const [isApprovalExecutable, setIsApprovalExecutable] = useState(false);
   const [isRejectionExecutable, setIsRejectionExecutable] = useState(false);
   const localDisclosure = useDisclosure();
+  const { isLoading, safe, checkIsSigned } = useLoadSafe({
+    safeAddress,
+    userAddress,
+  });
 
-  const { isTxnExecutable, safeService, approveTransfer, rejectTransfer } = useSafeSdk();
+  const approveTransfer = async (transaction: PaymentTransactions) => {
+    setApproveExeIsLoading(true);
+    // implement approve transfer logic here
+    setApproveExeIsLoading(false);
+  };
+
+  const rejectTransfer = async (transaction: PaymentTransactions) => {
+    setRejectExeIsLoading(true);
+    // implement reject transfer logic here
+    setRejectExeIsLoading(false);
+  };
+
+  const isTxnExecutable = async (transaction: PaymentTransactions) => {
+    // implement is transaction executable logic here
+    return true; // replace with actual logic
+  };
 
   useEffect(() => {
     const getExecutables = async () => {
-      if (safeTxHash && threshold) {
-        const approvalTx = await safeService.getTransaction(safeTxHash);
-        if (approvalTx && isTxnExecutable(Number(threshold), approvalTx)) {
+      if (transaction) {
+        const approvalTx = await isTxnExecutable(transaction);
+        if (approvalTx) {
           setIsApprovalExecutable(true);
         }
       }
-
-      if (safeRejectTxHash) {
-        const rejectionTx = await safeService.getTransaction(safeRejectTxHash);
-        if (rejectionTx && isTxnExecutable(Number(threshold), rejectionTx)) {
-          setIsRejectionExecutable(true);
-        }
-      }
     };
-
     getExecutables();
-  }, [isTxnExecutable, safeRejectTxHash, safeService, safeTxHash, threshold]);
+  }, [isTxnExecutable, transaction]);
 
   return (
     <div>
       <Button {...rest} onClick={localDisclosure.onOpen}>
         Execute
       </Button>
-      <AppModal disclosure={localDisclosure} title="Execute Transaction" modalSize="sm">
-        <Flex justify="space-between" py={6} alignItems="center" flexDirection="row">
+      <AppModal
+        disclosure={localDisclosure}
+        title="Execute Transaction"
+        modalSize="sm"
+      >
+        <Flex
+          justify="space-between"
+          py={6}
+          alignItems="center"
+          flexDirection="row"
+        >
           {isApprovalExecutable && (
             <Button
               isLoading={approveExeIsLoading}
               isDisabled={approveExeIsLoading}
               onClick={async () => {
-                if (hashTxn) {
-                  setApproveExeIsLoading(true);
-                  await approveTransfer({ safeTxHash, execTxn: true, hashTxn });
-                  setApproveExeIsLoading(false);
-                  localDisclosure.onClose();
-                }
+                await approveTransfer(transaction);
+                localDisclosure.onClose();
               }}
             >
               Execute Approval
             </Button>
           )}
           {isRejectionExecutable && (
-           <Button
-           isLoading={rejectExeIsLoading}
-           isDisabled={rejectExeIsLoading}
-           onClick={async () => {
-             if (hashTxn && safeRejectTxHash) {
-               setRejectExeIsLoading(true);
-               await rejectTransfer({ safeTxHash: safeRejectTxHash, execTxn: true, hashTxn, nonce });
-               setRejectExeIsLoading(false);
-               localDisclosure.onClose();
-             }
-           }}
-         >
-           Execute Rejection
-         </Button>
+            <Button
+              isLoading={rejectExeIsLoading}
+              isDisabled={rejectExeIsLoading}
+              onClick={async () => {
+                await rejectTransfer(transaction);
+                localDisclosure.onClose();
+              }}
+            >
+              Execute Rejection
+            </Button>
           )}
         </Flex>
       </AppModal>
