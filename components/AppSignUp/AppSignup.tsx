@@ -149,6 +149,9 @@ const AppSignup: FC<SignupProps> = ({ isCollapsed = false, username, email, pass
           <Button colorScheme="twitter" onClick={handleFirebaseTwitterSignUp}>
             Sign up with Twitter
           </Button>
+          <Button mt={4} colorScheme="teal" onClick={() => router.push('/signup')}>
+         Sign Up With Email And Password
+      </Button>
         </Stack>
       )}
     </Box>

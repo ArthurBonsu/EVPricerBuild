@@ -44,17 +44,18 @@ const HomePage: FC = () => {
                   icon={<BsInfoCircle />}
                   subtitle={'We deliver multiple services such as DAO and Crowdsource funds for you and your partners'}
                 />
-                <Footer
-                  message={'Please join us as we make this world a better place'}
-                  community={'Community'}
-                  copyright={'Trademark Policy'}
-                  blog={'Blog'}
-                  FAQ={'FAQ'}
-                  contact={'blockdao@gmail.com'}
-                  githubUrl={'https://github.com/ArthurBonsu'}
-                  twitterUrl={'https://twitter.com/home'}
-                  discordUrl={'https://uniswap.org/blog/uniswap-v3'}
-                />
+             <Footer 
+  message={'Please join us as we make this world a better place'}
+  community={'Community'}
+  copyright={'Trademark Policy'}
+  blog={'Blog'}
+  FAQ={'FAQ'}
+  Contact={'blockdao@gmail.com'}
+  githubUrl={'(https://github.com/ArthurBonsu)'}
+  twitterUrl={'(https://twitter.com/home)'}
+  discordUrl={'(https://uniswap.org/blog/uniswap-v3)'}
+/>
+
               </div>
             </>
           ) : (

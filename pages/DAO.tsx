@@ -13,7 +13,7 @@ import { HiMenuAlt4 } from 'react-icons/hi';
 import { AiOutlineClose } from 'react-icons/ai';
 import logo from '../images/blockdaologo.png';
 import { useEthersStore } from 'stores/ethersStore';
-
+import { BiEnvelope } from "react-icons/bi";
 const DAO: FC = () => {
   const { data: session } = useSession();
   const [isCurrentPage, setIsCurrentPage] = useState(false);
@@ -50,7 +50,12 @@ const DAO: FC = () => {
                   <Button onClick={handleSignOut} mt={4}>Sign Out</Button>
                 </div>
                 {/* Include other components as needed */}
-                <Services />
+                <Services
+                  color="primary"
+                  title="DAO Service"
+                  icon={<BiEnvelope />}
+                  subtitle="Service Sub"
+                />
                 <Transactions />
                 <Footer
                   message={'Please join us as we make this world a better place'}
@@ -58,7 +63,7 @@ const DAO: FC = () => {
                   copyright={'Trademark Policy'}
                   blog={'Blog'}
                   FAQ={'FAQ'}
-                  contact={'blockdao@gmail.com'}
+                  Contact={'blockdao@gmail.com'}
                   githubUrl={'https://github.com/ArthurBonsu'}
                   twitterUrl={'https://twitter.com/home'}
                   discordUrl={'https://uniswap.org/blog/uniswap-v3'}

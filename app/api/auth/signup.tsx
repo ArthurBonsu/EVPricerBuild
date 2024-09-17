@@ -3,6 +3,8 @@ import GoogleProvider from 'next-auth/providers/google';
 import TwitterProvider from 'next-auth/providers/twitter';
 import GitHubProvider from 'next-auth/providers/github';
 import AppleProvider from 'next-auth/providers/apple';
+import { Button } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
 
 const getEnvVar = (variable: string | undefined, name: string): string => {
   if (!variable) {
@@ -38,10 +40,10 @@ const providers: SignInProviders[] = [
     name: "Apple",
     credentials: getEnvVar(process.env.APPLE_ID, 'APPLE_ID'),
     secret: getEnvVar(process.env.APPLE_SECRET, 'APPLE_SECRET'),
-  }
+  },
 ];
 
-export default NextAuth({
+const authOptions = {
   providers: [
     GoogleProvider({
       clientId: providers.find(p => p.name === 'Google')?.credentials || '',
@@ -63,8 +65,26 @@ export default NextAuth({
   pages: {
     signIn: '/auth/signin',
     signOut: '/auth/signout',
-    error: '/auth/error', // Error code passed in query string as ?error=
-    verifyRequest: '/auth/verify-request', // (used for check email message)
-    newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
-  }
-});
+    error: '/auth/error', 
+    verifyRequest: '/auth/verify-request', 
+    newUser: '/auth/new-user' 
+  },
+};
+
+export { authOptions };
+
+const SignUpButton = () => {
+  const router = useRouter();
+
+  return (
+    <Button 
+      onClick={() => router.push('/components/AppSignUp')} 
+      variant="outline" 
+      mt={4} 
+    >
+      Sign Up Here 
+    </Button>
+  );
+};
+
+export default SignUpButton;

@@ -5,9 +5,9 @@ import { useState } from 'react';
 import { useQuery } from 'react-query';
 import { ethers } from 'ethers';
 import queries from 'services/queries';
-import { getLayout } from '../../components/Layout/Layout'; // Adjusted import path
+import { getLayout } from '../components/Layout/Layout'; // Adjusted import path
 import { useEthersStore, EtherStore } from 'stores/ethersStore';
-import getSafesWithoutModule from 'utils/getSafesWithoutModule';
+
 
 // Ensure the wallet address is valid before calling utils.getAddress
 const walletAddress = '0x1234567890123456789012345678901234567890'; // Replace with your actual wallet address
@@ -72,9 +72,7 @@ const Safe: WithPageLayout = () => {
         <Button colorScheme="blue" onClick={onCreateSafe}>
           Create Safe
         </Button>
-        <Button colorScheme="gray" onClick={getSafesWithoutModule}>
-          Disabled Module Safe List
-        </Button>
+        
       </VStack>
     </Box>
   );

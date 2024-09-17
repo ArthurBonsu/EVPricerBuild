@@ -34,6 +34,7 @@ import { BsGithub, BsTwitter, BsGoogle } from 'react-icons/bs';
 import { signInWithPopup } from 'firebase/auth';
 import { GoogleAuthProvider, TwitterAuthProvider } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
+import AppSignUp from '@components/AppSignUp';
 
 const providers = [
   { name: 'github', Icon: BsGithub },
@@ -145,6 +146,13 @@ const SignIn: FC<LoginProps> = ({ isCollapsed = false, username, email, password
           Sign in with Twitter
         </Button>
       </Stack>
+      <Button
+          onClick={() => router.push('@components/AppSignUp')}
+          variant="outline"
+          mt={4}
+        >
+          Sign Up Here
+        </Button>
     </Box>
   );
 };

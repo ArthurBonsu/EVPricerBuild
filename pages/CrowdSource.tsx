@@ -1,4 +1,5 @@
-// Import necessary modules and components
+
+// pages/CrowdSource.tsx
 import { FC, useState } from 'react';
 import { useSession, signOut, signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
@@ -8,27 +9,29 @@ import SimpleTransfer from '@components/SimpleTransfer';
 import Footer from '@components/Footer';
 import { Flex, Center, HStack, Heading, Button } from '@chakra-ui/react';
 
-const Crowdsource: FC = () => {
+const CrowdSource: FC = () => {
   // Use the session from next-auth
   const { data: session } = useSession();
-  
+
   // State for different sections of the page
   const [isCurrentPage, setIsCurrentPage] = useState(false);
   const [isRegistration, setIsRegistration] = useState(false);
   const [isTransaction, setIsTransaction] = useState(false);
 
   // Use ethersStore to get the address
-  const { address } = useEthersStore((state: { address: string }) => ({
-    address: state.address,
-  }));
+  const { address } = useEthersStore((state: { address: string }) => ({ address: state.address }));
 
   // useRouter for navigation
   const { push } = useRouter();
 
   // Function to handle sign-out
   const handleSignOut = async () => {
-    const data = await signOut({ redirect: false, callbackUrl: '/some' });
-    push(data.url);
+    try {
+      const data = await signOut({ redirect: false, callbackUrl: '/some' });
+      push(data.url);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
@@ -46,16 +49,16 @@ const Crowdsource: FC = () => {
                   <Button onClick={handleSignOut} mt={4}>Sign Out</Button>
                 </div>
                 {/* Other components */}
-                <Footer
-                  message={'Please join us as we make this world a better place'}
-                  community={'Community'}
-                  copyright={'Trademark Policy'}
-                  blog={'Blog'}
-                  FAQ={'FAQ'}
-                  contact={'blockdao@gmail.com'}
-                  githubUrl={'https://github.com/ArthurBonsu'}
-                  twitterUrl={'https://twitter.com/home'}
-                  discordUrl={'https://uniswap.org/blog/uniswap-v3'}
+                <Footer 
+                  message={'Please join us as we make this world a better place'} 
+                  community={'Community'} 
+                  copyright={'Trademark Policy'} 
+                  blog={'Blog'} 
+                  FAQ={'FAQ'} 
+                  Contact={'blockdao@gmail.com'} 
+                  githubUrl={'(https://github.com/ArthurBonsu)'} 
+                  twitterUrl={'(https://twitter.com/home'} 
+                  discordUrl={'(https://uniswap.org/blog/uniswap-v3)'} 
                 />
               </div>
             </>
@@ -71,4 +74,4 @@ const Crowdsource: FC = () => {
   );
 };
 
-export default Crowdsource;
+export default CrowdSource;

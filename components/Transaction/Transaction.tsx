@@ -15,7 +15,7 @@ import  useEthers   from 'hooks/useEthers'
 import  useFetch   from 'hooks/useFetch'
 import  useLoadSafe   from 'hooks/useLoadSafe'
 
-import useSafeSdk   from 'hooks/useSafeSdk'
+
 import useTransactions   from 'hooks/useTransactions'
 
 import getSafeInfo from 'hooks/useLoadSafe'

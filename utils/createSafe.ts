@@ -1,58 +1,50 @@
-import Web3 from 'web3';
-import EthersAdapter from '@gnosis.pm/safe-ethers-lib';
-import Safe, { SafeFactory, SafeAccountConfig } from '@gnosis.pm/safe-core-sdk';
+// C:\Users\Admin\Documents\peeapp\EVPricerBuild\utils\createSafe.ts
+import { ethers } from 'ethers';
+import { Web3Provider } from '@ethersproject/providers';
 
-// Declare the window object to ensure TypeScript knows about the Ethereum provider
-declare let window: any;
+// Define the contract ABI and bytecode
+const contractAbi: any[] = [];
+const contractBytecode: any = '';
 
-let newSafeAddress: string;
-let owners: string[];
+// Define the provider
+const provider: Web3Provider = new ethers.providers.Web3Provider(window.ethereum);
 
-export const createSafe = async (threshold: number, extrauseraddreess?: string[]) => {
-  // Initialize Web3 with the provider injected by MetaMask
-  const web3Provider = window.ethereum;
-  const web3 = new Web3(web3Provider);
+// Get the signer
+const signer: ethers.Signer = provider.getSigner();
 
-  // Get accounts from the Web3 provider
-  owners = await web3.eth.getAccounts();
+interface CreateSafeResponse {
+  newSafeAddress: string;
+  safeContract: ethers.Contract;
+}
 
-  // Add any extra user addresses to the owners array
-  if (extrauseraddreess) {
-    extrauseraddreess.forEach(user => owners.push(user));
+interface CreateSafeParams {
+  threshold: number;
+  extraUserAddresses?: string[];
+}
+
+// Define the function to create a new Safe
+export const createSafe = async ({ threshold, extraUserAddresses }: CreateSafeParams): Promise<CreateSafeResponse> => {
+  // Deploy the Safe contract instance
+  const safeFactory: ethers.ContractFactory = new ethers.ContractFactory(contractAbi, contractBytecode, signer);
+  const safeContract: ethers.Contract = await safeFactory.deploy();
+
+  // Wait for the contract to be deployed
+  await safeContract.deployed();
+
+  // Get the deployed contract address
+  const newSafeAddress: string = safeContract.address;
+
+  // Add extra user addresses to the Safe contract
+  if (extraUserAddresses) {
+    for (const address of extraUserAddresses) {
+      const tx = await safeContract.addOwner(address);
+      await tx.wait();
+    }
   }
 
-  // Use the first account as the signer
-  const owner = web3.eth.accounts.privateKeyToAccount(web3Provider._state.accounts[0]);
-
-  // Initialize the EthersAdapter with the Web3 provider and signer
-  const ethAdapter = new EthersAdapter({
-    web3,
-    signerOrProvider: owner,
-  });
-
-  // Create a SafeFactory instance
-  const safeFactory: SafeFactory = await SafeFactory.create({ ethAdapter });
-
-  // Configure the Safe account with the owners and threshold
-  const safeAccountConfig: SafeAccountConfig = { owners, threshold };
-  
-  // Deploy the new Safe
-  const safeSdk: Safe = await safeFactory.deploySafe({ safeAccountConfig });
-
-  // Get the new Safe address
-  newSafeAddress = safeSdk.getAddress();
-
-  // Alert the user with the new Safe address
-  alert(`New safe has been created ${newSafeAddress}`);
-
   return {
-    ethAdapter,
-    safeFactory,
-    owners,
-    safeAccountConfig,
-    safeSdk,
     newSafeAddress,
-    threshold,
+    safeContract,
   };
 };
 

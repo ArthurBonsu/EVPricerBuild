@@ -5,11 +5,11 @@ import { Box, Spinner, Table, Thead, Th, Tbody, Tr, Td } from '@chakra-ui/react'
 import { useQuery } from 'react-query';
 import { useRouter } from 'next/router';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { useEthersStore, EtherStore } from '../../../stores/ethersStore'; // Adjusted import path
-import PageSelection from '../../../components/PageSelection'; // Adjusted import path
-import { getLayout } from '../../../components/Layout/Layout'; // Adjusted import path
-import queries from '../../../services/queries'; // Adjusted import path
-import { ErrorType, TransfersType, ExtendedTransferType } from '../../../types'; // Adjusted import path
+import { useEthersStore, EtherStore } from '../../stores/ethersStore'; // Adjusted import path
+import PageSelection from '../../components/PageSelection'; // Adjusted import path
+import { getLayout } from '../../components/Layout/Layout'; // Adjusted import path
+import queries from '../../services/queries'; // Adjusted import path
+import { ErrorType, TransfersType, ExtendedTransferType } from 'types'; // Adjusted import path
 
 interface FormData {
   // Define your form fields here

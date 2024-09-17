@@ -21,25 +21,25 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
   const [isApprovalExecutable, setIsApprovalExecutable] = useState(false);
   const [isRejectionExecutable, setIsRejectionExecutable] = useState(false);
   const localDisclosure = useDisclosure();
-  const { isLoading, safe, checkIsSigned } = useLoadSafe({
+  const { proposeTransaction,approveTransfer, rejectTransfer, checkIfTxnExecutable, isLoading, safe, checkIsSigned } = useLoadSafe({
     safeAddress,
     userAddress,
   });
 
-  const approveTransfer = async (transaction: PaymentTransactions) => {
+  const approveTransfers = async (transaction: PaymentTransactions) => {
     setApproveExeIsLoading(true);
-    // implement approve transfer logic here
+    await approveTransfer(transaction);
     setApproveExeIsLoading(false);
   };
 
-  const rejectTransfer = async (transaction: PaymentTransactions) => {
+  const rejectTransfers = async (transaction: PaymentTransactions) => {
     setRejectExeIsLoading(true);
-    // implement reject transfer logic here
+    await rejectTransfer(transaction);
     setRejectExeIsLoading(false);
   };
 
   const isTxnExecutable = async (transaction: PaymentTransactions) => {
-    // implement is transaction executable logic here
+    await checkIfTxnExecutable(transaction);
     return true; // replace with actual logic
   };
 
@@ -76,7 +76,7 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
               isLoading={approveExeIsLoading}
               isDisabled={approveExeIsLoading}
               onClick={async () => {
-                await approveTransfer(transaction);
+                await approveTransfers(transaction);
                 localDisclosure.onClose();
               }}
             >
@@ -88,7 +88,7 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
               isLoading={rejectExeIsLoading}
               isDisabled={rejectExeIsLoading}
               onClick={async () => {
-                await rejectTransfer(transaction);
+                await rejectTransfers(transaction);
                 localDisclosure.onClose();
               }}
             >

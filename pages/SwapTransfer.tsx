@@ -43,9 +43,9 @@ const SwapTransfer: FC = () => {
                   blog={'Blog'}
                   FAQ={'FAQ'}
                   Contact={'blockdao@gmail.com'}
-                  Githuburl={'https://github.com/ArthurBonsu'}
-                  Twitterurl={'https://twitter.com/home'}
-                  Discordurl={'https://uniswap.org/blog/uniswap-v3'}
+                  githubUrl={'https://github.com/ArthurBonsu'}
+                  twitterUrl={'https://twitter.com/home'}
+                  discordUrl={'https://uniswap.org/blog/uniswap-v3'}
                 />
               </div>
             </>

@@ -1,7 +1,6 @@
 import { ethers, Signer, ContractFactory, Contract } from "ethers";
 import { useState, useEffect, useCallback } from 'react';
-import { enableModule } from 'utils/enableSafeModule';
-import { executeModule } from 'utils/executeSafeModule';
+
 import EthersAdapter from '@safe-global/safe-ethers-lib';
 import { createSafe } from 'utils/createSafe';
 import SafeServiceClient, { SafeInfoResponse } from '@safe-global/api-kit';

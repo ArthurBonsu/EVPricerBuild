@@ -25,7 +25,7 @@ const RejectTransfer: FC<RejectTransferProps> = ({
     await rejectTransfer(transaction);
     setIsLoading(false);
     localDisclosure.onClose();
-  }, [rejectTransfer, transaction]);
+    }, [rejectTransfer, transaction, localDisclosure]);
 
   return (
     <>

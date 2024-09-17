@@ -3,15 +3,15 @@
 import { useSwapStore } from 'stores/ContextStores/useSwapStore';
 import { useEthersStore } from 'stores/ethersStore';
 import { useSafeStore } from 'stores/safeStore';
-import { useHashTransactionStore } from 'stores/transactionStore';
+import { useTransactionStore } from 'stores/transactionStore';
 import { useUserStore } from 'stores/userStore';
 
 // HOOKS
 import useEthers from 'hooks/useEthers';
 import useFetch from 'hooks/useFetch';
 import useLoadSafe from 'hooks/useLoadSafe';
-import useSafe from 'hooks/useSafe';
-import useSafeSdk from 'hooks/useSafeSdk';
+import useSafe from 'hooks/useLoadSafe';
+
 import useTransactions from 'hooks/useTransactions';
 
 // Context 
@@ -53,7 +53,7 @@ const SecuredSwap: FC = () => {
 
     const signer = provider.getSigner();
     const swapContractAddress = '0xYourSwapContractAddress'; // Replace with your swap contract address
-    const swapContractAbi = [
+    const swapContractAbi :any= [
       // Add your swap contract ABI here
     ];
 
@@ -110,9 +110,9 @@ const SecuredSwap: FC = () => {
         blog="Blog"
         FAQ="FAQ"
         Contact="blockdao@gmail.com"
-        Githuburl="https://github.com/ArthurBonsu"
-        Twitterurl="https://twitter.com/home"
-        Discordurl="https://uniswap.org/blog/uniswap-v3"
+        githubUrl="https://github.com/ArthurBonsu"
+        twitterUrl="https://twitter.com/home"
+        discordUrl="https://uniswap.org/blog/uniswap-v3"
       />
     </Flex>
   );

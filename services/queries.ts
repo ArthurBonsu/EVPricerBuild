@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { TransfersType, AssetType, SafeInfoType, SwapTransactionType, TokenInfoResponse } from 'types';
-import { useHashTransactionStore } from 'stores/transactionStore';
+import { useTransactionStore } from 'stores/transactionStore';
 
 // Checking if the code is running in the browser environment
 if (typeof window !== 'undefined') {
@@ -31,7 +31,7 @@ if (typeof window !== 'undefined') {
 }
 
 // Extracting the logo URI from the store
-const logouri = useHashTransactionStore((state) => state.txlogoUri);
+const logouri = useTransactionStore((state) => state.txlogoUri);
 
 // Exporting functions for making API requests
 export default {

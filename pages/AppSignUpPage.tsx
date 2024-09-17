@@ -24,7 +24,7 @@ interface SignUpFormValues {
   password: string;
 }
 
-const SignUp: React.FC = () => {
+const AppSignUpPage: React.FC = () => {
   const { handleSubmit, register, formState: { errors } } = useForm<SignUpFormValues>();
   const router = useRouter();
   const toast = useToast();
@@ -98,6 +98,9 @@ const SignUp: React.FC = () => {
           <Button type="submit" colorScheme="blue" isLoading={loading}>Sign Up</Button>
         </Stack>
       </form>
+      <Button mt={4} colorScheme="teal" onClick={() => router.push('/signup')}>
+        Sign Up With Api
+      </Button>
       <Button mt={4} colorScheme="teal" onClick={() => router.push('/signin')}>
         Already have an account? Sign In
       </Button>
@@ -105,4 +108,4 @@ const SignUp: React.FC = () => {
   );
 };
 
-export default SignUp;
+export default AppSignUpPage;

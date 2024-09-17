@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 
 import React, { ReactNode } from 'react';
 import PageSelection from '@components/PageSelection';
-import { getLayout } from '../../../components/Layout/Layout';
+import { getLayout } from '../../components/Layout/Layout';
 import queries from 'services/queries';
 import { limitDecimals } from 'utils/tokenUtils';
 import { ErrorType, AssetType } from 'types'; // Import the ErrorType and AssetType interfaces
