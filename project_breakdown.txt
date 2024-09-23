@@ -1,0 +1,201 @@
+                   
++---app
+|   \---api
+|       \---auth
+|               error.tsx
+|               new-user.tsx
+|               signin.tsx
+|               signout.tsx
+|               signup.tsx
+|               user.ts
+|               welcome.tsx
+|               [...nextauth].ts
+|               
++---components
+|   |   AppSignIn.tsx
+|   |   MetaTags.tsx
+|   |   PageSelection.tsx
+|   |   
+|   +---AddSafeOwners
+|   |       AddSafeOwners.tsx
+|   |       index.ts
+|   |       
+|   +---AppAlertDialog
+|   |       AppAlertDialog.tsx
+|   |       index.ts
+|   |       
+|   +---AppModal
+|   |       AppModal.tsx
+|   |       index.ts
+|   |       
+|   +---ApproveTransfer
+|   |       ApproveTransfer.tsx
+|   |       index.ts
+|   |       
+|   +---AppSidebar
+|   |       AppSidebar.tsx
+|   |       index.tsx
+|   |       MenuItem.tsx
+|   |       
+|   +---AppSignUp
+|   |       AppSignup.tsx
+|   |       index.ts
+|   |       
+|   +---CreateSafe
+|   |       CreateSafe.tsx
+|   |       index.ts
+|   |       
+|   +---CrowdSource
+|   |       CrowdSource.tsx
+|   |       index.tsx
+|   |       
+|   +---CSV
+|   |       CSV.tsx
+|   |       index.ts
+|   |       
+|   +---DAO
+|   |       DAO.tsx
+|   |       index.ts
+|   |       
+|   +---ExecuteTransfer
+|   |       ExecuteTransfer.tsx
+|   |       index.ts
+|   |       
+|   +---Footer
+|   |       Footer.tsx
+|   |       index.ts
+|   |       
+|   +---Layout
+|   |       BasicAuth.tsx
+|   |       index.tsx
+|   |       Layout.tsx
+|   |       
+|   +---Loader
+|   |       index.ts
+|   |       Loader.tsx
+|   |       
+|   +---LoadSafeTransfer
+|   |       index.ts
+|   |       LoadSafeTransfer.tsx
+|   |       
+|   +---NavBar
+|   |       index.ts
+|   |       NavBar.tsx
+|   |       
+|   +---PaymentTransfer
+|   |       index.ts
+|   |       PaymentTransfer.tsx
+|   |       
+|   +---ProposeTransfer
+|   |       CreateTransferForm.tsx
+|   |       index.ts
+|   |       ProposeTransfer.tsx
+|   |       
+|   +---RejectTransfer
+|   |       index.ts
+|   |       RejectTransfer.tsx
+|   |       
+|   +---SecuredSwap.tsx
+|   |       index.ts
+|   |       SecuredSwap.tsx
+|   |       
+|   +---Services
+|   |       index.ts
+|   |       Services.tsx
+|   |       
+|   +---SimpleTransfer
+|   |       index.ts
+|   |       SimpleTransfer.tsx
+|   |       
+|   +---SwapTransfer
+|   |       index.ts
+|   |       SwapTransfer.tsx
+|   |       
+|   +---Transaction
+|   |       index.ts
+|   |       Transaction.tsx
+|   |       
+|   \---TransferConfirmation
+|           index.ts
+|           TransferConfirmation.tsx
+|           
++---config
+|       queryClient.ts
+|       
++---constants
+|       abi.ts
+|       constants.ts
+|       dummyData.ts
+|       module.ts
+|       shortenAddress.ts
+|       supportedChains.ts
+|       supportedNetworkOptions.ts
+|       Transactions.json
+|       
++---context
+|       useCrowdsourceContext.tsx
+|       useDaoContext.tsx
+|       usePortfolioContext.tsx
+|       useSafeContext.tsx
+|       useSwapContext.tsx
+|       useTransactionContext.tsx
+|       useTransferContext.tsx
+|       
++---contracts
+|   |   ERC20.sol
+|   |   FileToken.sol
+|   |   FileTokenUpgradeable.sol
+|   |   FileTokenUpgradeableV2.sol
+|   |   final_predictive_contracts.txt
+|   |   GnosisSafeGetAddresses.sol
+|   |   Greeter.sol
+|   |   IERC20.sol
+|   |   IERC20Metadata.sol
+|   |   MultiSigWallet.sol
+|   |   Safe.sol
+|   |   TokenABC.sol
+|   |   TokenBTC.sol
+|   |   TokenETH.sol
+|   |   TokenSwap.sol
+|   |   TokenXYZ.sol
+|   |   
+|   +---interfaces
+|   |       IFileToken.sol
+|   |       
+|   \---libraries
+|           Base64.sol
+|           Math.sol
+|           Power.sol
+|           SafeMath.sol
+|           StringUtils.sol
+|           UQ112x112.sol
+|           
++---database
+|       connectDB.js
+|       ConnectDB.ts
+|       
++---deploy
+|       deploy.js
+|       FileTokenDeploy.js
+|       filetokenupdeployupgradeable.js
+|       gnosisafedeploy.ts
+|       
++---ganache-cli
+|   |   args.js
+|   |   cli.js
+|   |   LICENSE
+|   |   package.json
+|   |   README.md
+|   |   
+|   +---build
+|   |       ganache-core.node.cli.js
+|   |       ganache-core.node.cli.js.map
+|   |       
+|   +---resources
+|   |   \---icons
+|   |           ganache-cli-128x128.png
+|   |           ganache-cli.svg
+|   |           
+|   \---scripts
+|           generate-otp.js
+|           
