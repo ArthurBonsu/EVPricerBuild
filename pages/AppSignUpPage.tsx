@@ -1,5 +1,5 @@
 // pages/signup.tsx
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/router';
 import {
@@ -15,7 +15,7 @@ import {
 } from '@chakra-ui/react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
-import { auth,db } from 'firebaseConfig';
+import { auth,db } from 'services/firebaseConfig';
 
 
 interface SignUpFormValues {

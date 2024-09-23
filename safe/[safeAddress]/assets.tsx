@@ -4,7 +4,7 @@ import { Box, Spinner, Table, Thead, Th, Tbody, Tr, Td } from '@chakra-ui/react'
 import { useQuery } from 'react-query';
 import { useRouter } from 'next/router';
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect,useCallback, useContext } from 'react';
 import PageSelection from '@components/PageSelection';
 import { getLayout } from '../../components/Layout/Layout';
 import queries from 'services/queries';

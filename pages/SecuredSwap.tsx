@@ -21,7 +21,7 @@ import useSwapContext from 'context/useSwapContext';
 import useTransactionContext from 'context/useTransactionContext';
 import useTransferContext from 'context/useTransferContext';
 
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState, useContext } from 'react';
 import { Flex, Box, Button, Heading, VStack, Input } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useSession, signIn, signOut } from 'next-auth/react';

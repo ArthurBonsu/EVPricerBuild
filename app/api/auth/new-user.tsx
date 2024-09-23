@@ -1,5 +1,5 @@
 // pages/auth/verify-request.tsx
-
+import { FC,useState, useEffect, useContext } from 'react';
 import { Heading, Text } from '@chakra-ui/react';
 
 const VerifyRequest = () => {

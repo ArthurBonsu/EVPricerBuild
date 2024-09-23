@@ -8,7 +8,7 @@ import {
   ModalProps,
   UseDisclosureReturn,
 } from '@chakra-ui/react'
-import { PropsWithChildren } from 'react'
+import { PropsWithChildren, useContext } from 'react'
 
 interface AppModalProps extends PropsWithChildren {
   disclosure: UseDisclosureReturn

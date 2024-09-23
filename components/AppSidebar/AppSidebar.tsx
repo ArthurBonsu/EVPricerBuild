@@ -1,5 +1,5 @@
 // AppSidebar.tsx
-import React, { FC, useEffect } from 'react';
+import React, { FC, useEffect,useContext } from 'react';
 import {
   Avatar,
   Flex,

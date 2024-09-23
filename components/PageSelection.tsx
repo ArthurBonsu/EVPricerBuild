@@ -1,6 +1,6 @@
 import { Select } from '@chakra-ui/react'
 import { useRouter } from 'next/router'
-import { FC } from 'react'
+import { FC,useContext } from 'react'
 
 // Page selection
 const PageSelection: FC<{ value: string }> = ({ value }) => {

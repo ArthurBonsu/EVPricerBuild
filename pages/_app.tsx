@@ -1,11 +1,12 @@
+import { ComponentType, FC, useState, useEffect,useContext } from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
 import { SessionProvider } from 'next-auth/react';
-import { useEffect } from 'react';
+
 import Head from 'next/head';
 import { AppProps } from 'next/app';
 import { NextPage } from 'next';
 import { QueryClientProvider } from 'react-query';
-import { FC } from 'react';
+
 import dynamic from 'next/dynamic';
 
 import queryClient from '@config/queryClient';

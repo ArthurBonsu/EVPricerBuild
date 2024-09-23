@@ -1,6 +1,6 @@
 import { Box, Flex, Icon, Menu, MenuButton, Text, Tooltip } from '@chakra-ui/react'
 import { useRouter } from 'next/router'
-import { ComponentType, FC } from 'react'
+import { ComponentType, FC, useContext } from 'react'
 
 interface MenuItemProps {
   icon?: ComponentType

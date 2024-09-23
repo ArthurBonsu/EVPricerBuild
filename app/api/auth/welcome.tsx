@@ -1,6 +1,6 @@
 // pages/welcome.tsx
+import { ComponentType, FC, useState, useEffect,useContext } from 'react';
 
-import { FC } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 

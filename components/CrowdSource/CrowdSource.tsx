@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useContext } from 'react';
 import { Button, ButtonProps, Flex, useDisclosure } from '@chakra-ui/react';
 import AppModal from '../AppModal/AppModal';
 import useLoadSafe from 'hooks/useLoadSafe';
@@ -53,8 +53,29 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
       }
     };
     getExecutables();
-  }, [isTxnExecutable, transaction]);
+  },);
 
+  const checkTxnExecutable = useCallback(async (transaction: PaymentTransactions) => {
+    try {
+      const approvalTx = await checkIfTxnExecutable(transaction);
+      return approvalTx;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }, [checkIfTxnExecutable]);
+  
+  useEffect(() => {
+    const getExecutables = async () => {
+      if (transaction) {
+        const approvalTx = await checkTxnExecutable(transaction);
+        if (approvalTx) {
+          setIsApprovalExecutable(true);
+        }
+      }
+    };
+    getExecutables();
+  }, [transaction, checkTxnExecutable]);
   return (
     <div>
       <Button {...rest} onClick={localDisclosure.onOpen}>

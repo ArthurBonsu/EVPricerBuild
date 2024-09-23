@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState , useContext} from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { Box, Flex, Heading, Button, HStack, Center } from '@chakra-ui/react';

@@ -25,13 +25,13 @@ import {
   FormHelperText,
   chakra,
 } from '@chakra-ui/react';
-import { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect, useContext } from 'react';
 import { useAppToast } from 'hooks/index';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { BsGithub, BsTwitter, BsGoogle } from 'react-icons/bs';
 import { signInWithPopup } from 'firebase/auth';
 import { GoogleAuthProvider, TwitterAuthProvider } from 'firebase/auth';
-import { auth } from 'firebaseConfig';
+import { auth,db } from '../../services/firebaseConfig';
 
 const providers = [
   { name: 'github', Icon: BsGithub },

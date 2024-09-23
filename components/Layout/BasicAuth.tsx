@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useEffect, FC, ReactNode } from 'react'
+import { useEffect, FC, ReactNode, useContext } from 'react'
 import { useEthersStore } from 'stores/ethersStore'
 
 // For authenticating address and setting the address

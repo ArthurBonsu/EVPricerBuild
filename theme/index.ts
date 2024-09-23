@@ -1,5 +1,6 @@
 // theme/index.ts
 import { extendTheme } from '@chakra-ui/react';
+import { useEffect, useCallback, useContext } from 'react';
 
 const theme = extendTheme({
   // Customize your Chakra UI theme here

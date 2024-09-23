@@ -19,7 +19,7 @@ const ApproveTransfer: FC<ApproveTransferProps> = ({ transaction, safeAddress, u
     setIsLoading(true);
     await approveTransfer(transaction);
     setIsLoading(false);
-  }, [transaction]);
+  }, [transaction, approveTransfer]);
 
   return (
     <>

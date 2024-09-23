@@ -1,6 +1,6 @@
 import { isBrowser } from 'utils/envUtils'
 import Head from 'next/head'
-import { FC } from 'react'
+import { FC, useContext } from 'react'
 
 interface MetaTagsProps {
   title?: string

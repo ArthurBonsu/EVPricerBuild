@@ -1,6 +1,6 @@
 import { Button, ButtonProps, Flex, useDisclosure } from '@chakra-ui/react';
 import AppModal from '@components/AppModal';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import useLoadSafe from '../../hooks/useLoadSafe';
 
 interface ExecuteTransferProps {

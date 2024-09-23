@@ -9,7 +9,7 @@ import {
   Button,
   UseDisclosureReturn,
 } from '@chakra-ui/react';
-import { FC, useRef } from 'react';
+import { FC, useRef,useContext} from 'react';
 
 interface AppAlertDialogProps {
   customOnClose: () => void;

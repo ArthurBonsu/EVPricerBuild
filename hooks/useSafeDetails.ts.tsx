@@ -1,5 +1,5 @@
 // useSafeDetails.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { ethers } from 'ethers';
 import { Web3Provider } from '@ethersproject/providers';
 import { PaymentTransactions } from 'types';

@@ -2,7 +2,7 @@ import { Avatar, Button, Flex, Heading, Stack, Menu, MenuButton, MenuList, Text,
 import { ChevronUpIcon, DuplicateIcon, LockClosedIcon, LoginIcon, } from '@heroicons/react/outline';
 import { LogoutIcon } from '@heroicons/react/solid';
 import Link from 'next/link';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState, useContext } from 'react';
 import Blockies from 'react-blockies';
 import CreateTransfer from 'components/CreateSafe';
 import { useAppToast } from 'hooks/index';

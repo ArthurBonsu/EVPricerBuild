@@ -1,6 +1,7 @@
 // pages/auth/error.tsx
 
 import { useRouter } from 'next/router';
+import { useEffect,useCallback, useContext} from 'react';
 import { Heading, Text } from '@chakra-ui/react';
 
 const ErrorPage = () => {

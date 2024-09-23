@@ -1,6 +1,6 @@
 // app/pages/index.tsx
 
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState, useContext } from 'react';
 import { useRouter } from 'next/router';
 import { Button, Grid } from '@chakra-ui/react';
 import { useSession, signOut } from 'next-auth/react';

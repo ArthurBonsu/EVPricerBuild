@@ -1,6 +1,6 @@
 
 // pages/CrowdSource.tsx
-import { FC, useState } from 'react';
+import { FC, useState, useContext } from 'react';
 import { useSession, signOut, signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useEthersStore } from 'stores/ethersStore';

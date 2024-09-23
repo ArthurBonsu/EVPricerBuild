@@ -1,3 +1,4 @@
+import React,{ useCallback, useState, useEffect, useContext } from 'react'
 import { chakra, Heading , Stack} from "@chakra-ui/react";
 
 import { ethers } from 'ethers'
@@ -46,7 +47,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 
 
-import React,{ useCallback, useState, useEffect } from 'react' 
+ 
 import { motion } from 'framer-motion';
 import Router from 'next/router'
 import { useQuery } from 'react-query'

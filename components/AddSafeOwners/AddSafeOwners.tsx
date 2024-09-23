@@ -1,4 +1,4 @@
-import { FC, useState, useCallback, useEffect } from 'react';
+import { FC, useState, useCallback, useEffect,useContext } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { useLoadSafe } from '../../hooks/useLoadSafe';
 import useSafeDetailsAndSetup from 'hooks/useSafeDetails.ts';
@@ -10,7 +10,7 @@ import { useAppToast } from 'hooks/index';
 import { BsGithub, BsTwitter, BsGoogle } from 'react-icons/bs';
 import { signInWithPopup } from 'firebase/auth';
 import { GoogleAuthProvider, TwitterAuthProvider } from 'firebase/auth';
-import { auth } from 'firebaseConfig';
+import { auth,db } from 'services/firebaseConfig';
 import { useSafeStore } from 'stores/safeStore';
 import { useEthersStore } from 'stores/ethersStore';
 import { useForm } from 'react-hook-form';

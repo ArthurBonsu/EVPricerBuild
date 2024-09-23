@@ -27,13 +27,13 @@ import {
   FormHelperText,
   chakra,
 } from '@chakra-ui/react';
-import { ComponentType, FC, useState, useEffect } from 'react';
+import { ComponentType, FC, useState, useEffect, useContext } from 'react';
 import { useAppToast } from 'hooks/index';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { BsGithub, BsTwitter, BsGoogle } from 'react-icons/bs';
 import { signInWithPopup } from 'firebase/auth';
 import { GoogleAuthProvider, TwitterAuthProvider } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import { auth,db } from 'services/firebaseConfig';
 import AppSignUp from '@components/AppSignUp';
 
 const providers = [

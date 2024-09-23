@@ -1,3 +1,4 @@
+import { ComponentType, FC, useState, useEffect,useContext } from 'react';
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import TwitterProvider from 'next-auth/providers/twitter';
