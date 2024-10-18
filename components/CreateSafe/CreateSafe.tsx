@@ -42,41 +42,26 @@ import { useAppToast } from 'hooks/index';
 const { setUpMultiSigSafeAddress } = useSafeDetailsAndSetup;
 
 const CreateSafe: FC = () => {
+  const router = useRouter();
   const [isBrowser, setIsBrowser] = useState(false);
-  const router = typeof window !== 'undefined' ? useRouter() : null;
+  const useraddress = useEthersStore((state) => state.address);
+  const toast = useToast();
+  const { data: session, status } = useSession();
+  const safeStore = useSafeStore();
+  const { safeAddress, ownersAddress, contractAddress } = safeStore;
+  const { setSafeAddress, setOwnersAddress, setContractAddress, setSafeStore } = safeStore;
+  const [isCreatingSafe, setIsCreatingSafe] = useState(false);
+  const { executeSafeTransaction, userAddToSafe, isLoading } = useLoadSafe({
+    safeAddress,
+    userAddress: useraddress,
+  });
+  const { isPendingSafeCreation, pendingSafeData, setIsPendingSafeCreation, setPendingSafeData } = useSafeStore();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsBrowser(true);
     }
   }, []);
-
-  if (!isBrowser) return null;
-
-  const useraddress = useEthersStore((state) => state.address);
-  const toast = useToast();
-  const { data: session, status } = useSession();
-  const safeStore = useSafeStore();
-  const { safeAddress, ownersAddress, contractAddress } = safeStore;
-  const {
-    setSafeAddress,
-    setOwnersAddress,
-    setContractAddress,
-    setSafeStore,
-  } = safeStore;
-
-  const [isCreatingSafe, setIsCreatingSafe] = useState(false);
-  const { executeSafeTransaction, userAddToSafe, isLoading } = useLoadSafe({
-    safeAddress,
-    userAddress: useraddress,
-  });
-
-  const {
-    isPendingSafeCreation,
-    pendingSafeData,
-    setIsPendingSafeCreation,
-    setPendingSafeData,
-  } = useSafeStore();
 
   useEffect(() => {
     const storedPendingSafeData = localStorage.getItem('pendingSafeData');
@@ -104,13 +89,10 @@ const CreateSafe: FC = () => {
       setPendingSafeData({ status: 'Deploying contract...', progress });
       setSafeAddress(newSafeAddress);
       setOwnersAddress([]); // Update ownersAddress state
-      setSafeStore({
-        safeAddress: newSafeAddress,
-        contractAddress: SafecontractAddress,
-      });
+      setSafeStore({ safeAddress: newSafeAddress, contractAddress: SafecontractAddress });
       setIsCreatingSafe(false);
       console.log(`Safe Address: ${newSafeAddress}`);
-      router?.push('/AddSafeOwners'); // Route to AddSafeOwners page
+      router.push('/AddSafeOwners'); // Route to AddSafeOwners page
       setPendingSafeData(null); // Clear pending safe data
       setIsPendingSafeCreation(false); // Set isPendingSafeCreation to false
     } catch (error) {
@@ -124,9 +106,13 @@ const CreateSafe: FC = () => {
     }
   };
 
+  if (!isBrowser) {
+    return <Heading>Loading...</Heading>;
+  }
+
   if (session) {
     setTimeout(() => {
-      router?.push('/'); // Route to Home page
+      router.push('/'); // Route to Home page
     }, 5000);
     return (
       <Box maxW="md" mx="auto" mt={8}>
@@ -169,3 +155,5 @@ const CreateSafe: FC = () => {
     </Box>
   );
 };
+
+export default CreateSafe;

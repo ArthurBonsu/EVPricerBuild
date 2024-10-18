@@ -1,14 +1,4 @@
-
-// MenuItem.tsx
-import {
-  Box,
-  Flex,
-  Icon,
-  Menu,
-  MenuButton,
-  Text,
-  Tooltip,
-} from '@chakra-ui/react';
+import { Box, Flex, Icon, Menu, MenuButton, Text, Tooltip } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { ComponentType, FC, useEffect, useState } from 'react';
 
@@ -30,7 +20,7 @@ const MenuItem: FC<MenuItemProps> = ({
   pathname = '/',
 }) => {
   const [isBrowser, setIsBrowser] = useState(false);
-  const router = typeof window !== 'undefined' ? useRouter() : null;
+  const router = useRouter();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -40,11 +30,14 @@ const MenuItem: FC<MenuItemProps> = ({
 
   if (!isBrowser) return null;
 
+  if (!router) return null;
+
   const hasShortcutKeys = Boolean(shortCutKeys.length);
   const iconColor = hasShortcutKeys ? 'gray.400' : 'gray.500';
   const textColor = hasShortcutKeys ? 'blackAlpha.400' : 'gray.600';
+
   const onClickAction = () => {
-    if (router) {
+    if (router && typeof window !== 'undefined') {
       router.push(pathname);
     }
   };
@@ -66,7 +59,10 @@ const MenuItem: FC<MenuItemProps> = ({
           gutter={16}
         >
           <MenuButton onClick={onClick || onClickAction} w="full">
-            <Flex justifyContent="space-between" alignItems="center">
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+            >
               <Flex
                 alignItems="center"
                 w="full"
@@ -74,21 +70,16 @@ const MenuItem: FC<MenuItemProps> = ({
               >
                 {icon && <Icon color={iconColor} as={icon} />}
                 {!isCollapsed && (
-                  <Text
-                    color={textColor}
-                    fontSize={14}
-                    ml={hasShortcutKeys ? 2 : 4}
-                  >
+                  <Text color={textColor} fontSize={14} ml={hasShortcutKeys ? 2 : 4}>
                     {label}
                   </Text>
                 )}
               </Flex>
-              {!isCollapsed &&
-                hasShortcutKeys && (
-                  <Text fontSize={10} color="blackAlpha.300" flexShrink={0}>
-                    {shortCutKeys.join(' ')}
-                  </Text>
-                )}
+              {!isCollapsed && hasShortcutKeys && (
+                <Text fontSize={10} color="blackAlpha.300" flexShrink={0}>
+                  {shortCutKeys.join(' ')}
+                </Text>
+              )}
             </Flex>
           </MenuButton>
         </Tooltip>

@@ -19,19 +19,13 @@ const ApproveTransfer: FC<ApproveTransferProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isBrowser, setIsBrowser] = useState(false);
   const localDisclosure = useDisclosure();
+  const { approveTransfer, ...rest } = useLoadSafe({ safeAddress, userAddress });
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsBrowser(true);
     }
   }, []);
-
-  if (!isBrowser) return null;
-
-  const { approveTransfer, ...rest } = useLoadSafe({
-    safeAddress,
-    userAddress,
-  });
 
   const handleSubmit = useCallback(
     async () => {
@@ -41,6 +35,8 @@ const ApproveTransfer: FC<ApproveTransferProps> = ({
     },
     [transaction, approveTransfer]
   );
+
+  if (!isBrowser) return null;
 
   return (
     <>

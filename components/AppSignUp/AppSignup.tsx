@@ -1,4 +1,3 @@
-
 // AppSignup.tsx
 import {
   Avatar,
@@ -36,9 +35,18 @@ import { auth, db } from '../../services/firebaseConfig';
 import { useRouter } from 'next/router';
 
 const providers = [
-  { name: 'github', Icon: BsGithub },
-  { name: 'twitter', Icon: BsTwitter },
-  { name: 'google', Icon: BsGoogle },
+  {
+    name: 'github',
+    Icon: BsGithub,
+  },
+  {
+    name: 'twitter',
+    Icon: BsTwitter,
+  },
+  {
+    name: 'google',
+    Icon: BsGoogle,
+  },
 ];
 
 interface SignupProps {
@@ -55,7 +63,14 @@ const AppSignup: FC<SignupProps> = ({
   password,
 }) => {
   const [isBrowser, setIsBrowser] = useState(false);
-  const router = typeof window !== 'undefined' ? useRouter() : null;
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSignedUp, setIsSignedUp] = useState(false);
+  const [authMethod, setAuthMethod] = useState<'oauth' | 'firebase' | null>(null);
+
+  const router = useRouter();
+  const { hasCopied, onCopy } = useClipboard(username || '');
+  const toast = useAppToast();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -63,26 +78,19 @@ const AppSignup: FC<SignupProps> = ({
     }
   }, []);
 
-  if (!isBrowser) return null;
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSignedUp, setIsSignedUp] = useState(false);
-  const [authMethod, setAuthMethod] = useState<'oauth' | 'firebase' | null>(null);
-  const { hasCopied, onCopy } = useClipboard(username || '');
-  const toast = useAppToast();
-  const stackSpacing = isCollapsed ? 4 : 1;
-  const { data: session, status } = useSession();
-
   useEffect(() => {
     if (hasCopied) {
       toast.showToast('Signup details copied', 'info');
     }
   }, [hasCopied, toast]);
 
+  if (!isBrowser) return <Heading>Loading...</Heading>;
+
   if (status === 'loading') return <Heading>Checking Authentication ...</Heading>;
+
   if (session) {
     setTimeout(() => {
-      router?.push('/');
+      router.push('/');
     }, 5000);
     return <Heading>You are already signed up</Heading>;
   }
@@ -95,7 +103,7 @@ const AppSignup: FC<SignupProps> = ({
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      router?.push('/welcome');
+      router.push('/welcome');
     } catch (error: any) {
       console.error(error.message);
     }
@@ -105,7 +113,7 @@ const AppSignup: FC<SignupProps> = ({
     const provider = new TwitterAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      router?.push('/welcome');
+      router.push('/welcome');
     } catch (error: any) {
       console.error(error.message);
     }
@@ -120,6 +128,8 @@ const AppSignup: FC<SignupProps> = ({
   const setEmail = (email: string) => {
     return email;
   };
+
+  const stackSpacing = isCollapsed ? 4 : 1;
 
   return (
     <Box maxW="md" mx="auto" mt={8}>
@@ -160,7 +170,7 @@ const AppSignup: FC<SignupProps> = ({
           </chakra.form>
         </>
       )}
-  {authMethod === 'firebase' && (
+    {authMethod === 'firebase' && (
   <Stack spacing={4} mt={4}>
     <Button colorScheme="blue" onClick={handleFirebaseGoogleSignUp}>
       Sign up with Google
@@ -171,7 +181,7 @@ const AppSignup: FC<SignupProps> = ({
     <Button
       mt={4}
       colorScheme="teal"
-      onClick={() => router?.push('/signup')}
+      onClick={() => router.push('/signup')}
     >
       Sign Up With Email And Password
     </Button>

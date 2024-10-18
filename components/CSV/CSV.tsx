@@ -1,12 +1,6 @@
+
 // CSV.tsx
-import React, {
-  useCallback,
-  useState,
-  useEffect,
-  ComponentType,
-  FC,
-  useContext,
-} from "react";
+import React, { useCallback, useState, useEffect, ComponentType, FC, useContext } from "react";
 import { read, utils, writeFile } from "xlsx";
 import {
   Stack,
@@ -52,7 +46,6 @@ import {
   AccordionButton,
   AccordionPanel,
   AccordionIcon,
-  
 } from "@chakra-ui/react";
 import { max } from "lodash";
 import usePortFolioContext from "context/usePortfolioContext";
@@ -61,9 +54,10 @@ import {
   useFormContext,
   useFieldArray,
   useForm,
-  Controller,FieldErrors, FieldValues 
+  Controller,
+  FieldErrors,
+  FieldValues,
 } from "react-hook-form";
-
 import { ethers } from "ethers";
 const hre = require("hardhat");
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -104,7 +98,12 @@ import { motion } from "framer-motion";
 import Router from "next/router";
 import { useQuery } from "react-query";
 import queries from "services/queries";
-import { RowType, TokensSelected, CSVProps, CSVPropsType } from "types/index";
+import {
+  RowType,
+  TokensSelected,
+  CSVProps,
+  CSVPropsType,
+} from "types/index";
 import {
   createCSCFormSchema,
   TcreateCSCFormSchemaValues,
@@ -129,20 +128,30 @@ let timestampstore: Array<String>;
 let transaction_typestore: Array<string>;
 let tokenstore: Array<String>;
 let amountstore: Array<string>;
+
 let timestampgiven, _thetransactiontype, tokengained, amountpushed;
 let rows: Array<RowType>;
 let onTokenSelected: any, onDatePicked: any;
+
 let datedbalancedamount: number | string;
 let datedwithdrawalamount: number | string;
 let dateddepositedamount: number | string;
+
 let BTCPVOfParticularToken: number | string;
+
 let ETHVOfParticularToken: number | string;
 let XRPVOfParticularToken: number | string;
+
 let balancedamount: any;
 let withdrawalamount: any;
 let depositedamount: any;
 
-const PVForToken: React.FC <PVForTokenProps> = ({ token, balancedamount, withdrawalamount, depositedamount }) => {
+const PVForToken: React.FC<PVForTokenProps> = ({
+  token,
+  balancedamount,
+  withdrawalamount,
+  depositedamount,
+}) => {
   return (
     <div>
       <h3>Token: {token}</h3>
@@ -269,7 +278,6 @@ const CSVSubmit = ({
   const [isFormLoading, setIsFormLoading] = useState(false);
   const [_tokenselect, setTokenSelected] = useState('');
   const [datePicker, setDatePicker] = useState<DateType>(undefined);
-  
   const router = useRouter();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -320,112 +328,116 @@ const CSVSubmit = ({
       console.error(error);
     }
   };
-  
 
   // Render
-  return (
-    <Flex direction="column" align="center" justify="center" p={6}>
-      <Heading as="h1" size="4xl" noOfLines={1}>
-        CSV Upload
-      </Heading>
-
-      <form onSubmit={handleSubmit(handleCSVSubmit)}>
-        <Stack spacing={6}>
+return (
+  <Flex direction="column" align="center" justify="center" p={6}>
+    <Heading as="h1" size="4xl" noOfLines={1}> CSV Upload </Heading>
+    <form onSubmit={handleSubmit(handleCSVSubmit)}>
+      <Stack spacing={6}>
         <FormControl isInvalid={!!errors.token}>
-            <FormLabel>Token</FormLabel>
-            <Select 
-              {...register("token")}
-              placeholder="Select token"
-              onChange={(e) => handleTokenSelect(e.target.value)}
-            >
-              {SelectedTokenList.map((token) => (
-                <option key={token.symbol} value={token.symbol}>
-                  {token.name}
-                </option>
-              ))}
-            </Select>
-            <FormItem>
-<FormErrorMessage>
-{errors.token?.message || 'Error'}
-</FormErrorMessage>
-  </FormItem>
+          <FormLabel>Token</FormLabel>
+          <Select 
+            {...register("token", { required: true })}
+            placeholder="Select token" 
+            onChange={(e) => handleTokenSelect(e.target.value)}
+          >
+            {SelectedTokenList.map((token) => (
+              <option key={token.symbol} value={token.symbol}>
+                {token.name}
+              </option>
+            ))}
+          </Select>
+          <FormErrorMessage>
+            {errors.token?.message?.toString() || 'Error'}
+          </FormErrorMessage>
+        </FormControl>
+        <FormControl isInvalid={!!errors.date}>
+          <FormLabel>Date</FormLabel>
+          <Input 
+            {...register("date", { required: true })}
+            type="date" 
+            placeholder="Select date" 
+            onChange={(e) => handleDatePick(e.target.valueAsDate)}
+          />
+          <FormErrorMessage>
+            {errors.date?.message?.toString() || 'Error'}
+          </FormErrorMessage>
+        </FormControl>
+        <FormControl isInvalid={!!errors.pvvalue}>
+          <FormLabel>PV Value</FormLabel>
+          <NumberInput>
+            <NumberInputField {...register("pvvalue", { required: true })} />
+            <NumberInputStepper>
+              <NumberIncrementStepper />
+              <NumberDecrementStepper />
+            </NumberInputStepper>
+          </NumberInput>
+          <FormErrorMessage>
+            {errors.pvvalue?.message?.toString() || 'Error'}
+          </FormErrorMessage>
+        </FormControl>
+        <FormControl isInvalid={!!errors.timestamp}>
+          <FormLabel>Timestamp</FormLabel>
+          <Input 
+            {...register("timestamp", { required: true })}
+            type="datetime-local" 
+          />
+          <FormErrorMessage>
+            {errors.timestamp?.message?.toString() || 'Error'}
+          </FormErrorMessage>
+        </FormControl>
+        <FormControl isInvalid={!!errors.transaction_type}>
+          <FormLabel>Transaction Type</FormLabel>
+          <Select 
+            {...register("transaction_type", { required: true })}
+            placeholder="Select transaction type" 
+          >
+            <option value="deposit">Deposit</option>
+            <option value="withdrawal">Withdrawal</option>
+          </Select>
+          <FormErrorMessage>
+            {errors.transaction_type?.message?.toString() || 'Error'}
+          </FormErrorMessage>
+        </FormControl>
+        <FormControl isInvalid={!!errors.amount}>
+          <FormLabel>Amount</FormLabel>
+          <NumberInput>
+            <NumberInputField {...register("amount", { required: true })} />
+            <NumberInputStepper>
+              <NumberIncrementStepper />
+              <NumberDecrementStepper />
+            </NumberInputStepper>
+          </NumberInput>
+          <FormErrorMessage>
+            {errors.amount?.message?.toString() || 'Error'}
+          </FormErrorMessage>
+        </FormControl>
+        <Button type="submit" isLoading={isLoading}> Submit </Button>
+      </Stack>
+    </form>
+    {isOpen && (
+      <AlertDialog 
+        onClose={onClose} 
+        motionPreset="slideInBottom"
+      >
+        <AlertDialogOverlay />
+        <AlertDialogContent>
+          <AlertDialogHeader>CSV Upload</AlertDialogHeader>
+          <AlertDialogCloseButton />
+          <AlertDialogBody>
+            <p>CSV uploaded successfully!</p>
+          </AlertDialogBody>
+          <AlertDialogFooter>
+            <Button onClick={onClose}>Close</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    )}
+  </Flex>
+);
 
-          </FormControl>
-
-          <FormControl isInvalid={errors.date}>
-            <FormLabel>Date</FormLabel>
-            <Input
-              {...register("date")}
-              type="date"
-              placeholder="Select date"
-              onChange={(e) => handleDatePick(e.target.valueAsDate)}
-            />
-            <FormErrorMessage>{errors.date?.message}</FormErrorMessage>
-          </FormControl>
-
-          <FormControl isInvalid={errors.pvvalue}>
-            <FormLabel>PV Value</FormLabel>
-            <NumberInput>
-              <NumberInputField {...register("pvvalue")} />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-            <FormErrorMessage>{errors.pvvalue?.message}</FormErrorMessage>
-          </FormControl>
-
-          <FormControl isInvalid={errors.timestamp}>
-            <FormLabel>Timestamp</FormLabel>
-            <Input {...register("timestamp")} type="datetime-local" />
-            <FormErrorMessage>{errors.timestamp?.message}</FormErrorMessage>
-          </FormControl>
-
-          <FormControl isInvalid={errors.transaction_type}>
-            <FormLabel>Transaction Type</FormLabel>
-            <Select {...register("transaction_type")} placeholder="Select transaction type">
-              <option value="deposit">Deposit</option>
-              <option value="withdrawal">Withdrawal</option>
-            </Select>
-            <FormErrorMessage>{errors.transaction_type?.message}</FormErrorMessage>
-          </FormControl>
-
-          <FormControl isInvalid={errors.amount}>
-            <FormLabel>Amount</FormLabel>
-            <NumberInput>
-              <NumberInputField {...register("amount")} />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-            <FormErrorMessage>{errors.amount?.message}</FormErrorMessage>
-          </FormControl>
-
-          <Button type="submit" isLoading={isLoading}>
-            Submit
-          </Button>
-        </Stack>
-      </form>
-
-      {isOpen && (
-        <AlertDialog onClose={onClose}>
-          <AlertDialogOverlay>
-            <AlertDialogContent>
-              <AlertDialogHeader>CSV Upload</AlertDialogHeader>
-              <AlertDialogCloseButton />
-              <AlertDialogBody>
-                <p>CSV uploaded successfully!</p>
-              </AlertDialogBody>
-              <AlertDialogFooter>
-                <Button onClick={onClose}>Close</Button>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialogOverlay>
-        </AlertDialog>
-      )}
-    </Flex>
-  );
 };
+
 
 export default CSV;

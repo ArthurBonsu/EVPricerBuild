@@ -25,8 +25,12 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
   userAddress,
   ...rest
 }) => {
+  const router = useRouter();
   const [isBrowser, setIsBrowser] = useState(false);
-  const router = typeof window !== 'undefined' ? useRouter() : null;
+  const [approveExeIsLoading, setApproveExeIsLoading] = useState(false);
+  const [rejectExeIsLoading, setRejectExeIsLoading] = useState(false);
+  const [isApprovalExecutable, setIsApprovalExecutable] = useState(false);
+  const [isRejectionExecutable, setIsRejectionExecutable] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -35,11 +39,6 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
   }, []);
 
   if (!isBrowser) return null;
-
-  const [approveExeIsLoading, setApproveExeIsLoading] = useState(false);
-  const [rejectExeIsLoading, setRejectExeIsLoading] = useState(false);
-  const [isApprovalExecutable, setIsApprovalExecutable] = useState(false);
-  const [isRejectionExecutable, setIsRejectionExecutable] = useState(false);
 
   const localDisclosure = useDisclosure();
   const {
@@ -79,7 +78,7 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
       }
     };
     getExecutables();
-  }, []);
+  }, [transaction, isTxnExecutable]);
 
   const checkTxnExecutable = useCallback(
     async (transaction: PaymentTransactions) => {
