@@ -24,7 +24,7 @@ import  useSwapContext   from 'context/useSwapContext'
 import  useTransactionContext   from 'context/useTransactionContext'
 import useTransferContext   from 'context/useTransferContext'
 import {ServiceProps} from 'types/ethers'
-
+import React, { FC, useEffect,  useCallback, useState, useContext } from 'react';
 
 
 const ServiceCard: React.FC<ServiceProps> = ({ color, title, icon , subtitle }) => (

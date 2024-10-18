@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { useEthers } from 'hooks';
 import { useRouter } from 'next/router';
 import { useTransactionStore } from 'stores/transactionStore';
-import {useEffect, useContext} from 'react'
+import React, { useEffect, useContext} from 'react'
 
 const ProposeTransfer: FC = () => {
   const router = useRouter();

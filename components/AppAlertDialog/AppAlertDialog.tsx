@@ -9,7 +9,7 @@ import {
   Button,
   UseDisclosureReturn,
 } from '@chakra-ui/react';
-import { FC, useRef,useContext} from 'react';
+import { FC, useRef, useEffect, useState } from 'react';
 
 interface AppAlertDialogProps {
   customOnClose: () => void;
@@ -29,9 +29,17 @@ const AppAlertDialog: FC<AppAlertDialogProps> = ({
   body,
 }) => {
   const { isOpen } = disclosure;
-  const cancelRef = useRef<HTMLButtonElement | null>(null); // Define the type of ref
+  const cancelRef = useRef<HTMLButtonElement | null>(null);
+  const [isBrowser, setIsBrowser] = useState(false);
 
-  // ALERT FOR ALERTING THINGS
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsBrowser(true);
+    }
+  }, []);
+
+  if (!isBrowser) return null;
+
   return (
     <AlertDialog
       motionPreset="slideInBottom"
@@ -41,7 +49,6 @@ const AppAlertDialog: FC<AppAlertDialogProps> = ({
       isCentered
     >
       <AlertDialogOverlay />
-
       <AlertDialogContent>
         <AlertDialogHeader>{header}</AlertDialogHeader>
         <AlertDialogCloseButton />

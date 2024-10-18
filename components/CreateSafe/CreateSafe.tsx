@@ -1,39 +1,82 @@
-import { FC, useState, useEffect,useContext } from 'react';
+
+// CreateSafe.tsx
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Menu,
+  MenuButton,
+  MenuList,
+  Text,
+  useClipboard,
+  Input,
+  Stack,
+  InputGroup,
+  InputLeftElement,
+  InputRightElement,
+  Grid,
+  VStack,
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
+  FormHelperText,
+  chakra,
+  useToast,
+} from '@chakra-ui/react';
+import { FC, useState, useEffect, useContext } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { useLoadSafe } from '../../hooks/useLoadSafe';
 import useSafeDetailsAndSetup from 'hooks/useSafeDetails.ts';
 import { useRouter } from 'next/router';
 import { SafecontractAddress } from 'constants/constants';
 import { useUserStore } from 'stores/userStore';
-import { Box, Button, Flex, Heading, Menu, MenuButton, MenuList, Text, useClipboard, Input, Stack, InputGroup, InputLeftElement, InputRightElement, Grid, VStack, FormControl, FormLabel, FormErrorMessage, FormHelperText, chakra, useToast } from '@chakra-ui/react';
-import { useAppToast } from 'hooks/index';
+import { useSafeStore } from 'stores/safeStore';
+import { useEthersStore } from 'stores/ethersStore';
 import { BsGithub, BsTwitter, BsGoogle } from 'react-icons/bs';
 import { signInWithPopup } from 'firebase/auth';
 import { GoogleAuthProvider, TwitterAuthProvider } from 'firebase/auth';
-import { auth,db } from 'services/firebaseConfig';
-import { useSafeStore } from 'stores/safeStore';
-import { useEthersStore } from 'stores/ethersStore';
+import { auth, db } from 'services/firebaseConfig';
+import { useAppToast } from 'hooks/index';
 
 const { setUpMultiSigSafeAddress } = useSafeDetailsAndSetup;
 
 const CreateSafe: FC = () => {
-  const router = useRouter();
-  const useraddress = useEthersStore((state) => state.address);
-  const toast = useToast();
+  const [isBrowser, setIsBrowser] = useState(false);
+  const router = typeof window !== 'undefined' ? useRouter() : null;
 
   useEffect(() => {
-    if (!useraddress) {
-      router.replace('/');
+    if (typeof window !== 'undefined') {
+      setIsBrowser(true);
     }
-  }, [useraddress, router]);
+  }, []);
 
+  if (!isBrowser) return null;
+
+  const useraddress = useEthersStore((state) => state.address);
+  const toast = useToast();
   const { data: session, status } = useSession();
   const safeStore = useSafeStore();
   const { safeAddress, ownersAddress, contractAddress } = safeStore;
-  const { setSafeAddress, setOwnersAddress, setContractAddress, setSafeStore } = safeStore;
+  const {
+    setSafeAddress,
+    setOwnersAddress,
+    setContractAddress,
+    setSafeStore,
+  } = safeStore;
+
   const [isCreatingSafe, setIsCreatingSafe] = useState(false);
-  const { executeSafeTransaction, userAddToSafe, isLoading } = useLoadSafe({ safeAddress, userAddress: useraddress });
-  const { isPendingSafeCreation, pendingSafeData, setIsPendingSafeCreation, setPendingSafeData } = useSafeStore();
+  const { executeSafeTransaction, userAddToSafe, isLoading } = useLoadSafe({
+    safeAddress,
+    userAddress: useraddress,
+  });
+
+  const {
+    isPendingSafeCreation,
+    pendingSafeData,
+    setIsPendingSafeCreation,
+    setPendingSafeData,
+  } = useSafeStore();
 
   useEffect(() => {
     const storedPendingSafeData = localStorage.getItem('pendingSafeData');
@@ -42,7 +85,7 @@ const CreateSafe: FC = () => {
       setIsPendingSafeCreation(true);
     }
   }, [setIsPendingSafeCreation, setPendingSafeData]);
-  
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setPendingSafeData(null);
@@ -61,10 +104,13 @@ const CreateSafe: FC = () => {
       setPendingSafeData({ status: 'Deploying contract...', progress });
       setSafeAddress(newSafeAddress);
       setOwnersAddress([]); // Update ownersAddress state
-      setSafeStore({ safeAddress: newSafeAddress, contractAddress: SafecontractAddress });
+      setSafeStore({
+        safeAddress: newSafeAddress,
+        contractAddress: SafecontractAddress,
+      });
       setIsCreatingSafe(false);
       console.log(`Safe Address: ${newSafeAddress}`);
-      router.push('/AddSafeOwners'); // Route to AddSafeOwners page
+      router?.push('/AddSafeOwners'); // Route to AddSafeOwners page
       setPendingSafeData(null); // Clear pending safe data
       setIsPendingSafeCreation(false); // Set isPendingSafeCreation to false
     } catch (error) {
@@ -80,7 +126,7 @@ const CreateSafe: FC = () => {
 
   if (session) {
     setTimeout(() => {
-      router.push('/'); // Route to Home page
+      router?.push('/'); // Route to Home page
     }, 5000);
     return (
       <Box maxW="md" mx="auto" mt={8}>
@@ -94,7 +140,10 @@ const CreateSafe: FC = () => {
     <Box maxW="md" mx="auto" mt={8}>
       <Heading mb={6}>Sign Up</Heading>
       <VStack spacing={4}>
-        <Button onClick={handleCreateSafe} disabled={isCreatingSafe || isLoading}>
+        <Button
+          onClick={handleCreateSafe}
+          disabled={isCreatingSafe || isLoading}
+        >
           Create Safe
         </Button>
         {isPendingSafeCreation && <Text>Loading...</Text>}
@@ -106,7 +155,7 @@ const CreateSafe: FC = () => {
         {pendingSafeData && (
           <Text>
             Current Status: {pendingSafeData.status}
-           <Button
+            <Button
               onClick={() => {
                 setPendingSafeData(null);
                 setIsPendingSafeCreation(false);
@@ -120,5 +169,3 @@ const CreateSafe: FC = () => {
     </Box>
   );
 };
-
-export default CreateSafe;

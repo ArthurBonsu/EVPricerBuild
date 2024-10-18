@@ -1,17 +1,26 @@
-import { Box, Flex, Icon, Menu, MenuButton, Text, Tooltip } from '@chakra-ui/react'
-import { useRouter } from 'next/router'
-import { ComponentType, FC, useContext } from 'react'
+
+// MenuItem.tsx
+import {
+  Box,
+  Flex,
+  Icon,
+  Menu,
+  MenuButton,
+  Text,
+  Tooltip,
+} from '@chakra-ui/react';
+import { useRouter } from 'next/router';
+import { ComponentType, FC, useEffect, useState } from 'react';
 
 interface MenuItemProps {
-  icon?: ComponentType
-  label: string
-  pathname?: string
-  isCollapsed?: boolean
-  shortCutKeys?: string[]
-  onClick?: () => void
+  icon?: ComponentType;
+  label: string;
+  pathname?: string;
+  isCollapsed?: boolean;
+  shortCutKeys?: string[];
+  onClick?: () => void;
 }
 
-// Menu Items providing ui infoos
 const MenuItem: FC<MenuItemProps> = ({
   icon,
   label,
@@ -20,14 +29,25 @@ const MenuItem: FC<MenuItemProps> = ({
   isCollapsed = false,
   pathname = '/',
 }) => {
-  const router = useRouter()
-  const hasShortcutKeys = Boolean(shortCutKeys.length)
-  const iconColor = hasShortcutKeys ? 'gray.400' : 'gray.500'
-  const textColor = hasShortcutKeys ? 'blackAlpha.400' : 'gray.600'
+  const [isBrowser, setIsBrowser] = useState(false);
+  const router = typeof window !== 'undefined' ? useRouter() : null;
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsBrowser(true);
+    }
+  }, []);
 
+  if (!isBrowser) return null;
 
-  const onClickAction = () => router.push(pathname)
+  const hasShortcutKeys = Boolean(shortCutKeys.length);
+  const iconColor = hasShortcutKeys ? 'gray.400' : 'gray.500';
+  const textColor = hasShortcutKeys ? 'blackAlpha.400' : 'gray.600';
+  const onClickAction = () => {
+    if (router) {
+      router.push(pathname);
+    }
+  };
 
   return (
     <Flex
@@ -38,32 +58,43 @@ const MenuItem: FC<MenuItemProps> = ({
       {...(isCollapsed && { justifyContent: 'center' })}
     >
       <Menu id={label}>
-        <Tooltip isDisabled={!isCollapsed} label={<Box p={1}>{label}</Box>} hasArrow placement="right" gutter={16}>
+        <Tooltip
+          isDisabled={!isCollapsed}
+          label={<Box p={1}>{label}</Box>}
+          hasArrow
+          placement="right"
+          gutter={16}
+        >
           <MenuButton onClick={onClick || onClickAction} w="full">
             <Flex justifyContent="space-between" alignItems="center">
-              <Flex alignItems="center" w="full" justifyContent={isCollapsed ? 'center' : 'start'}>
+              <Flex
+                alignItems="center"
+                w="full"
+                justifyContent={isCollapsed ? 'center' : 'start'}
+              >
                 {icon && <Icon color={iconColor} as={icon} />}
                 {!isCollapsed && (
-                  <Text color={textColor} fontSize={14} ml={hasShortcutKeys ? 2 : 4}>
+                  <Text
+                    color={textColor}
+                    fontSize={14}
+                    ml={hasShortcutKeys ? 2 : 4}
+                  >
                     {label}
                   </Text>
                 )}
               </Flex>
-
-              {!isCollapsed && hasShortcutKeys && (
-                <Text fontSize={10} color="blackAlpha.300" flexShrink={0}>
-                  {shortCutKeys.join(' ')}
-                </Text>
-              )}
+              {!isCollapsed &&
+                hasShortcutKeys && (
+                  <Text fontSize={10} color="blackAlpha.300" flexShrink={0}>
+                    {shortCutKeys.join(' ')}
+                  </Text>
+                )}
             </Flex>
           </MenuButton>
-
         </Tooltip>
-
       </Menu>
-
     </Flex>
-  )
-}
+  );
+};
 
-export default MenuItem
+export default MenuItem;

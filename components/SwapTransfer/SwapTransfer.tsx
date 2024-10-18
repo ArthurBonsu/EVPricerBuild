@@ -58,6 +58,8 @@ import queries from "services/queries";
 // Update the SwapProp interface to include the newcontract property
 import { SwapProp } from 'types/index';
 
+
+
 interface TransactionDisplayProps {
   account: string;
   tokenAname: string;

@@ -1,6 +1,6 @@
 // Layout.tsx
 
-import React, { FC, PropsWithChildren, ReactNode, useEffect } from 'react';
+import React, { FC, PropsWithChildren, ReactNode, useEffect, useContext } from 'react';
 import {
   Box,
   ButtonGroup,

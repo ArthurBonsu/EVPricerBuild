@@ -1,8 +1,10 @@
+
 import { FC, useState } from 'react';
 import { TransactionsCardProps } from 'types/ethers';
 import { shortenAddress } from "../../constants/shortenAddress";
 import useFetch from 'hooks/useFetch';
-import { Image, Stack, InputGroup, Input, InputRightAddon } from "@chakra-ui/react";
+import { Image, Stack, InputGroup, Input, InputRightAddon  } from "@chakra-ui/react";
+import React, { useEffect,  useCallback, useContext } from 'react';
 
 const TransactionsCard: FC<TransactionsCardProps> = ({ addressTo, addressFrom, timestamp, message, keyword, amount, url }) => {
   const gifUrl = useFetch({ keyword });

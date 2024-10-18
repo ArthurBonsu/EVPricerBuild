@@ -1,5 +1,5 @@
 import { createStandaloneToast } from '@chakra-ui/react'
-import { UseToastOptions } from '@chakra-ui/toast'
+import { UseToastOptions } from '@chakra-ui/react';
 import { useRef, useEffect } from 'react'
 import { useToast } from '@chakra-ui/react'
 

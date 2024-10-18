@@ -1,12 +1,11 @@
-import { ComponentType, FC, useState, useEffect,useContext } from 'react';
+import { ComponentType, FC, useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/router';
 import {
   Avatar,
-  Button,
+  Button,  
   Flex,
   Heading,
   Menu,
-  ButtonProps,
   useDisclosure,
   MenuButton,
   MenuList,
@@ -14,18 +13,17 @@ import {
   useClipboard,
   Input,
   Stack,
+  ButtonProps,  
   InputGroup,
   InputLeftElement,
   InputRightElement,
   Box,
   Grid,
-  VStack,
   FormControl,
   FormLabel,
   FormErrorMessage,
   FormHelperText,
   chakra,
-  
 } from '@chakra-ui/react';
 
 import { useAppToast } from 'hooks/index';
@@ -34,7 +32,7 @@ import { BsGithub, BsTwitter, BsGoogle } from 'react-icons/bs';
 import { signInWithPopup } from 'firebase/auth';
 import { GoogleAuthProvider, TwitterAuthProvider } from 'firebase/auth';
 import { auth, db } from '../../../services/firebaseConfig';
-
+import { VStack } from '@chakra-ui/react';
 const providers = [
   { name: 'github',   Icon: BsGithub },
   { name: 'twitter', Icon: BsTwitter },

@@ -1,7 +1,7 @@
 import { Button, ButtonProps, useDisclosure } from '@chakra-ui/react';
 import AppAlertDialog from '@components/AppAlertDialog';
 import useSafeSdk, { useLoadSafe } from 'hooks/useLoadSafe';
-import { FC, useCallback, useState, useContext } from 'react';
+import React, { FC, useEffect,  useCallback, useState, useContext } from 'react';
 
 interface SecuredSwapProps {
   safeTxHash: string | null;

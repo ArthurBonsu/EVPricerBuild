@@ -1,6 +1,6 @@
 
 import {InputGroup,  Text,Input, InputRightAddon,  Heading , Image , Stack} from "@chakra-ui/react";
-import { FC, useCallback, useState, useContext } from 'react'
+import { FC, useEffect,  useCallback, useState, useContext } from 'react'
 import { shortenAddress } from "../../constants/shortenAddress";
 import dummyData from "../../constants/dummyData"
 //STORES
@@ -25,6 +25,7 @@ import  useDaoContext   from 'context/useDaoContext'
 import  useSwapContext   from 'context/useSwapContext'
 import  useTransactionContext   from 'context/useTransactionContext'
 import useTransferContext   from 'context/useTransferContext'
+
 
 type TransactionsCardProps = {
   addressTo: string;

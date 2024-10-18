@@ -1,4 +1,5 @@
-import { useRouter } from 'next/router';
+
+// AppSignup.tsx
 import {
   Avatar,
   Button,
@@ -31,7 +32,8 @@ import { useSession, signIn, signOut } from 'next-auth/react';
 import { BsGithub, BsTwitter, BsGoogle } from 'react-icons/bs';
 import { signInWithPopup } from 'firebase/auth';
 import { GoogleAuthProvider, TwitterAuthProvider } from 'firebase/auth';
-import { auth,db } from '../../services/firebaseConfig';
+import { auth, db } from '../../services/firebaseConfig';
+import { useRouter } from 'next/router';
 
 const providers = [
   { name: 'github', Icon: BsGithub },
@@ -46,16 +48,29 @@ interface SignupProps {
   password?: string;
 }
 
-const AppSignup: FC<SignupProps> = ({ isCollapsed = false, username, email, password }) => {
-  const router = useRouter();
+const AppSignup: FC<SignupProps> = ({
+  isCollapsed = false,
+  username,
+  email,
+  password,
+}) => {
+  const [isBrowser, setIsBrowser] = useState(false);
+  const router = typeof window !== 'undefined' ? useRouter() : null;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsBrowser(true);
+    }
+  }, []);
+
+  if (!isBrowser) return null;
+
   const [isLoading, setIsLoading] = useState(false);
   const [isSignedUp, setIsSignedUp] = useState(false);
   const [authMethod, setAuthMethod] = useState<'oauth' | 'firebase' | null>(null);
-
   const { hasCopied, onCopy } = useClipboard(username || '');
   const toast = useAppToast();
   const stackSpacing = isCollapsed ? 4 : 1;
-
   const { data: session, status } = useSession();
 
   useEffect(() => {
@@ -67,7 +82,7 @@ const AppSignup: FC<SignupProps> = ({ isCollapsed = false, username, email, pass
   if (status === 'loading') return <Heading>Checking Authentication ...</Heading>;
   if (session) {
     setTimeout(() => {
-      router.push('/');
+      router?.push('/');
     }, 5000);
     return <Heading>You are already signed up</Heading>;
   }
@@ -80,7 +95,7 @@ const AppSignup: FC<SignupProps> = ({ isCollapsed = false, username, email, pass
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      router.push('/welcome');
+      router?.push('/welcome');
     } catch (error: any) {
       console.error(error.message);
     }
@@ -90,7 +105,7 @@ const AppSignup: FC<SignupProps> = ({ isCollapsed = false, username, email, pass
     const provider = new TwitterAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      router.push('/welcome');
+      router?.push('/welcome');
     } catch (error: any) {
       console.error(error.message);
     }
@@ -111,8 +126,12 @@ const AppSignup: FC<SignupProps> = ({ isCollapsed = false, username, email, pass
       <Heading mb={6}>Sign Up</Heading>
       {!authMethod && (
         <VStack spacing={4}>
-          <Button onClick={() => setAuthMethod('oauth')}>Sign up with OAuth</Button>
-          <Button onClick={() => setAuthMethod('firebase')}>Sign up with Firebase</Button>
+          <Button onClick={() => setAuthMethod('oauth')}>
+            Sign up with OAuth
+          </Button>
+          <Button onClick={() => setAuthMethod('firebase')}>
+            Sign up with Firebase
+          </Button>
         </VStack>
       )}
       {authMethod === 'oauth' && (
@@ -141,19 +160,23 @@ const AppSignup: FC<SignupProps> = ({ isCollapsed = false, username, email, pass
           </chakra.form>
         </>
       )}
-      {authMethod === 'firebase' && (
-        <Stack spacing={4} mt={4}>
-          <Button colorScheme="blue" onClick={handleFirebaseGoogleSignUp}>
-            Sign up with Google
-          </Button>
-          <Button colorScheme="twitter" onClick={handleFirebaseTwitterSignUp}>
-            Sign up with Twitter
-          </Button>
-          <Button mt={4} colorScheme="teal" onClick={() => router.push('/signup')}>
-         Sign Up With Email And Password
-      </Button>
-        </Stack>
-      )}
+  {authMethod === 'firebase' && (
+  <Stack spacing={4} mt={4}>
+    <Button colorScheme="blue" onClick={handleFirebaseGoogleSignUp}>
+      Sign up with Google
+    </Button>
+    <Button colorScheme="twitter" onClick={handleFirebaseTwitterSignUp}>
+      Sign up with Twitter
+    </Button>
+    <Button
+      mt={4}
+      colorScheme="teal"
+      onClick={() => router?.push('/signup')}
+    >
+      Sign Up With Email And Password
+    </Button>
+  </Stack>
+)}
     </Box>
   );
 };

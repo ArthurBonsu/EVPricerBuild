@@ -1,8 +1,17 @@
+
+// CrowdSource.tsx
+import {
+  Button,
+  ButtonProps,
+  Flex,
+  useDisclosure,
+} from '@chakra-ui/react';
 import { useEffect, useState, useCallback, useContext } from 'react';
-import { Button, ButtonProps, Flex, useDisclosure } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
+import { useSession, signIn, signOut } from 'next-auth/react';
 import AppModal from '../AppModal/AppModal';
 import useLoadSafe from 'hooks/useLoadSafe';
-import { PaymentTransactions } from "types";
+import { PaymentTransactions } from 'types';
 
 export interface CrowdsourceTransferProps {
   transaction: PaymentTransactions;
@@ -16,15 +25,32 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
   userAddress,
   ...rest
 }) => {
+  const [isBrowser, setIsBrowser] = useState(false);
+  const router = typeof window !== 'undefined' ? useRouter() : null;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsBrowser(true);
+    }
+  }, []);
+
+  if (!isBrowser) return null;
+
   const [approveExeIsLoading, setApproveExeIsLoading] = useState(false);
   const [rejectExeIsLoading, setRejectExeIsLoading] = useState(false);
   const [isApprovalExecutable, setIsApprovalExecutable] = useState(false);
   const [isRejectionExecutable, setIsRejectionExecutable] = useState(false);
+
   const localDisclosure = useDisclosure();
-  const { proposeTransaction,approveTransfer, rejectTransfer, checkIfTxnExecutable, isLoading, safe, checkIsSigned } = useLoadSafe({
-    safeAddress,
-    userAddress,
-  });
+  const {
+    proposeTransaction,
+    approveTransfer,
+    rejectTransfer,
+    checkIfTxnExecutable,
+    isLoading,
+    safe,
+    checkIsSigned,
+  } = useLoadSafe({ safeAddress, userAddress });
 
   const approveTransfers = async (transaction: PaymentTransactions) => {
     setApproveExeIsLoading(true);
@@ -53,18 +79,21 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
       }
     };
     getExecutables();
-  },);
+  }, []);
 
-  const checkTxnExecutable = useCallback(async (transaction: PaymentTransactions) => {
-    try {
-      const approvalTx = await checkIfTxnExecutable(transaction);
-      return approvalTx;
-    } catch (error) {
-      console.error(error);
-      return false;
-    }
-  }, [checkIfTxnExecutable]);
-  
+  const checkTxnExecutable = useCallback(
+    async (transaction: PaymentTransactions) => {
+      try {
+        const approvalTx = await checkIfTxnExecutable(transaction);
+        return approvalTx;
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
+    },
+    [checkIfTxnExecutable]
+  );
+
   useEffect(() => {
     const getExecutables = async () => {
       if (transaction) {
@@ -76,6 +105,7 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
     };
     getExecutables();
   }, [transaction, checkTxnExecutable]);
+
   return (
     <div>
       <Button {...rest} onClick={localDisclosure.onOpen}>
