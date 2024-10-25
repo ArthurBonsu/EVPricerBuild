@@ -13,15 +13,17 @@ import { useSession } from 'next-auth/react';
 import NextAuth from 'next-auth';
 import { useRouter } from 'next/router';
 
+// Dynamically import ChakraProvider to disable SSR
 const ChakraProvider = dynamic(
   () => import('@chakra-ui/react').then((module) => module.ChakraProvider),
   { ssr: false }
 );
 
+// Define types for NextPage and AppProps
 type NextPageWithLayout = NextPage & WithPageLayout;
 type AppPropsWithLayout = AppProps & { Component: NextPageWithLayout };
 
-const App: FC<AppPropsWithLayout> = ({ Component, pageProps: { ...pageProps } }) => {
+const App: FC<AppPropsWithLayout> = ({ Component, pageProps }) => {
   const [isClient, setIsClient] = useState(false);
   const getLayout = Component.getLayout ?? ((page) => page);
   const { data: session } = useSession();
@@ -37,7 +39,8 @@ const App: FC<AppPropsWithLayout> = ({ Component, pageProps: { ...pageProps } })
     }
   }, [router, isClient]);
 
-  if (!isClient) return null; // or a loading indicator
+  // Render nothing on server-side or while loading
+  if (!isClient) return null;
 
   return (
     <SessionProvider session={session}>

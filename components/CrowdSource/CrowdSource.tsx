@@ -6,7 +6,12 @@ import {
   Flex,
   useDisclosure,
 } from '@chakra-ui/react';
-import { useEffect, useState, useCallback, useContext } from 'react';
+import {
+  useEffect,
+  useState,
+  useCallback,
+  useContext,
+} from 'react';
 import { useRouter } from 'next/router';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import AppModal from '../AppModal/AppModal';
@@ -26,21 +31,13 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
   ...rest
 }) => {
   const router = useRouter();
+  const disclosure = useDisclosure();
   const [isBrowser, setIsBrowser] = useState(false);
   const [approveExeIsLoading, setApproveExeIsLoading] = useState(false);
   const [rejectExeIsLoading, setRejectExeIsLoading] = useState(false);
   const [isApprovalExecutable, setIsApprovalExecutable] = useState(false);
   const [isRejectionExecutable, setIsRejectionExecutable] = useState(false);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsBrowser(true);
-    }
-  }, []);
-
-  if (!isBrowser) return null;
-
-  const localDisclosure = useDisclosure();
   const {
     proposeTransaction,
     approveTransfer,
@@ -49,38 +46,12 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
     isLoading,
     safe,
     checkIsSigned,
-  } = useLoadSafe({ safeAddress, userAddress });
+  } = useLoadSafe({
+    safeAddress,
+    userAddress,
+  });
 
-  const approveTransfers = async (transaction: PaymentTransactions) => {
-    setApproveExeIsLoading(true);
-    await approveTransfer(transaction);
-    setApproveExeIsLoading(false);
-  };
-
-  const rejectTransfers = async (transaction: PaymentTransactions) => {
-    setRejectExeIsLoading(true);
-    await rejectTransfer(transaction);
-    setRejectExeIsLoading(false);
-  };
-
-  const isTxnExecutable = async (transaction: PaymentTransactions) => {
-    await checkIfTxnExecutable(transaction);
-    return true; // replace with actual logic
-  };
-
-  useEffect(() => {
-    const getExecutables = async () => {
-      if (transaction) {
-        const approvalTx = await isTxnExecutable(transaction);
-        if (approvalTx) {
-          setIsApprovalExecutable(true);
-        }
-      }
-    };
-    getExecutables();
-  }, [transaction, isTxnExecutable]);
-
-  const checkTxnExecutable = useCallback(
+  const isTxnExecutable = useCallback(
     async (transaction: PaymentTransactions) => {
       try {
         const approvalTx = await checkIfTxnExecutable(transaction);
@@ -94,24 +65,44 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
   );
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsBrowser(true);
+    }
+  }, []);
+
+  useEffect(() => {
     const getExecutables = async () => {
       if (transaction) {
-        const approvalTx = await checkTxnExecutable(transaction);
+        const approvalTx = await isTxnExecutable(transaction);
         if (approvalTx) {
           setIsApprovalExecutable(true);
         }
       }
     };
     getExecutables();
-  }, [transaction, checkTxnExecutable]);
+  }, [transaction, isTxnExecutable]);
+
+  const approveTransfers = async (transaction: PaymentTransactions) => {
+    setApproveExeIsLoading(true);
+    await approveTransfer(transaction);
+    setApproveExeIsLoading(false);
+  };
+
+  const rejectTransfers = async (transaction: PaymentTransactions) => {
+    setRejectExeIsLoading(true);
+    await rejectTransfer(transaction);
+    setRejectExeIsLoading(false);
+  };
+
+  if (!isBrowser) return null;
 
   return (
     <div>
-      <Button {...rest} onClick={localDisclosure.onOpen}>
+      <Button {...rest} onClick={disclosure.onOpen}>
         Execute
       </Button>
       <AppModal
-        disclosure={localDisclosure}
+        disclosure={disclosure}
         title="Execute Transaction"
         modalSize="sm"
       >
@@ -127,7 +118,7 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
               isDisabled={approveExeIsLoading}
               onClick={async () => {
                 await approveTransfers(transaction);
-                localDisclosure.onClose();
+                disclosure.onClose();
               }}
             >
               Execute Approval
@@ -139,7 +130,7 @@ export const CrowdSource: React.FC<CrowdsourceTransferProps> = ({
               isDisabled={rejectExeIsLoading}
               onClick={async () => {
                 await rejectTransfers(transaction);
-                localDisclosure.onClose();
+                disclosure.onClose();
               }}
             >
               Execute Rejection

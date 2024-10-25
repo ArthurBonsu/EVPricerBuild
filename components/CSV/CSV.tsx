@@ -1,12 +1,9 @@
-
 // CSV.tsx
-import React, { useCallback, useState, useEffect, ComponentType, FC, useContext } from "react";
-import { read, utils, writeFile } from "xlsx";
+import React, { useRef , useState, useEffect } from 'react';
 import {
   Stack,
   Heading,
   Button,
-  ButtonProps,
   Flex,
   useDisclosure,
   AlertDialog,
@@ -18,9 +15,15 @@ import {
   chakra,
   AlertDialogHeader,
   AlertDialogOverlay,
-  UseDisclosureReturn,
-  Select,
-  FormErrorMessage,
+  Table,
+  Thead,
+  Tr,
+  Th,
+  Tbody,
+  Td,
+} from '@chakra-ui/react';
+import { useForm } from 'react-hook-form';
+import {
   FormControl,
   FormLabel,
   NumberInput,
@@ -29,296 +32,100 @@ import {
   NumberDecrementStepper,
   NumberInputStepper,
   Input,
-  IconButton,
-  AlertIcon,
-  Grid,
-  Box,
-  Text,
-  InputGroup,
-  InputRightAddon,
-  FormHelperText,
-  Wrap,
-  WrapItem,
-  VisuallyHidden,
-  VisuallyHiddenInput,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-} from "@chakra-ui/react";
-import { max } from "lodash";
-import usePortFolioContext from "context/usePortfolioContext";
-import { dateAtTime, timeAgo, dateFormat, DateType } from "utils/formatDate";
-import {
-  useFormContext,
-  useFieldArray,
-  useForm,
-  Controller,
-  FieldErrors,
-  FieldValues,
-} from "react-hook-form";
-import { ethers } from "ethers";
-const hre = require("hardhat");
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useRouter } from "next/router";
-import { RiArrowDownSLine } from "react-icons/ri";
-import {
-  createSwapFormSchema,
-  createSwapTransferFormSchema,
-} from "../../validation";
-import { BsShieldFillCheck } from "react-icons/bs";
-import { BiSearchAlt } from "react-icons/bi";
-import { RiHeart2Fill } from "react-icons/ri";
-import { PlusSmIcon, MinusSmIcon } from "@heroicons/react/outline";
-import {
-  CreateSwapTransferInput,
-  CreateTransferInput,
-  SimpleTokenList,
-} from "types";
-import supportedNetworkOptions from "constants/supportedNetworkOptions";
-import { useSwapStore } from "stores/ContextStores/useSwapStore";
-import { useEthersStore } from "stores/ethersStore";
-import { useSafeStore } from "stores/safeStore";
-import { useTransactionStore } from "stores/transactionStore";
-import { useUserStore } from "stores/userStore";
-import { Receipients } from "types/index";
-import useEthers from "hooks/useEthers";
-import useFetch from "hooks/useFetch";
-import useLoadSafe from "hooks/useLoadSafe";
-import useTransactions from "hooks/useTransactions";
-import useSafeInfo from "hooks/useSafeDetails.ts";
-import useCrowdsourceContext from "context/useCrowdsourceContext";
-import useDaoContext from "context/useDaoContext";
-import useSwapContext from "context/useSwapContext";
-import useTransactionContext from "context/useTransactionContext";
-import useTransferContext from "context/useTransferContext";
-import * as yup from "yup";
-import { motion } from "framer-motion";
-import Router from "next/router";
-import { useQuery } from "react-query";
-import queries from "services/queries";
-import {
-  RowType,
-  TokensSelected,
-  CSVProps,
-  CSVPropsType,
-} from "types/index";
-import {
-  createCSCFormSchema,
-  TcreateCSCFormSchemaValues,
-} from "../../validation";
-import {
-  AllPVsProps,
-  PVForTokenProps,
-  DateForMultiTokenProps,
-  DateWithTokenProps,
-} from "types/index";
-import { PublicClient } from "coinbase-pro";
+  FormErrorMessage,
+} from '@chakra-ui/react';
+import { useQuery, QueryClient, QueryClientProvider } from 'react-query';
 
-const SelectedTokenList: TokensSelected[] = [
-  { name: "Bitcoin", symbol: "BTC" },
-  { name: "Ethereum", symbol: "ETH" },
-  { name: "XRP", symbol: "XRP" },
-];
+// Create a client
+const queryClient = new QueryClient();
 
-const publicClient = new PublicClient();
-
-let timestampstore: Array<String>;
-let transaction_typestore: Array<string>;
-let tokenstore: Array<String>;
-let amountstore: Array<string>;
-
-let timestampgiven, _thetransactiontype, tokengained, amountpushed;
-let rows: Array<RowType>;
-let onTokenSelected: any, onDatePicked: any;
-
-let datedbalancedamount: number | string;
-let datedwithdrawalamount: number | string;
-let dateddepositedamount: number | string;
-
-let BTCPVOfParticularToken: number | string;
-
-let ETHVOfParticularToken: number | string;
-let XRPVOfParticularToken: number | string;
-
-let balancedamount: any;
-let withdrawalamount: any;
-let depositedamount: any;
-
-const PVForToken: React.FC<PVForTokenProps> = ({
-  token,
-  balancedamount,
-  withdrawalamount,
-  depositedamount,
-}) => {
+// Wrap your app with QueryClientProvider
+function App() {
   return (
-    <div>
-      <h3>Token: {token}</h3>
-      <p>Balance Amount: {balancedamount}</p>
-      <p>Withdrawal Amount: {withdrawalamount}</p>
-      <p>Deposited Amount: {depositedamount}</p>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <CSVSubmit />
+    </QueryClientProvider>
   );
-};
+}
 
-const DateWithToken: React.FC<DateWithTokenProps> = ({
-  date,
-  token,
-  datedbalancedamount,
-  datedwithdrawalamount,
-  dateddepositedamount,
-}) => {
-  return (
-    <div>
-      <p>Date: {date}</p>
-      <p>Token: {token}</p>
-      <p>Dated Balanced Amount: {datedbalancedamount}</p>
-      <p>Dated Withdrawal Amount: {datedwithdrawalamount}</p>
-      <p>Dated Deposited Amount: {dateddepositedamount}</p>
-    </div>
-  );
-};
+interface CSVProps {
+  rows: Array<any>;
+  date: string;
+  pvvalue: number;
+  timestamp: string;
+  transaction_type: string;
+  token: string;
+  amount: number;
+}
 
-const AllPVs = ({
-  _BTCPVOfParticularToken,
-  _ETHVOfParticularToken,
-  _XRPVOfParticularToken,
-}: AllPVsProps) => {
-  return (
-    <Stack spacing={6}>
-      <Box maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden">
-        <Heading as="h1" size="4xl" noOfLines={1}>
-          {" "}
-        </Heading>
-        <br />
-        <Text as="b"> Bitcoin PV Value</Text>
-        <Text as="b">{_BTCPVOfParticularToken}</Text>
-        <br />
-        <Text as="b"> Ethereum PV Value</Text>
-        <Text as="b">{_ETHVOfParticularToken}</Text>
-        <br />
-        <Text as="b"> XRP PV Value</Text>
-        <Text as="b">{_XRPVOfParticularToken}</Text>
-        <br />
-      </Box>
-    </Stack>
-  );
-};
 
-const PVForSelectedToken = ({
-  token,
-  balancedamount,
-  withdrawalamount,
-  depositedamount,
-}: PVForTokenProps) => {
-  return (
-    <Stack spacing={6}>
-      <Box maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden">
-        <motion.div animate={{ scale: 0.5 }} />
-        <Heading as="h1" size="4xl" noOfLines={1}>
-          PV For Token Selected {token}
-        </Heading>
-        <br />
-        <Text as="b"> Balanced Amount</Text>
-        <Text as="b">{balancedamount}</Text>
-        <br />
-        <Text as="b"> Withdrawal Amount</Text>
-        <Text as="b">{withdrawalamount}</Text>
-        <br />
-        <Text as="b"> Deposit Amount</Text>
-        <Text as="b">{depositedamount}</Text>
-        <br />
-      </Box>
-    </Stack>
-  );
-};
-
-// get all the PV for multiple tokens by date
-const DateForMultiToken = ({
-  date,
-  BTCDatedPV,
-  ETHDatedPV,
-  XRPDatedPV,
-}: DateForMultiTokenProps) => {
-  return (
-    <Stack spacing={6}>
-      <Box maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden">
-        <Heading as="h1" size="4xl" noOfLines={1}>
-          View PV Value From Date {date} Given
-        </Heading>
-        <br />
-        <Text as="b"> BTC PV</Text>
-        <Text as="b">{BTCDatedPV}</Text>
-        <br />
-        <Text as="b"> ETC PV</Text>
-        <Text as="b">{ETHDatedPV}</Text>
-        <br />
-        <Text as="b"> XRP PV </Text>
-        <Text as="b">{XRPDatedPV}</Text>
-        <br />
-      </Box>
-    </Stack>
-  );
-};
-
-// submit the properties of the tokens and then submit this information
-const CSVSubmit = ({
-  rows,
-  date,
-  pvvalue,
-  timestamp,
-  transaction_type,
-  token,
-  amount,
-}: CSVProps) => {
-  const [portfolioDetails, setPortfolioDetails1] = useState<RowType[]>([]);
-  const [porfoliodetails, setPortfolioDetails2] = useState([]);
-  const [value, setValue] = useState("");
+const CSVSubmit = () => {
+  const cancelRef = useRef(null);
+  const [portfolioDetails, setPortfolioDetails] = useState([]);
+  const [value, setValue] = useState('');
   const [isFormLoading, setIsFormLoading] = useState(false);
   const [_tokenselect, setTokenSelected] = useState('');
-  const [datePicker, setDatePicker] = useState<DateType>(undefined);
-  const router = useRouter();
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const [datePicker, setDatePicker] = useState(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CSVProps>();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [isBrowser, setIsBrowser] = useState(false);
-  const { data, isLoading } = useQuery(
-    "transactions",
+  const { data, isLoading, error } = useQuery(
+    'transactions',
     async () => {
-      const response = await fetch("/api/transactions");
+      const response = await fetch('/api/transactions');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
       return response.json();
+    },
+    {
+      retry: 3,
+      staleTime: 10000,
     }
   );
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setIsBrowser(true);
+    if (typeof window !== 'undefined') {
+      setIsFormLoading(false);
     }
   }, []);
 
-  if (!isBrowser) return null;
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-  // Functions
+  if (error) {
+    return (
+      <div>
+        Error: {(error as any)?.message ?? 'An unknown error occurred'}
+      </div>
+    );
+  }
+
   const handleTokenSelect = (token: string) => {
     setTokenSelected(token);
   };
 
-  const handleDatePick = (date: DateType) => {
+  const handleDatePick = (date: any) => {
     setDatePicker(date);
   };
 
-  const handleCSVSubmit = async (data: FieldValues) => {
-    const csvData: CSVProps = {
+  const handleCSVSubmit = async (data: any) => {
+    const csvData = {
       rows: data.rows,
       transaction_type: data.transaction_type,
       token: data.token,
       amount: data.amount,
     };
+
     try {
-      const response = await fetch("/api/csv", {
-        method: "POST",
+      const response = await fetch('/api/csv', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(csvData),
       });
@@ -329,115 +136,134 @@ const CSVSubmit = ({
     }
   };
 
-  // Render
-return (
-  <Flex direction="column" align="center" justify="center" p={6}>
-    <Heading as="h1" size="4xl" noOfLines={1}> CSV Upload </Heading>
-    <form onSubmit={handleSubmit(handleCSVSubmit)}>
-      <Stack spacing={6}>
-        <FormControl isInvalid={!!errors.token}>
-          <FormLabel>Token</FormLabel>
-          <Select 
-            {...register("token", { required: true })}
-            placeholder="Select token" 
-            onChange={(e) => handleTokenSelect(e.target.value)}
-          >
-            {SelectedTokenList.map((token) => (
-              <option key={token.symbol} value={token.symbol}>
-                {token.name}
-              </option>
-            ))}
-          </Select>
-          <FormErrorMessage>
-            {errors.token?.message?.toString() || 'Error'}
-          </FormErrorMessage>
-        </FormControl>
-        <FormControl isInvalid={!!errors.date}>
-          <FormLabel>Date</FormLabel>
-          <Input 
-            {...register("date", { required: true })}
-            type="date" 
-            placeholder="Select date" 
-            onChange={(e) => handleDatePick(e.target.valueAsDate)}
-          />
-          <FormErrorMessage>
-            {errors.date?.message?.toString() || 'Error'}
-          </FormErrorMessage>
-        </FormControl>
-        <FormControl isInvalid={!!errors.pvvalue}>
-          <FormLabel>PV Value</FormLabel>
-          <NumberInput>
-            <NumberInputField {...register("pvvalue", { required: true })} />
-            <NumberInputStepper>
-              <NumberIncrementStepper />
-              <NumberDecrementStepper />
-            </NumberInputStepper>
-          </NumberInput>
-          <FormErrorMessage>
-            {errors.pvvalue?.message?.toString() || 'Error'}
-          </FormErrorMessage>
-        </FormControl>
-        <FormControl isInvalid={!!errors.timestamp}>
-          <FormLabel>Timestamp</FormLabel>
-          <Input 
-            {...register("timestamp", { required: true })}
-            type="datetime-local" 
-          />
-          <FormErrorMessage>
-            {errors.timestamp?.message?.toString() || 'Error'}
-          </FormErrorMessage>
-        </FormControl>
-        <FormControl isInvalid={!!errors.transaction_type}>
-          <FormLabel>Transaction Type</FormLabel>
-          <Select 
-            {...register("transaction_type", { required: true })}
-            placeholder="Select transaction type" 
-          >
-            <option value="deposit">Deposit</option>
-            <option value="withdrawal">Withdrawal</option>
-          </Select>
-          <FormErrorMessage>
-            {errors.transaction_type?.message?.toString() || 'Error'}
-          </FormErrorMessage>
-        </FormControl>
-        <FormControl isInvalid={!!errors.amount}>
-          <FormLabel>Amount</FormLabel>
-          <NumberInput>
-            <NumberInputField {...register("amount", { required: true })} />
-            <NumberInputStepper>
-              <NumberIncrementStepper />
-              <NumberDecrementStepper />
-            </NumberInputStepper>
-          </NumberInput>
-          <FormErrorMessage>
-            {errors.amount?.message?.toString() || 'Error'}
-          </FormErrorMessage>
-        </FormControl>
-        <Button type="submit" isLoading={isLoading}> Submit </Button>
-      </Stack>
-    </form>
-    {isOpen && (
-      <AlertDialog 
-        onClose={onClose} 
-        motionPreset="slideInBottom"
-      >
-        <AlertDialogOverlay />
-        <AlertDialogContent>
-          <AlertDialogHeader>CSV Upload</AlertDialogHeader>
-          <AlertDialogCloseButton />
-          <AlertDialogBody>
-            <p>CSV uploaded successfully!</p>
-          </AlertDialogBody>
-          <AlertDialogFooter>
-            <Button onClick={onClose}>Close</Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    )}
-  </Flex>
-);
+  return (
+    <Flex direction="column" align="center" justify="center" p={6}>
+      <Heading as="h1" size="4xl" noOfLines={1}>
+        CSV Upload
+      </Heading>
+      <form onSubmit={handleSubmit(handleCSVSubmit)}>
+        <Stack spacing={6}>
+          <FormControl isInvalid={!!errors.token}>
+            <FormLabel>Token</FormLabel>
+            <Input {...register('token', { required: true })} placeholder="Select token" />
+            <FormErrorMessage>
+              {errors.token?.message || 'Error with token'}
+            </FormErrorMessage>
+          </FormControl>
 
+          <FormControl isInvalid={!!errors.date}>
+            <FormLabel>Date</FormLabel>
+            <Input {...register('date', { required: true })} type="date" placeholder="Select date" />
+            <FormErrorMessage>
+              {errors.date?.message || 'Error with date'}
+            </FormErrorMessage>
+          </FormControl>
+
+          <FormControl isInvalid={!!errors.pvvalue}>
+            <FormLabel>PV Value</FormLabel>
+            <NumberInput>
+              <NumberInputField {...register('pvvalue', { required: true })} />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+            <FormErrorMessage>
+              {errors.pvvalue?.message || 'Error with PV value'}
+            </FormErrorMessage>
+          </FormControl>
+
+          <FormControl isInvalid={!!errors.timestamp}>
+            <FormLabel>Timestamp</FormLabel>
+            <Input {...register('timestamp', { required: true })} type="datetime-local" />
+            <FormErrorMessage>
+              {errors.timestamp?.message || 'Error with timestamp'}
+            </FormErrorMessage>
+          </FormControl>
+
+          <FormControl isInvalid={!!errors.transaction_type}>
+            <FormLabel>Transaction Type</FormLabel>
+            <Input {...register('transaction_type', { required: true })} placeholder="Select transaction type" />
+            <FormErrorMessage>
+              {errors.transaction_type?.message || 'Error with transaction type'}
+            </FormErrorMessage>
+          </FormControl>
+
+          <FormControl isInvalid={!!errors.amount}>
+            <FormLabel>Amount</FormLabel>
+            <NumberInput>
+              <NumberInputField {...register('amount', { required: true })} />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+            <FormErrorMessage>
+              {errors.amount?.message || 'Error with amount'}
+            </FormErrorMessage>
+          </FormControl>
+
+          <Button type="submit" isLoading={isFormLoading}>
+            Submit
+          </Button>
+        </Stack>
+      </form>
+
+      {isOpen && (
+  <AlertDialog
+    leastDestructiveRef={cancelRef}
+    isOpen={isOpen}
+    onClose={onClose}
+    motionPreset="slideInBottom"
+  >
+    <AlertDialogOverlay />
+    <AlertDialogContent>
+      <AlertDialogHeader>Confirmation</AlertDialogHeader>
+      <AlertDialogCloseButton />
+      <AlertDialogBody>
+        Are you sure you want to submit the CSV data?
+      </AlertDialogBody>
+      <AlertDialogFooter>
+        <Button ref={cancelRef} onClick={onClose}>
+          Cancel
+        </Button>
+        <Button ml={3} onClick={handleCSVSubmit}>
+          Confirm
+        </Button>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+)}
+
+      {data && (
+        <Stack spacing={6} mt={6}>
+          <Heading as="h2" size="xl">
+            CSV Data
+          </Heading>
+          <Table variant="simple">
+            <Thead>
+              <Tr>
+                <Th>Token</Th>
+                <Th>Transaction Type</Th>
+                <Th>Amount</Th>
+                <Th>Timestamp</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+            {data.map((row: any, index: number) => (
+  <Tr key={index}>
+    <Td>{row.token}</Td>
+    <Td>{row.transaction_type}</Td>
+    <Td>{row.amount}</Td>
+    <Td>{row.timestamp}</Td>
+  </Tr>
+))}
+            </Tbody>
+          </Table>
+        </Stack>
+      )}
+    </Flex>
+  );
 };
 
-
-export default CSV;
+export default CSVSubmit;
