@@ -1,41 +1,33 @@
-// Parameter Libraries
-// Stores Library
-import { useSwapStore } from 'stores/ContextStores/useSwapStore';
-import { useEthersStore } from 'stores/ethersStore';
-import { useSafeStore } from 'stores/safeStore';
-import { useTransactionStore } from 'stores/transactionStore';
-import { useUserStore } from 'stores/userStore';
-
-// HOOKS
-import useEthers from 'hooks/useEthers';
-import useFetch from 'hooks/useFetch';
-import useLoadSafe from 'hooks/useLoadSafe';
-import useSafe from 'hooks/useLoadSafe';
-
-import useTransactions from 'hooks/useTransactions';
-
-// Context 
-import useCrowdsourceContext from 'context/useCrowdsourceContext';
-import useDaoContext from 'context/useDaoContext';
-import useSwapContext from 'context/useSwapContext';
-import useTransactionContext from 'context/useTransactionContext';
-import useTransferContext from 'context/useTransferContext';
-
-import { FC, useEffect, useState, useContext } from 'react';
+// pages/SecuredSwap.tsx
 import dynamic from 'next/dynamic';
-
-const Button = dynamic(() => import('@chakra-ui/react').then((module) => module.Button), { ssr: false });
-const Input = dynamic(() => import('@chakra-ui/react').then((module) => module.Input), { ssr: false });
-const Flex = dynamic(() => import('@chakra-ui/react').then((module) => module.Flex), { ssr: false });
-const Box = dynamic(() => import('@chakra-ui/react').then((module) => module.Box), { ssr: false });
-const Heading = dynamic(() => import('@chakra-ui/react').then((module) => module.Heading), { ssr: false });
-const VStack = dynamic(() => import('@chakra-ui/react').then((module) => module.VStack), { ssr: false });
+import { FC, useEffect, useState, useContext } from 'react';
 import { useRouter } from 'next/router';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { ethers } from 'ethers';
+
+// Dynamic imports to avoid server-side rendering issues
+const Button = dynamic(() => import('@chakra-ui/react').then((module) => module.Button), {
+  ssr: false,
+});
+const Input = dynamic(() => import('@chakra-ui/react').then((module) => module.Input), {
+  ssr: false,
+});
+const Flex = dynamic(() => import('@chakra-ui/react').then((module) => module.Flex), {
+  ssr: false,
+});
+const Box = dynamic(() => import('@chakra-ui/react').then((module) => module.Box), {
+  ssr: false,
+});
+const Heading = dynamic(() => import('@chakra-ui/react').then((module) => module.Heading), {
+  ssr: false,
+});
+const VStack = dynamic(() => import('@chakra-ui/react').then((module) => module.VStack), {
+  ssr: false,
+});
+
 import NavBar from '@components/NavBar';
 import Footer from '@components/Footer';
-
+import { useEthersStore } from 'stores/ethersStore'
 const SecuredSwap: FC = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -60,9 +52,7 @@ const SecuredSwap: FC = () => {
 
     const signer = provider.getSigner();
     const swapContractAddress = '0xYourSwapContractAddress'; // Replace with your swap contract address
-    const swapContractAbi :any= [
-      // Add your swap contract ABI here
-    ];
+    const swapContractAbi: any = []; // Add your swap contract ABI here
 
     const swapContract = new ethers.Contract(swapContractAddress, swapContractAbi, signer);
 
@@ -88,7 +78,6 @@ const SecuredSwap: FC = () => {
   return (
     <Flex direction="column" align="center" justify="center" minH="100vh" bg="gray.800" color="white">
       <NavBar title="Secured Swap" address={address} />
-
       <VStack spacing={4} mt={8}>
         {session ? (
           <>

@@ -58,7 +58,12 @@ const options: NextAuthOptions = {
 };
 
 const authHandler = async (req: NextApiRequest, res: NextApiResponse) => {
-  return NextAuth(req, res, options);
+  try {
+    return NextAuth(req, res, options);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Authentication failed' });
+  }
 };
 
 export default authHandler;

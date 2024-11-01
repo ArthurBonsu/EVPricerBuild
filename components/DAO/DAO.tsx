@@ -1,13 +1,9 @@
-import {
-  Button,
-  ButtonProps,
-  Flex,
-  useDisclosure,
-} from '@chakra-ui/react';
+import React from 'react';
+import { Button, ButtonProps, Flex } from '@chakra-ui/react';
 import AppModal from '@components/AppModal';
 import { useEffect, useState, useContext } from 'react';
 import useLoadSafe from '../../hooks/useLoadSafe';
-
+import { useDisclosure } from '@chakra-ui/react';
 
 interface PaymentTransactions {
   safeTxHash: string;
@@ -23,25 +19,18 @@ interface ExecuteTransferProps {
   userAddress: string;
 }
 
-const DAO: React.FC<ExecuteTransferProps> = ({
-  transaction,
-  safeAddress,
-  userAddress,
-  ...rest
-}) => {
+const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAddress, ...rest }) => {
   const [approveExeIsLoading, setApproveExeIsLoading] = useState<boolean>(false);
   const [rejectExeIsLoading, setRejectExeIsLoading] = useState<boolean>(false);
   const [isApprovalExecutable, setIsApprovalExecutable] = useState<boolean>(false);
   const [isRejectionExecutable, setIsRejectionExecutable] = useState<boolean>(false);
+
   const localDisclosure = useDisclosure();
-  const { approveTransfer, rejectTransfer, checkIfTxnExecutable, } = useLoadSafe({
-    safeAddress,
-    userAddress,
-  });
+  const { approveTransfer, rejectTransfer, checkIfTxnExecutable } = useLoadSafe({ safeAddress, userAddress });
 
   useEffect(() => {
     const getExecutables = async () => {
-      if (transaction) {
+      if (transaction && typeof window !== 'undefined') {
         const approvalTx = await checkIfTxnExecutable(transaction);
         if (approvalTx) {
           setIsApprovalExecutable(true);
@@ -51,22 +40,15 @@ const DAO: React.FC<ExecuteTransferProps> = ({
     getExecutables();
   }, [checkIfTxnExecutable, transaction]);
 
+  if (typeof window === 'undefined') return null;
+
   return (
     <div>
       <Button {...rest} onClick={localDisclosure.onOpen}>
         Execute
       </Button>
-      <AppModal
-        disclosure={localDisclosure}
-        title="Execute Transaction"
-        modalSize="sm"
-      >
-        <Flex
-          justify="space-between"
-          py={6}
-          alignItems="center"
-          flexDirection="row"
-        >
+      <AppModal disclosure={localDisclosure} title="Execute Transaction" modalSize="sm">
+        <Flex justify="space-between" py={6} alignItems="center" flexDirection="row">
           {isApprovalExecutable && (
             <Button
               isLoading={approveExeIsLoading}
@@ -102,3 +84,4 @@ const DAO: React.FC<ExecuteTransferProps> = ({
 };
 
 export default DAO;
+
