@@ -1,6 +1,4 @@
-
-// pages/_app.tsx
-import { ComponentType, FC, useState, useEffect, useContext } from 'react';
+import { ComponentType, FC, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { SessionProvider } from 'next-auth/react';
 import Head from 'next/head';

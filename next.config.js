@@ -5,6 +5,8 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   generateEtags: false,
+
+
   
   async redirects() {
     return [
@@ -18,6 +20,7 @@ const nextConfig = {
 
   webpack: (config) => {
     config.plugins.push(new NodePolyfillPlugin());
+    config.stats = 'verbose'; // or 'detailed'
  
  // Fallbacks for Node.js modules
  config.resolve.fallback = {

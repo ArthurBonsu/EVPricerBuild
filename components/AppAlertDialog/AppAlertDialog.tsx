@@ -25,8 +25,8 @@ const AppAlertDialog: FC<AppAlertDialogProps> = ({
   disclosure,
   isLoading,
   handleSubmit,
-  header,
-  body,
+  header = '',
+  body = '',
 }) => {
   const { isOpen } = disclosure;
   const cancelRef = useRef<HTMLButtonElement | null>(null);
