@@ -2,7 +2,16 @@ import { ethers } from "ethers";
 import { FC, useState } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
-import { Box, Flex, Heading, Button, HStack, Center } from '@chakra-ui/react';
+import dynamic from 'next/dynamic';
+
+const Box = dynamic(() => import('@chakra-ui/react').then((module) => module.Box), { ssr: false });
+const Flex = dynamic(() => import('@chakra-ui/react').then((module) => module.Flex), { ssr: false });
+const Heading = dynamic(() => import('@chakra-ui/react').then((module) => module.Heading), { ssr: false });
+const Button = dynamic(() => import('@chakra-ui/react').then((module) => module.Button), { ssr: false });
+const HStack = dynamic(() => import('@chakra-ui/react').then((module) => module.HStack), { ssr: false });
+const Center = dynamic(() => import('@chakra-ui/react').then((module) => module.Center), { ssr: false });
+const Input = dynamic(() => import('@chakra-ui/react').then((module) => module.Input), { ssr: false });
+const VStack = dynamic(() => import('@chakra-ui/react').then((module) => module.VStack), { ssr: false });
 import SimpleTransfer from '@components/SimpleTransfer';
 import Footer from '@components/Footer';
 import NavBar from '@components/NavBar';

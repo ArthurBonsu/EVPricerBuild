@@ -1,0 +1,54 @@
+PS C:\Users\Bonsu\Documents\GitHub\EVPricerBuild> yarn run build
+yarn run v1.22.22
+$ next build
+  ▲ Next.js 14.2.5
+  - Environments: .env
+
+   Creating an optimized production build ...
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ✓ Compiled successfully
+ ✓ Linting and checking validity of types
+   Collecting page data  .ReferenceError: window is not defined
+    at 6970 (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\chunks\197.js:1:9108)
+    at o (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\webpack-runtime.js:1:127)
+    at C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\chunks\197.js:1:1883
+    at o.a (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\webpack-runtime.js:1:866)
+    at 118 (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\chunks\197.js:1:1772)
+    at o (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\webpack-runtime.js:1:127)
+    at C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\chunks\197.js:1:3909
+    at o.a (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\webpack-runtime.js:1:866)
+    at 3781 (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\chunks\197.js:1:3863)
+    at o (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\webpack-runtime.js:1:127)
+ReferenceError: window is not defined
+    at 6970 (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\chunks\197.js:1:9108)
+    at o (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\webpack-runtime.js:1:127)
+    at C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\chunks\197.js:1:1883
+    at o.a (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\webpack-runtime.js:1:866)
+    at 118 (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\chunks\197.js:1:1772)
+    at o (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\webpack-runtime.js:1:127)
+    at C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\chunks\197.js:1:3909
+    at o.a (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\webpack-runtime.js:1:866)
+    at 3781 (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\chunks\197.js:1:3863)
+    at o (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\webpack-runtime.js:1:127)
+TypeError: Cannot read properties of null (reading 'useContext')
+    at exports.useContext (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\node_modules\react\cjs\react.production.min.js:24:118)
+    at useColorMode (file:///C:/Users/Bonsu/Documents/GitHub/EVPricerBuild/node_modules/@chakra-ui/react/dist/esm/color-mode/color-mode-context.mjs:7:19)
+    at useChakra (file:///C:/Users/Bonsu/Documents/GitHub/EVPricerBuild/node_modules/@chakra-ui/react/dist/esm/system/hooks.mjs:6:27)
+    at useToast (file:///C:/Users/Bonsu/Documents/GitHub/EVPricerBuild/node_modules/@chakra-ui/react/dist/esm/toast/use-toast.mjs:8:21)
+    at C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\chunks\197.js:1:15041
+TypeError: Cannot read properties of null (reading 'useContext')
+    at exports.useContext (C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\node_modules\react\cjs\react.production.min.js:24:118)
+    at useColorMode (file:///C:/Users/Bonsu/Documents/GitHub/EVPricerBuild/node_modules/@chakra-ui/react/dist/esm/color-mode/color-mode-context.mjs:7:19)
+    at useChakra (file:///C:/Users/Bonsu/Documents/GitHub/EVPricerBuild/node_modules/@chakra-ui/react/dist/esm/system/hooks.mjs:6:27)
+    at useToast (file:///C:/Users/Bonsu/Documents/GitHub/EVPricerBuild/node_modules/@chakra-ui/react/dist/esm/toast/use-toast.mjs:8:21)
+    at C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\.next\server\chunks\197.js:1:15041
+
+> Build error occurred
+Error: Failed to collect page data for /HomePage
+    at C:\Users\Bonsu\Documents\GitHub\EVPricerBuild\node_modules\next\dist\build\utils.js:1268:15 {
+  type: 'Error'
+}
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

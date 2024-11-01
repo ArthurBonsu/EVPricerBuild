@@ -22,7 +22,14 @@ import useTransactionContext from 'context/useTransactionContext';
 import useTransferContext from 'context/useTransferContext';
 
 import { FC, useEffect, useState, useContext } from 'react';
-import { Flex, Box, Button, Heading, VStack, Input } from '@chakra-ui/react';
+import dynamic from 'next/dynamic';
+
+const Button = dynamic(() => import('@chakra-ui/react').then((module) => module.Button), { ssr: false });
+const Input = dynamic(() => import('@chakra-ui/react').then((module) => module.Input), { ssr: false });
+const Flex = dynamic(() => import('@chakra-ui/react').then((module) => module.Flex), { ssr: false });
+const Box = dynamic(() => import('@chakra-ui/react').then((module) => module.Box), { ssr: false });
+const Heading = dynamic(() => import('@chakra-ui/react').then((module) => module.Heading), { ssr: false });
+const VStack = dynamic(() => import('@chakra-ui/react').then((module) => module.VStack), { ssr: false });
 import { useRouter } from 'next/router';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { ethers } from 'ethers';
