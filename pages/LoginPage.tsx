@@ -1,5 +1,5 @@
 // pages/LoginPage.tsx
-
+"use client"
 import { useRouter } from 'next/router';
 import {
   Avatar,

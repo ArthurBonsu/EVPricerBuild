@@ -1,3 +1,4 @@
+"use client"
 import { ComponentType, FC, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { SessionProvider } from 'next-auth/react';

@@ -1,7 +1,8 @@
+"use client";
+import React, { FC, useEffect, useCallback, useState, useContext, lazy, Suspense } from 'react';
 import { Button, ButtonProps, useDisclosure } from '@chakra-ui/react';
 import AppAlertDialog from '@components/AppAlertDialog';
 import useSafeSdk, { useLoadSafe } from 'hooks/useLoadSafe';
-import React, { FC, useEffect,  useCallback, useState, useContext } from 'react';
 
 interface SecuredSwapProps {
   safeTxHash: string | null;
@@ -9,12 +10,11 @@ interface SecuredSwapProps {
   userAddress: string;
   isDisabled?: boolean;
   threshold: number;
-  execTxn: boolean; 
+  execTxn: boolean;
   nonce: number;
   hashTxn?: string;
 }
 
-// Secured swap component
 const SecuredSwap: FC<SecuredSwapProps> = ({
   safeTxHash,
   safeAddress,
@@ -29,15 +29,18 @@ const SecuredSwap: FC<SecuredSwapProps> = ({
   const localDisclosure = useDisclosure();
   const { rejectTransfer } = useLoadSafe({ safeAddress, userAddress });
 
-  const handleSubmit = useCallback(async () => {
-    setIsLoading(true);
-    await rejectTransfer({ safeTxHash, execTxn, nonce, hashTxn: hashTxn || '' });
-    setIsLoading(false);
-    localDisclosure.onClose();
-  }, [rejectTransfer, safeTxHash, execTxn, nonce, localDisclosure, hashTxn]);
+  const handleSubmit = useCallback(
+    async () => {
+      setIsLoading(true);
+      await rejectTransfer({ safeTxHash, execTxn, nonce, hashTxn: hashTxn || '' });
+      setIsLoading(false);
+      localDisclosure.onClose();
+    },
+    [rejectTransfer, safeTxHash, execTxn, nonce, localDisclosure, hashTxn]
+  );
 
   return (
-    <>
+    <Suspense fallback={<div>Loading...</div>}>
       <Button onClick={localDisclosure.onOpen} {...rest}>
         Reject
       </Button>
@@ -52,7 +55,7 @@ const SecuredSwap: FC<SecuredSwapProps> = ({
           setIsLoading(false);
         }}
       />
-    </>
+    </Suspense>
   );
 };
 

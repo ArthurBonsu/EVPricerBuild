@@ -1,3 +1,4 @@
+"use client"
 import Rect from 'react'
 import { getSession, useSession } from "next-auth/react"
 

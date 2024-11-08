@@ -1,4 +1,5 @@
 // pages/signup.tsx
+"use client"
 import { useState, useContext } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/router';

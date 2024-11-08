@@ -1,3 +1,4 @@
+"use client"
 // pages/SecuredSwap.tsx
 import dynamic from 'next/dynamic';
 import { FC, useEffect, useState, useContext } from 'react';

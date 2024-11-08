@@ -1,3 +1,5 @@
+
+
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 /** @type {import('next').NextConfig} */
@@ -5,6 +7,7 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   generateEtags: false,
+  output: 'serverless',
   async redirects() {
     return [
       {
