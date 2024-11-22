@@ -40,7 +40,7 @@ interface useTransactionProps {
   symbol: string;
   logoUri: string;
 }
-
+// useTransactions is for token sending
 const useTransactions = async ({ nonce, amount, tokenname, symbol, logoUri }: SwapTransactionType) => {
   const [tokentxhash, settokentxhash] = useState('');
   const [isLoading, setIsLoading] = useState(false);

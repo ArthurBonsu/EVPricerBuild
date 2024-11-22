@@ -1,4 +1,6 @@
 // C:\Users\Admin\Documents\peeapp\EVPricerBuild\utils\createSafe.ts
+
+// WE WONT USE THIS ONE
 import { ethers } from 'ethers';
 import { Web3Provider } from '@ethersproject/providers';
 

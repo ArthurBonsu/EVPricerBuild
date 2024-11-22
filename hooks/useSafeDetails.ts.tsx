@@ -60,6 +60,8 @@ export const useSafeDetailsAndSetup = {
     // Store the deployed address in the addresses array
     addresses.push(deployedAddress);
     // Return the deployed address
+
+    //SC: Intergration of addresses for the safe contract(we push the deployed address to the contract <safeaddress>)
     return deployedAddress;
   },
 
@@ -71,6 +73,7 @@ export const useSafeDetailsAndSetup = {
     const tx = await safeContract.addOwner(newAddress);
     await tx.wait();
     // Return the updated list of addresses
+    //SC: Intergration of addresses for the safe owner( we push the safe owner address to the contract where the safe contrat address is<safeaddress, safeowners[]>)
     return addresses;
   },
 
@@ -82,6 +85,7 @@ export const useSafeDetailsAndSetup = {
     const tx = await safeContract.functions.getModules();
     const modules = await tx.wait();
     // Return the modules
+    // SC:  Intergration of modules ( to get the modules from the safe <safe address, return safe address and safeowners> )
     return modules;
   },
 
@@ -107,6 +111,7 @@ export const useSafeDetailsAndSetup = {
     );
     // Return the receipt
     return receipt;
+    // SC:  Intergration of modules ( to get the modules from the storeTransaction <safe address, timestamp, trasaction data, boolean, receipt hash> )
   },
 
   getAllTransactions: async ({ safeAddress }: SafeInfoParam) => {
@@ -116,7 +121,9 @@ export const useSafeDetailsAndSetup = {
     // this could be transaction id and hashes stored in the smart contract 
     const transactions = await safeContract.functions.getMultiSigTransactions();
     // Return the transactions
+    // SC: Intergration of transction retrieval ( to get the transactions from the safe < safeAddress, transaction details>)
     return transactions;
+        // SC:  Intergration of getAllTransaction that are on the for a particular safe <safeAddress>  )
   },
 
   // Check if transaction is executable
@@ -125,7 +132,9 @@ export const useSafeDetailsAndSetup = {
     const safeContract = new ethers.Contract(safeAddress, contractAbi, provider);
     // Call the isTransactionExecutable function on the contract
     const executable = await safeContract.functions.isTransactionExecutable(transaction);
+   
     return executable;
+     //SC: Transaction is executable <return boolean>
   },
 
   // Propose transaction
@@ -136,6 +145,7 @@ export const useSafeDetailsAndSetup = {
     const tx = await safeContract.functions.proposeTransaction(transaction);
     await tx.wait();
     return tx;
+    // SC: Transaction is proposed  <transaction params>
   },
 
   // Approve transfer
@@ -146,6 +156,7 @@ export const useSafeDetailsAndSetup = {
     const tx = await safeContract.functions.approveTransaction(transaction);
     await tx.wait();
     return tx;
+    // SC: Transaction is approved  <transaction params , boolean true>
   },
 
   // Reject transfer
@@ -156,6 +167,7 @@ export const useSafeDetailsAndSetup = {
     const tx = await safeContract.functions.rejectTransaction(transaction);
     await tx.wait();
     return tx;
+       // SC: Transaction is rejected  <transaction params , boolean false>
   },
 };
 

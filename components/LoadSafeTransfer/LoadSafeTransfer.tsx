@@ -31,7 +31,7 @@ const LoadSafeTransfer: React.FC<ExecuteTransferProps> = ({
     safeAddress: safeTxHash,
     userAddress: '', // You might need to pass the user address here
   });
-
+      // You might need to pass the user address here 
   useEffect(() => {
     const getExecutables = async () => {
       if (safeTxHash && threshold) {
@@ -49,7 +49,7 @@ const LoadSafeTransfer: React.FC<ExecuteTransferProps> = ({
     };
     getExecutables();
   }, [checkIfTxnExecutable, safeRejectTxHash, safeTxHash, threshold]);
-
+ // safeTxHash, safeRejectTxHash, threshold , nonce
   return (
     <div>
       <Button {...rest} onClick={localDisclosure.onOpen}>
