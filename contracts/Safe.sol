@@ -1,146 +1,350 @@
-// contracts/Safe.sol
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract Safe {
-    // Owners and their weights
-    mapping(address => uint256) public owners;
-    uint256 public threshold;
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-    // Assets held by the Safe
-    mapping(address => uint256) public assets;
+contract Safe is ReentrancyGuard {
+    using SafeMath for uint256;
 
-    // Transaction queue
+    // Enhanced owner structure
+    struct Owner {
+        uint256 weight;
+        bool exists;
+        uint256 joinedAt;
+    }
+
+    // Enhanced transaction structure
     struct Transaction {
         address destination;
         uint256 value;
         bytes data;
         uint256 approvals;
         bool executed;
+        uint256 createdAt;
+        address proposer;
+        mapping(address => bool) confirmations;
     }
+
+    // Configurations and limits
+    uint256 public constant MAX_OWNERS = 10;
+    uint256 public constant MAX_TRANSACTION_VALIDITY = 30 days;
+    uint256 public constant MIN_WEIGHT = 1;
+    uint256 public constant MAX_WEIGHT = 100;
+
+    // Mappings and state variables
+    mapping(address => Owner) public owners;
+    address[] public ownerAddresses;
+    uint256 public threshold;
+    uint256 public totalWeight;
+
+    // Transaction management
     Transaction[] public transactions;
+    mapping(address => uint256[]) public userTransactions;
 
-    // Approvals for each transaction
-    mapping(uint256 => mapping(address => bool)) public confirmations;
+    // Asset tracking
+    mapping(address => uint256) public assets;
 
-    // Events
-    event OwnerAdded(address indexed owner, uint256 weight);
-    event OwnerRemoved(address indexed owner);
-    event ThresholdUpdated(uint256 threshold);
-    event Deposited(address indexed asset, uint256 amount);
-    event Transferred(address indexed recipient, uint256 amount);
-    event TransactionApproved(uint256 indexed txId, address indexed owner);
-    event TransactionExecuted(uint256 indexed txId);
-    event ExecutionFailure(uint256 indexed txId);
-    event ConfirmTransaction(uint256 indexed txId);
-    // Modifier to check if the caller is an owner
+    // Events with enhanced logging
+    event OwnerAdded(
+        address indexed owner, 
+        uint256 weight, 
+        uint256 totalWeight
+    );
+    event OwnerRemoved(
+        address indexed owner, 
+        uint256 weight, 
+        uint256 totalWeight
+    );
+    event ThresholdUpdated(
+        uint256 oldThreshold, 
+        uint256 newThreshold
+    );
+    event Deposited(
+        address indexed depositor, 
+        address indexed asset, 
+        uint256 amount
+    );
+    event TransactionProposed(
+        uint256 indexed txId, 
+        address indexed proposer, 
+        address indexed destination, 
+        uint256 value
+    );
+    event TransactionApproved(
+        uint256 indexed txId, 
+        address indexed approver, 
+        uint256 approvalWeight,
+        uint256 totalApprovals
+    );
+    event TransactionExecuted(
+        uint256 indexed txId, 
+        address indexed executor
+    );
+    event ExecutionFailure(
+        uint256 indexed txId, 
+        bytes reason
+    );
+
+    // Modifiers with enhanced checks
     modifier onlyOwner() {
-        require(owners[msg.sender] > 0, "Only owners can call this function");
+        require(owners[msg.sender].exists, "Not an owner");
         _;
     }
 
-    modifier confirmed(uint256 transactionId, address owner) {
-        require(confirmations[transactionId][owner], "Transaction not confirmed");
+    modifier validOwner(address _owner) {
+        require(_owner != address(0), "Invalid owner address");
         _;
     }
 
-    modifier notConfirmed(uint256 transactionId, address owner) {
-        require(!confirmations[transactionId][owner], "Transaction already confirmed");
+    modifier validTransaction(uint256 transactionId) {
+        require(transactionId < transactions.length, "Transaction does not exist");
+        require(
+            block.timestamp <= transactions[transactionId].createdAt + MAX_TRANSACTION_VALIDITY, 
+            "Transaction expired"
+        );
         _;
     }
 
-    modifier notExecuted(uint256 transactionId) {
-        require(!transactions[transactionId].executed, "Transaction already executed");
-        _;
-    }
+    // Constructor with robust initialization
+    constructor(
+        address[] memory _initialOwners, 
+        uint256[] memory _weights, 
+        uint256 _threshold
+    ) {
+        require(_initialOwners.length > 0, "At least one owner required");
+        require(
+            _initialOwners.length == _weights.length, 
+            "Owners and weights must match"
+        );
+        require(
+            _initialOwners.length <= MAX_OWNERS, 
+            "Too many owners"
+        );
 
-    // Constructor to initialize the Safe
-    constructor(address[] memory _owners, uint256[] memory _weights, uint256 _threshold) {
-        require(_owners.length == _weights.length, "Owners and weights length mismatch");
-        require(_owners.length > 0, "Owners required");
-        require(_threshold > 0 && _threshold <= _owners.length, "Invalid threshold");
+        uint256 initialTotalWeight = 0;
+        for (uint256 i = 0; i < _initialOwners.length; i++) {
+            address owner = _initialOwners[i];
+            uint256 weight = _weights[i];
 
-        for (uint256 i = 0; i < _owners.length; i++) {
-            owners[_owners[i]] = _weights[i];
+            require(
+                weight >= MIN_WEIGHT && weight <= MAX_WEIGHT, 
+                "Invalid owner weight"
+            );
+            require(!owners[owner].exists, "Duplicate owner");
+
+            owners[owner] = Owner({
+                weight: weight,
+                exists: true,
+                joinedAt: block.timestamp
+            });
+            ownerAddresses.push(owner);
+            initialTotalWeight += weight;
+
+            emit OwnerAdded(owner, weight, initialTotalWeight);
         }
+
+        totalWeight = initialTotalWeight;
+        
+        require(
+            _threshold > 0 && _threshold <= initialTotalWeight, 
+            "Invalid threshold"
+        );
         threshold = _threshold;
     }
 
-    // Add a new owner with a specified weight
-    function addOwner(address owner, uint256 weight) public onlyOwner {
-        require(owners[owner] == 0, "Owner already exists");
-        owners[owner] = weight;
-        emit OwnerAdded(owner, weight);
+    // Enhanced receive function
+    receive() external payable {
+        assets[address(0)] += msg.value;
+        emit Deposited(msg.sender, address(0), msg.value);
+    }
+
+    // Propose a new transaction
+    function proposeTransaction(
+        address destination, 
+        uint256 value, 
+        bytes memory data
+    ) public onlyOwner returns (uint256 transactionId) {
+        require(destination != address(0), "Invalid destination");
+
+        transactionId = transactions.length;
+        Transaction storage newTransaction = transactions.push();
+        
+        newTransaction.destination = destination;
+        newTransaction.value = value;
+        newTransaction.data = data;
+        newTransaction.createdAt = block.timestamp;
+        newTransaction.proposer = msg.sender;
+        newTransaction.approvals = 0;
+
+        userTransactions[msg.sender].push(transactionId);
+
+        emit TransactionProposed(
+            transactionId, 
+            msg.sender, 
+            destination, 
+            value
+        );
+
+        // Automatically approve by proposer
+        _approveTransaction(transactionId);
+    }
+
+    // Internal transaction approval
+    function _approveTransaction(uint256 transactionId) internal {
+        Transaction storage txn = transactions[transactionId];
+        
+        require(!txn.confirmations[msg.sender], "Already confirmed");
+        
+        uint256 ownerWeight = owners[msg.sender].weight;
+        txn.confirmations[msg.sender] = true;
+        txn.approvals += ownerWeight;
+
+        emit TransactionApproved(
+            transactionId, 
+            msg.sender, 
+            ownerWeight, 
+            txn.approvals
+        );
+
+        // Attempt execution if threshold met
+        if (txn.approvals >= threshold) {
+            _executeTransaction(transactionId);
+        }
+    }
+
+    // Approve a transaction
+    function approveTransaction(
+        uint256 transactionId
+    ) public 
+      onlyOwner 
+      validTransaction(transactionId) 
+    {
+        _approveTransaction(transactionId);
+    }
+
+    // Internal transaction execution
+    function _executeTransaction(
+        uint256 transactionId
+    ) internal nonReentrant {
+        Transaction storage txn = transactions[transactionId];
+        
+        require(!txn.executed, "Already executed");
+        require(txn.approvals >= threshold, "Insufficient approvals");
+
+        txn.executed = true;
+
+        (bool success, bytes memory returnData) = txn.destination.call{
+            value: txn.value
+        }(txn.data);
+
+        if (success) {
+            emit TransactionExecuted(transactionId, msg.sender);
+        } else {
+            txn.executed = false;
+            emit ExecutionFailure(transactionId, returnData);
+        }
+    }
+
+    // Add a new owner with weight
+    function addOwner(
+        address newOwner, 
+        uint256 weight
+    ) public onlyOwner validOwner(newOwner) {
+        require(!owners[newOwner].exists, "Owner already exists");
+        require(
+            weight >= MIN_WEIGHT && weight <= MAX_WEIGHT, 
+            "Invalid weight"
+        );
+        require(
+            ownerAddresses.length < MAX_OWNERS, 
+            "Max owners reached"
+        );
+
+        owners[newOwner] = Owner({
+            weight: weight,
+            exists: true,
+            joinedAt: block.timestamp
+        });
+        ownerAddresses.push(newOwner);
+        
+        totalWeight += weight;
+
+        // Adjust threshold if necessary
+        if (threshold > totalWeight) {
+            threshold = totalWeight;
+        }
+
+        emit OwnerAdded(newOwner, weight, totalWeight);
     }
 
     // Remove an owner
     function removeOwner(address owner) public onlyOwner {
-        require(owners[owner] > 0, "Owner does not exist");
+        require(owners[owner].exists, "Not an owner");
+        require(ownerAddresses.length > 1, "Cannot remove last owner");
+
+        uint256 ownerWeight = owners[owner].weight;
+        totalWeight -= ownerWeight;
+
         delete owners[owner];
-        emit OwnerRemoved(owner);
-    }
 
-    // Update the threshold value
-    function setThreshold(uint256 newThreshold) public onlyOwner {
-        require(newThreshold > 0, "Threshold must be greater than 0");
-        threshold = newThreshold;
-        emit ThresholdUpdated(threshold);
-    }
-
-    // Deposit assets into the Safe
-    receive() external payable {
-        assets[msg.sender] += msg.value;
-        emit Deposited(msg.sender, msg.value);
-    }
-
-    // Transfer assets out of the Safe (requires owner approvals)
-    function transfer(address destination, uint256 value, bytes memory data) public onlyOwner {
-        require(destination != address(0), "Invalid recipient");
-        require(value > 0, "Invalid value");
-
-        uint256 transactionId = transactions.length;
-
-        transactions.push(Transaction({
-            destination: destination,
-            value: value,
-            data: data,
-            approvals: 0,
-            executed: false
-        }));
-        emit Transferred(destination, value);
-        emit ConfirmTransaction(transactionId);
-    }
-
-    // Approve a transaction
-    function approveTransaction(uint256 transactionId) public onlyOwner {
-        require(transactionId < transactions.length, "Transaction does not exist");
-        require(!confirmations[transactionId][msg.sender], "Transaction already confirmed");
-
-        confirmations[transactionId][msg.sender] = true;
-        transactions[transactionId].approvals += owners[msg.sender];
-
-        emit TransactionApproved(transactionId, msg.sender);
-        executeTransaction(transactionId);
-    }
-
-    // Execute a transaction if it has reached the required threshold of approvals
-    function executeTransaction(uint256 transactionId) public onlyOwner notExecuted(transactionId) {
-        require(transactionId < transactions.length, "Transaction does not exist");
-        require(transactions[transactionId].approvals >= threshold, "Threshold not reached");
-
-        Transaction storage txn = transactions[transactionId];
-        txn.executed = true;
-
-        (bool success, ) = txn.destination.call{value: txn.value}(txn.data);
-        if (success) {
-            emit TransactionExecuted(transactionId);
-        } else {
-            emit ExecutionFailure(transactionId);
-            txn.executed = false;
+        // Remove from owner addresses
+        for (uint256 i = 0; i < ownerAddresses.length; i++) {
+            if (ownerAddresses[i] == owner) {
+                ownerAddresses[i] = ownerAddresses[ownerAddresses.length - 1];
+                ownerAddresses.pop();
+                break;
+            }
         }
+
+        // Adjust threshold if necessary
+        if (threshold > totalWeight) {
+            threshold = totalWeight;
+        }
+
+        emit OwnerRemoved(owner, ownerWeight, totalWeight);
     }
 
-    // Helper function to check if an address is an owner
-    function isOwner(address account) public view returns (bool) {
-        return owners[account] > 0;
+    // Update threshold
+    function updateThreshold(uint256 newThreshold) public onlyOwner {
+        require(
+            newThreshold > 0 && newThreshold <= totalWeight, 
+            "Invalid threshold"
+        );
+
+        uint256 oldThreshold = threshold;
+        threshold = newThreshold;
+
+        emit ThresholdUpdated(oldThreshold, newThreshold);
+    }
+
+    // View functions for transparency
+    function getOwners() public view returns (address[] memory) {
+        return ownerAddresses;
+    }
+
+    function getOwnerDetails(
+        address owner
+    ) public view returns (
+        uint256 weight, 
+        bool exists, 
+        uint256 joinedAt
+    ) {
+        Owner memory ownerDetails = owners[owner];
+        return (
+            ownerDetails.weight,
+            ownerDetails.exists,
+            ownerDetails.joinedAt
+        );
+    }
+
+    function getTransactionCount() public view returns (uint256) {
+        return transactions.length;
+    }
+
+    function getUserTransactions(
+        address user
+    ) public view returns (uint256[] memory) {
+        return userTransactions[user];
     }
 }
