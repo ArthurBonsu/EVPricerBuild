@@ -68,8 +68,12 @@ const useTransactions = async ({ nonce, amount, tokenname, symbol, logoUri }: Sw
         setAddress(userAddress);
 
         // Update ABI type
+         
+        // functions under Swap Contract 
         const SwapContract = new web3.eth.Contract(TokenSwapcontractABI as any, TokenSwapcontractAddress);
+         const swapTXA = {}
 
+        
         const depositAmount = web3.utils.toBN(amount);
         try {
           const swapTx = await SwapContract.methods.swapTKA(depositAmount).send({ from: userAddress });

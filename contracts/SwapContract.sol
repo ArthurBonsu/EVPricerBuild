@@ -26,6 +26,14 @@ constructor(address _tokenABC, address _tokenXYZ, address _uniswapRouter) {
     tokenXYZ.approve(address(this), tokenABC.totalSupply());
 }
 
+function setTokenAddresses(address _tokenA, address _tokenB) external onlyOwner {
+    tokenAAddress = _tokenA;
+    tokenBAddress = _tokenB;
+}
+
+function getTokenAddresses() external view returns (address, address) {
+    return (tokenAAddress, tokenBAddress);
+}
 modifier onlyAdmin() {
     require(payable(msg.sender) == admin, "Only admin can call this function");
     _;
@@ -46,6 +54,35 @@ function setFees(uint256 _Fees) public onlyAdmin {
 function getFees() public view onlyAdmin returns (uint256) {
     return fees;
 }
+
+
+  function swapTokens(address tokenIn, address tokenOut, uint256 amountIn) public {
+        require(tokenIn != tokenOut, "Tokens must be different");
+        require(amountIn > 0, "Amount must be greater than zero");
+
+        // Get the pair address
+        address pair = uniswapRouter.pairFor(tokenIn, tokenOut);
+
+        // Check if the pair exists
+        require(pair != address(0), "Pair does not exist");
+
+        // Approve the router to spend the tokens
+        ERC20(tokenIn).approve(address(uniswapRouter), amountIn);
+
+        // Perform the swap
+        uint256[] memory amounts = uniswapRouter.swapExactTokensForTokens(
+            amountIn,
+            0,
+            [tokenIn, tokenOut],
+            msg.sender,
+            block.timestamp
+        );
+
+        // Emit the event
+        emit TokenSwapped(amountIn, amounts[1]);
+    }
+
+    event TokenSwapped(uint256 amountIn, uint256 amountOut);
 
 event eventswapTKA(uint256 indexed swapTKAcounter, uint256 indexed initialamount, uint256 indexed amountafter);
 

@@ -1,9 +1,9 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "./Transaction.sol";
+import "./TransactionContract.sol";
 
-contract EnhancedDAO is AccessControl {
+contract DAO is AccessControl {
     // Define roles
     bytes32 public constant PROPOSER_ROLE = keccak256("PROPOSER_ROLE");
     bytes32 public constant APPROVER_ROLE = keccak256("APPROVER_ROLE");

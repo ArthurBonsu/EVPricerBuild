@@ -37,6 +37,6 @@
     "app/NextAuthFiles.ts",
     "app/pages/api/auth/route.js",
     "pages/**/*"
-  ],
+, "truffle-config.js"  ],
   "exclude": ["node_modules"]
 }

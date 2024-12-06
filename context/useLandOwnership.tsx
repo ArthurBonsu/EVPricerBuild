@@ -43,7 +43,7 @@ let key:string = '';
       
     export  const datedTransactions = Array<TransactionDesc>();
  
-    const usePortFolioContext = () => {
+    const useLandOwnershipContext = () => {
 
         const mapKeygetter = ( ) => {
       const groupsheetkeys = Object.keys(groupSheet);
@@ -242,7 +242,7 @@ let key:string = '';
   } 
  }
   
-  export default usePortFolioContext
+  export default useLandOwnershipContext;
        
 
   
