@@ -65,7 +65,10 @@ const SwapTransfer: React.FC<SwapTransferProps> = () => {
   const onSubmit = async (data: SwapTransferFormValues) => {
     setIsSubmitting(true);
     try {
-      // Add your submission logic here
+     // handle form submission
+     // submit transactions to the smart contract
+     // update the transaction state
+     // provide button to make swap transfer 
       console.log(data);
     } catch (error) {
       console.error(error);

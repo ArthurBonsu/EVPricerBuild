@@ -1,254 +1,146 @@
+import React, { useEffect, useState } from "react";
+import { ethers } from "ethers";
+import { BlockchainTransaction } from "types/ethers";
 
-import { dateAtTime,  timeAgo,   dateFormat, DateType } from 'utils/formatDate'
-import { useState } from 'react'
-import { RiEmotionNormalLine } from 'react-icons/ri'
-let maxtimestamp; let timeoftimestamp: string; 
-let groupSheet: GroupedSheetEntery = {};
-let key:string = '';
-      
-      export type TokenSet ={
-        ETH: string
-        BTC: string 
-        XRP : string 
+const contractABI = "";
+const contractAddress = "";
+
+const { ethereum } = window;
+
+const useLandPaymentContext = () => {
+  const createEthereumContract = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = await provider.getSigner();
+    const landPaymentContract = new ethers.Contract(contractAddress, contractABI, signer);
+    return landPaymentContract;
+  };
+
+  const [formData, setFormData] = useState({
+    landAddress: "",
+    amount: "",
+    message: "",
+  });
+
+  const [currentAccount, setCurrentAccount] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [transactionCount, setTransactionCount] = useState(localStorage.getItem("transactionCount"));
+  const [transactions, setTransactions] = useState([]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
+    setFormData((prevState) => ({ ...prevState, [name]: e.target.value }));
+  };
+
+  const getAllTransactions = async () => {
+    try {
+      if (ethereum) {
+        const landPaymentContract = await createEthereumContract();
+        const availableTransactions = await landPaymentContract.getAllTransactions();
+        const structuredTransactions = availableTransactions.map((transaction: BlockchainTransaction) => ({
+          landAddress: transaction.landAddress,
+          sender: transaction.sender,
+          amount: transaction.amount,
+          message: transaction.message,
+          timestamp: new Date(transaction.timestamp.toNumber() * 1000).toLocaleString(),
+        }));
+        console.log(structuredTransactions);
+        setTransactions(structuredTransactions);
+      } else {
+        console.log("Ethereum is not present");
       }
-     
-      export type TransactionDesc = {
-        timestamp: string
-        transaction_type: string       
-        token: string 
-        amount: string
-       
-      
+    } catch (error) {
+      console.log(error);
     }
-      
-    export type TokenTypeOptions = Record<string, string>
+  };
 
-     export interface GroupedRows  {
-        count: number 
-        tokenlists: TransactionDesc[]
-        date: string 
-        tokensettaken : TokenSet
-
-     }
-
-     const tokentype: Record<string, 'ETH' | 'BTC' | 'XRP'> = {
-      ETH: 'ETH',
-      BTC: 'BTC',
-      XRP: 'XRP',
-    }
-  
-     
-    export  type  GroupedSheetEntery  = Record<string, TransactionDesc[]>
-     export type setRowItem = Record<string, TransactionDesc> 
-      
-    export  const datedTransactions = Array<TransactionDesc>();
- 
-    const useLandOwnershipContext = () => {
-
-        const mapKeygetter = ( ) => {
-      const groupsheetkeys = Object.keys(groupSheet);
-       groupsheetkeys.map ((item, index) => {
-       key = item; 
-      })
-      
-        }
- 
-        const getMaxtimestampToken = () => {
-          // the maximum timestamp
-          const listoftimestamp = groupSheet[key];
-          const maximumtimestamp = listoftimestamp.reduce((prevtransaction, curtransaction) => {
-            return prevtransaction['timestamp'] > curtransaction['timestamp'] ? prevtransaction : curtransaction;
-          });
-          return maximumtimestamp.timestamp;
-        }
-        
-        const getMaxtimestampPerToken = (tokentypeselected: string) => {
-          // the maximum timestamp per token
-          const listoftimestamp = groupSheet[key];
-          const selectedTokens = listoftimestamp.filter(({ token }) => token === tokentypeselected);
-          const maximumtimestamp = selectedTokens.reduce((prevtransaction, curtransaction) => {
-            return prevtransaction['timestamp'] > curtransaction['timestamp'] ? prevtransaction : curtransaction;
-          });
-          return maximumtimestamp.timestamp;
-        }
-        
-
-        const selectTokenType = (tokenexpected: string) => {
-          const tokenoptions: TokenSet = { ETH: "ETH", BTC: "BTC", XRP: "XRP" }
-          const tokentypeselected = Object.keys(tokenoptions).find((token) => tokenoptions[token as keyof TokenSet] === tokenexpected)
-          return tokentypeselected
-        }
-        
-                
-        const getAllTokenOfParticularType = (tokenchoice: string) => {
-          const chosentokentype = selectTokenType(tokenchoice);
-          const tokensofXType = groupSheet[key].filter(({ token }) => token === chosentokentype)
-          return tokensofXType;
-        }
-        
-        const getLatestTokenOfType = (tokenchoice: string) => {
-          const newtime = getMaxtimestampPerToken(tokenchoice);
-          const alltokensoftype = getAllTokenOfParticularType(tokenchoice);
-          const foundToken = alltokensoftype.find(({ timestamp }) => timestamp === newtime);
-          return foundToken ? foundToken : null;
-        }
-        
-        const getTokensAtLatestTimestamp  = (tokenchoice: string) => {
-          // for multiple tokens that are all at latest timestamp
-          const newtime = getMaxtimestampPerToken(tokenchoice);
-          const alltokensoftype = getAllTokenOfParticularType(tokenchoice);
-          const latestTokens = alltokensoftype.filter(({ timestamp }) => timestamp === newtime);
-          return latestTokens;
-        }
-         
-         const getLatestTokenOfAllThreeTypes = () => {
-          const BTCLatestToken = getLatestTokenOfType('BTC');
-          const ETHLatestToken = getLatestTokenOfType('ETH');
-          const XRPLatestToken = getLatestTokenOfType('XRP');
-          
-           return {BTCLatestToken, ETHLatestToken, XRPLatestToken } 
-         }
-         const getPortFolioValueOfTokenofAllThreeTypes = () => 
-         {
-           const BTCPVOfParticularToken = getPortFolioValueOfSpecifiedToken('BTC');
-                   const ETHVOfParticularToken = getPortFolioValueOfSpecifiedToken('ETH');
-                   const XRPVOfParticularToken = getPortFolioValueOfSpecifiedToken('XRP');
-           
-         return  {BTCPVOfParticularToken, ETHVOfParticularToken, XRPVOfParticularToken}  ;
-         }
-     
-         const getWithdrawnAmountOfTokenType  = (token: string ) => 
-         {
-          let withdrawnvalue = 0;  
-        const alltokens = groupSheet[key];
-        const selectedTokens =   alltokens.filter(({ token }) => token === token)
-      const transactiontypeset =      selectedTokens.filter(({ transaction_type}) => transaction_type === 'WITHDRAWAL')
-      const sum = selectedTokens.reduce((summation , currentamount) => {
-        withdrawnvalue =   withdrawnvalue + Number(currentamount.amount);
-    
-            return  summation;
-      })
-
-       return withdrawnvalue; 
+  const checkIfWalletIsConnect = async () => {
+    try {
+      if (!ethereum) return alert("Please install MetaMask.");
+      const accounts = await ethereum.request({ method: "eth_accounts" });
+      if (accounts.length) {
+        setCurrentAccount(accounts[0]);
+        getAllTransactions();
+      } else {
+        console.log("No accounts found");
       }
-           
-        
-      const getDepositedAmountOfTokenType  = (token: string ) => 
-      {
-        let depositvalue = 0;  
-       
-        const alltokens = groupSheet[key];
-        const selectedTokens =   alltokens.filter(({ token }) => token === token)
-        const transactiontypeset = selectedTokens.filter(({ transaction_type}) => transaction_type === 'DEPOSIT')
-        const sum = selectedTokens.reduce((summation , currentamount) => {
-        depositvalue =   depositvalue + Number(currentamount.amount);
-    
-            return  summation;
-      })
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-       return depositvalue; 
-   }
-    //specified token LP
-   
-    const getPortFolioValueOfSpecifiedToken = (token: string) => 
-   {
-     const withdrawalamount = getWithdrawnAmountOfTokenType( token);
-     const depositedamount   = getDepositedAmountOfTokenType(token); 
-      const balancedamount = withdrawalamount > depositedamount? withdrawalamount - depositedamount : depositedamount -withdrawalamount ;
-     
-  return  {balancedamount, withdrawalamount, depositedamount}  ;
+  const checkIfTransactionsExists = async () => {
+    try {
+      if (ethereum) {
+        const landPaymentContract = await createEthereumContract();
+        const currentTransactionCount = await landPaymentContract.getTransactionCount();
+        window.localStorage.setItem("transactionCount", currentTransactionCount);
+      }
+    } catch (error) {
+      console.log(error);
+      throw new Error("No ethereum object");
+    }
+  };
+
+  const connectWallet = async () => {
+    try {
+      if (!ethereum) return alert("Please install MetaMask.");
+      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+      setCurrentAccount(accounts[0]);
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+      throw new Error("No ethereum object");
+    }
+  };
+
+  const sendTransaction = async () => {
+    try {
+      if (ethereum) {
+        const { landAddress, amount, message } = formData;
+        const landPaymentContract = await createEthereumContract();
+        const parsedAmount = ethers.utils.parseEther(amount);
+        setIsLoading(true);
+        await ethereum.request({
+          method: "eth_sendTransaction",
+          params: [{
+            from: currentAccount,
+            to: landAddress,
+            gas: "0x5208",
+            value: ethers.utils.formatEther(parsedAmount),
+          }],
+        });
+        const transactionHash = await landPaymentContract.payForLand(landAddress, parsedAmount, message);
+        setIsLoading(true);
+        console.log(`Loading - ${transactionHash.hash}`);
+        await transactionHash.wait();
+        console.log(`Success - ${transactionHash.hash}`);
+        setIsLoading(false);
+        const transactionsCount = await landPaymentContract.getTransactionCount();
+        setTransactionCount(transactionsCount.toNumber());
+        window.location.reload();
+      } else {
+        console.log("No ethereum object");
+      }
+    } catch (error) {
+      console.log(error);
+      throw new Error("No ethereum object");
+    }
+  };
+
+  useEffect(() => {
+    checkIfWalletIsConnect();
+    checkIfTransactionsExists();
+  }, [transactionCount]);
+
+  return {
+    transactionCount,
+    connectWallet,
+    transactions,
+    currentAccount,
+    isLoading,
+    sendTransaction,
+    handleChange,
+    formData,
+  }
 }
 
-
-        //getLatestTokenOfAllThreeTypes
-        //getPortfolioPerToken     
-
-          const getPortFolioWithDate = (date: DateType, tokenstring: string ) => 
-          {        
-             const dateset = dateAtTime(date);
-            const alltokens = groupSheet[key];
-
-            const selectedTokens =   alltokens.filter(({ token }) => token  === tokenstring)
-            selectedTokens.forEach((transactions) => {
-             
-              const datefromTimestamp =   dateAtTime(transactions.timestamp);
-              if (dateset  == datefromTimestamp){
-                 datedTransactions.push(transactions);
-                return datedTransactions; 
-              }
-            });
-              return datedTransactions;
-           
-            }
-
-
-
-              const getDatedWithdrawnAmountOfTokenType  = (date: DateType, token: string ) => 
-              {
-
-               let withdrawnvalue = 0;  
-             const datedtokens = getPortFolioWithDate(date, token); 
-             const selectedTokens =   datedtokens.filter(({ token }) => token === token)
-           const transactiontypeset =      selectedTokens.filter(({ transaction_type}) => transaction_type === 'WITHDRAWAL')
-           const sum = selectedTokens.reduce((summation , currentamount) => {
-             withdrawnvalue =   withdrawnvalue + Number(currentamount.amount);
-         
-                 return  summation;
-           });
-      
-            return withdrawnvalue; 
-           }
-                
-             
-           const getDatedDepositedAmountOfTokenType  = (date: DateType,token: string ) => 
-           {
-             let depositvalue = 0;  
-            
-             const datedtokens = getPortFolioWithDate(date, token); 
-             const selectedTokens =   datedtokens.filter(({ token }) => token === token)
-           const transactiontypeset =      selectedTokens.filter(({ transaction_type}) => transaction_type === 'DEPOSIT')
-           const sum = selectedTokens.reduce((summation , currentamount) => {
-             depositvalue =   depositvalue + Number(currentamount.amount);
-         
-                 return  summation;
-           });
-      
-            return depositvalue; 
-        }
-               //dated portfolio with token
-        const getDatedPortFolioValueOfTokenType = (date: DateType, token: string) => 
-        {
-          const datedwithdrawalamount = getDatedWithdrawnAmountOfTokenType( date,token);
-          const dateddepositedamount   = getDatedDepositedAmountOfTokenType(date, token); 
-           const datedbalancedamount = datedwithdrawalamount > dateddepositedamount? datedwithdrawalamount - dateddepositedamount : dateddepositedamount -datedwithdrawalamount ;
-          
-       return  {datedbalancedamount, datedwithdrawalamount, dateddepositedamount} ;
-      }
-        // All three types
-      const getDatedPortFolioValueOfAllThreeTypes = (date: DateType) => 
-      { 
-        const BTCDatedPV = getDatedPortFolioValueOfTokenType(date,'BTC');
-        const ETHDatedPV = getDatedPortFolioValueOfTokenType(date,'ETH');
-        const XRPDatedPV = getDatedPortFolioValueOfTokenType(date, 'XRP');
-        
-     return  {BTCDatedPV, ETHDatedPV, XRPDatedPV} ;
-    }
-  
-  return {mapKeygetter, getMaxtimestampToken,  getMaxtimestampPerToken,  selectTokenType,
-  getAllTokenOfParticularType,  getLatestTokenOfType,  getLatestTokenOfAllThreeTypes,
-  getWithdrawnAmountOfTokenType,  getDepositedAmountOfTokenType,  getPortFolioValueOfSpecifiedToken,
-  getPortFolioWithDate,  getDatedWithdrawnAmountOfTokenType,  getDatedDepositedAmountOfTokenType,
-  getDatedPortFolioValueOfTokenType,getDatedPortFolioValueOfAllThreeTypes, getPortFolioValueOfTokenofAllThreeTypes
-  } 
- }
-  
-  export default useLandOwnershipContext;
-       
-
-  
-
-
-  
-
-
-     
+export default useLandPaymentContext;
