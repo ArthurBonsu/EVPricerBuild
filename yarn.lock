@@ -19670,6 +19670,11 @@ wcwidth@^1.0.1:
   dependencies:
     defaults "^1.0.3"
 
+web-eth@^0.0.1-security:
+  version "0.0.1-security"
+  resolved "https://registry.yarnpkg.com/web-eth/-/web-eth-0.0.1-security.tgz#b7895da6b6e604ba47067bc6ede36c66730e15bc"
+  integrity sha512-1MFveeL2qdVi3F1Djp4v/JDUiWGIWWIfHGdc6ca76391wmA1L4ONpieZ119LfkQ7zWJQazYbOw0xnZCuul0DUg==
+
 web-streams-polyfill@^3.2.1:
   version "3.3.2"
   resolved "https://registry.npmjs.org/web-streams-polyfill/-/web-streams-polyfill-3.3.2.tgz"

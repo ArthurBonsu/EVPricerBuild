@@ -1,6 +1,6 @@
 import { ExecOptionsWithStringEncoding } from "child_process"
 import TXRejectedError from "ganache-core/lib/utils/txrejectederror"
-import { Transaction } from "web3-eth/types"
+
 import ethers from 'ethers'
 import { Icon, IconProps, Image } from '@chakra-ui/react';
 import { Icons } from "next/dist/lib/metadata/types/metadata-types";

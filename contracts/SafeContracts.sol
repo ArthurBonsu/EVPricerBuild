@@ -9,7 +9,7 @@ using SafeMath for uint256;
 // Enhanced owner structure
 struct Owner {
     uint256 weight;
-    bool exists;
+    bool exists;s
     uint256 joinedAt;
 }
 

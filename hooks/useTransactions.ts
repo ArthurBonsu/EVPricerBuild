@@ -6,13 +6,14 @@ import { useEthersStore } from 'stores/ethersStore';
 import { SwapTokenTransaction } from 'types/ethers';
 import { TokenDepositvalue, TokenType, TokenTypesDetails, SwapTransactionType } from 'types/index';
 import { useSafeStore } from 'stores/safeStore';
-import useLoadSafe from 'hooks/useLoadSafe'; // Import useLoadSafe
+import useLoadSafe from 'hooks/useLoadSafe';
+import { BigNumber } from 'ethers'; // Import BigNumber from ethers
 
+// Import useLoadSafe
 const TokenSwapcontractABI: any[] = []; // Define ABI placeholder
-const TokenSwapcontractAddress = "";
-
-// Initialize Web3 provider
+const TokenSwapcontractAddress = ""; // Initialize Web3 provider
 let web3: Web3 | null = null;
+
 if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
   web3 = new Web3(window.ethereum);
 }
@@ -40,8 +41,10 @@ interface useTransactionProps {
   symbol: string;
   logoUri: string;
 }
+
 // useTransactions is for token sending
 const useTransactions = async ({ nonce, amount, tokenname, symbol, logoUri }: SwapTransactionType) => {
+ 
   const [tokentxhash, settokentxhash] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const address = useEthersStore((state) => state.address);
@@ -50,12 +53,7 @@ const useTransactions = async ({ nonce, amount, tokenname, symbol, logoUri }: Sw
   const { onConnect, onDisconnect } = useEthers();
 
   // Use useLoadSafe instead of useSafeSdk
-  const {
-   
-    approveTransfer,
-    rejectTransfer,
-    isLoading: safeLoading,
-  } = useLoadSafe({ safeAddress: TokenSwapcontractAddress, userAddress: address });
+  const { approveTransfer, rejectTransfer, isLoading: safeLoading, } = useLoadSafe({ safeAddress: TokenSwapcontractAddress, userAddress: address });
 
   useEffect(() => {
     const init = async () => {
@@ -66,15 +64,11 @@ const useTransactions = async ({ nonce, amount, tokenname, symbol, logoUri }: Sw
       if (accounts && accounts.length > 0) {
         const userAddress = accounts[0];
         setAddress(userAddress);
-
         // Update ABI type
-         
-        // functions under Swap Contract 
+        // functions under Swap Contract
         const SwapContract = new web3.eth.Contract(TokenSwapcontractABI as any, TokenSwapcontractAddress);
-         const swapTXA = {}
-
-        
-        const depositAmount = web3.utils.toBN(amount);
+        const swapTXA = {}
+        const depositAmount = BigNumber.from(amount); // Update this line
         try {
           const swapTx = await SwapContract.methods.swapTKA(depositAmount).send({ from: userAddress });
           const txData = swapTx.transactionHash;
@@ -84,7 +78,7 @@ const useTransactions = async ({ nonce, amount, tokenname, symbol, logoUri }: Sw
             tokenname,
             symbol,
             signer: userAddress,
-            txdata: swapTx.raw,
+            txdata: swapTx.logs[0].data,
             logoUri,
           };
           settokentxhash(txData);
@@ -95,7 +89,7 @@ const useTransactions = async ({ nonce, amount, tokenname, symbol, logoUri }: Sw
             tokenname,
             symbol,
             signer: userAddress,
-            txdata: swapTx.raw,
+            txdata: swapTx.logs[0].data,
             logoUri,
             swapTransaction,
           };
@@ -132,4 +126,3 @@ const useTransactions = async ({ nonce, amount, tokenname, symbol, logoUri }: Sw
 };
 
 export default useTransactions;
-

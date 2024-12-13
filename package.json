@@ -222,6 +222,7 @@
     "url": "^0.11.3",
     "util": "^0.12.5",
     "vm-browserify": "^1.1.2",
+    "web-eth": "^0.0.1-security",
     "web-streams-polyfill": "^3.2.1",
     "web3": "^4.15.0",
     "web3modal": "^1.9.12",
