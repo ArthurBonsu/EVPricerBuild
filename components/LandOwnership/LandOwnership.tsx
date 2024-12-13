@@ -16,6 +16,9 @@ import { useRouter } from 'next/router';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import AppModal from '../AppModal/AppModal';
 import useLandOwnershipContext from 'context/useLandOwnership';
+import useLoadSafe from 'hooks/useLoadSafe';
+import useTransactions from 'hooks/useTransactions';
+import useSafeDetailsAndSetup from 'hooks/useSafeDetails.ts';
 
 export interface LandOwnershipProps {
   landId: number;
@@ -35,27 +38,28 @@ export const LandOwnership: React.FC<LandOwnershipProps> = ({
 }) => {
   const router = useRouter();
   const disclosure = useDisclosure();
+  const { data: session } = useSession();
+  const { isLoading, safe, checkIsSigned, executeSafeTransaction } =
+    useLoadSafe({
+      safeAddress: '0x...',
+      userAddress: session?.user?.address,
+    });
+  const { sendTransaction, handleChange, formData } = useLandOwnershipContext();
   const {
-    mapKeygetter,
-    getMaxtimestampToken,
-    getMaxtimestampPerToken,
-    selectTokenType,
-    getAllTokenOfParticularType,
-    getLatestTokenOfType,
-    getLatestTokenOfAllThreeTypes,
-    getWithdrawnAmountOfTokenType,
-    getDepositedAmountOfTokenType,
-    getPortFolioValueOfSpecifiedToken,
-    getPortFolioWithDate,
-    getDatedWithdrawnAmountOfTokenType,
-    getDatedDepositedAmountOfTokenType,
-    getDatedPortFolioValueOfTokenType,
-    getDatedPortFolioValueOfAllThreeTypes,
-    getPortFolioValueOfTokenofAllThreeTypes,
-  } = useLandOwnershipContext();
+    setUpMultiSigSafeAddress,
+    addAddressToSafe,
+    getSafeInfo,
+    executeTransaction,
+    getAllTransactions,
+    isTxnExecutable,
+    proposeTransaction,
+    approveTransfer,
+    rejectTransfer,
+  } = useSafeDetailsAndSetup;
 
   const [isLandOwner, setIsLandOwner] = useState(false);
   const [isLandAvailable, setIsLandAvailable] = useState(false);
+  const [transactionHash, setTransactionHash] = useState('');
 
   useEffect(() => {
     if (landOwner === '0x...') {
@@ -66,16 +70,55 @@ export const LandOwnership: React.FC<LandOwnershipProps> = ({
     }
   }, [landOwner, landPrice]);
 
+  const registerLand = async () => {
+    try {
+      const landId = await setUpMultiSigSafeAddress('0x...');
+      console.log(`Land registered with ID: ${landId}`);
+    } catch (error) {
+      console.error('Error registering land:', error);
+    }
+  };
+
   const buyLand = async () => {
-    // implement buy land logic here
+    try {
+      const transaction = await executeSafeTransaction({
+        landId,
+        landOwner,
+        landLocation,
+        landSize,
+        landPrice,
+      });
+      setTransactionHash(transaction.txhash);
+      console.log(`Land purchased with transaction hash: ${transactionHash}`);
+    } catch (error) {
+      console.error('Error buying land:', error);
+    }
   };
 
   const transferLand = async () => {
-    // implement transfer land logic here
+    try {
+      const newOwner = '0x...';
+      await addAddressToSafe(landId, newOwner);
+      console.log(`Land transferred to new owner: ${newOwner}`);
+    } catch (error) {
+      console.error('Error transferring land:', error);
+    }
   };
 
   const updateLandPrice = async () => {
-    // implement update land price logic here
+    try {
+      const newPrice = 100;
+      await executeTransaction({
+        landId,
+        landOwner,
+        landLocation,
+        landSize,
+        landPrice: newPrice,
+      });
+      console.log(`Land price updated to: ${newPrice}`);
+    } catch (error) {
+      console.error('Error updating land price:', error);
+    }
   };
 
   return (
@@ -83,17 +126,8 @@ export const LandOwnership: React.FC<LandOwnershipProps> = ({
       <Button {...rest} onClick={disclosure.onOpen}>
         View Land Details
       </Button>
-      <AppModal
-        disclosure={disclosure}
-        title="Land Details"
-        modalSize="sm"
-      >
-        <Flex
-          justify="space-between"
-          py={6}
-          alignItems="center"
-          flexDirection="row"
-        >
+      <AppModal disclosure={disclosure} title="Land Details" modalSize="sm">
+        <Flex justify="space-between" py={6} alignItems="center" flexDirection="row">
           {isLandOwner && (
             <Button
               isLoading={false}
@@ -128,10 +162,51 @@ export const LandOwnership: React.FC<LandOwnershipProps> = ({
           >
             Update Land Price
           </Button>
-        </Flex>
-      </AppModal>
-    </div>
+         <Button
+          isLoading={false}
+          isDisabled={false}
+          onClick={async () => {
+            await registerLand();
+            disclosure.onClose();
+          }}
+        >
+          Register Land
+        </Button>
+        <Button
+          isLoading={false}
+          isDisabled={false}
+          onClick={async () => {
+            await sendTransaction();
+            disclosure.onClose();
+          }}
+        >
+          Send Transaction
+        </Button>
+      </Flex>
+      <Flex justify="space-between" py={6} alignItems="center" flexDirection="row">
+        <input
+          type="text"
+          value={formData.landAddress}
+          onChange={(e) => handleChange(e, 'landAddress')}
+          placeholder="Land Address"
+        />
+        <input
+          type="number"
+          value={formData.amount}
+          onChange={(e) => handleChange(e, 'amount')}
+          placeholder="Amount"
+        />
+        <input
+          type="text"
+          value={formData.message}
+          onChange={(e) => handleChange(e, 'message')}
+          placeholder="Message"
+        />
+      </Flex>
+    </AppModal>
+  </div>
+  
   );
-};
-
-export default LandOwnership;
+  };
+  
+  export default LandOwnership;
