@@ -325,6 +325,7 @@ const useTransactionContext = () => {
   }, [transactionCount]);
 
   return {
+    
     sendPayment,
     sendSimpleTransfer,
     transactionCount,

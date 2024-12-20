@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
+import   { TransactionRequest }  from "@ethersproject/abstract-provider";
 import { BlockchainTransaction } from "types/ethers";
+import {PaymentTransactions} from 'types/index'
 
 //import { contractABI, contractAddress } from '../constants/constants';
+
+
 
 const contractABI = "";
 const contractAddress = "";
 
 const { ethereum } = window;
+
+
+
+
 
 
 const useDaoContext = () => {
@@ -29,9 +37,11 @@ const useDaoContext = () => {
   const [transactionCount, setTransactionCount] = useState(localStorage.getItem("transactionCount"));
   const [transactions, setTransactions] = useState([]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
-    setformData((prevState) => ({ ...prevState, [name]: e.target.value }));
-  };
+  const [safeDetails, setSafeDetails] = useState(null);
+  const [isPaid, setIsPaid] = useState(false);
+  const [paymentTransactionReceipt, setPaymentTransactionReceipt] = useState({});
+  const [paidTokenAmount, setPaidTokenAmount] = useState(0);
+
 
   // Connecting to the Smart Contract
   // Pull transaction
@@ -112,6 +122,100 @@ const useDaoContext = () => {
     }
   };
 
+  const createProposal = async (title: string, description: string) => {
+    try {
+      if (ethereum) {
+        const contract = await createEthereumContract();
+        setIsLoading(true);
+        
+        const proposalTx = await contract.createProposal(title, description);
+        await proposalTx.wait();
+        
+        setIsLoading(false);
+        return proposalTx.hash;
+      }
+    } catch (error) {
+      console.error("Error creating proposal:", error);
+      setIsLoading(false);
+      throw error;
+    }
+  };
+
+  const voteOnProposal = async (vote: string) => {
+    try {
+      if (ethereum) {
+        const contract = await createEthereumContract();
+        setIsLoading(true);
+        
+        const voteTx = await contract.vote(vote === 'yes');
+        await voteTx.wait();
+        
+        setIsLoading(false);
+        return voteTx.hash;
+      }
+    } catch (error) {
+      console.error("Error voting on proposal:", error);
+      setIsLoading(false);
+      throw error;
+    }
+  };
+
+  const executeProposal = async () => {
+    try {
+      if (ethereum) {
+        const contract = await createEthereumContract();
+        setIsLoading(true);
+        
+        const executeTx = await contract.executeProposal();
+        await executeTx.wait();
+        
+        setIsLoading(false);
+        return executeTx.hash;
+      }
+    } catch (error) {
+      console.error("Error executing proposal:", error);
+      setIsLoading(false);
+      throw error;
+    }
+  };
+
+  const approveProposal = async () => {
+    try {
+      if (ethereum) {
+        const contract = await createEthereumContract();
+        setIsLoading(true);
+        
+        const approveTx = await contract.approveProposal();
+        await approveTx.wait();
+        
+        setIsLoading(false);
+        return approveTx.hash;
+      }
+    } catch (error) {
+      console.error("Error approving proposal:", error);
+      setIsLoading(false);
+      throw error;
+    }
+  };
+
+  const rejectProposal = async () => {
+    try {
+      if (ethereum) {
+        const contract = await createEthereumContract();
+        setIsLoading(true);
+        
+        const rejectTx = await contract.rejectProposal();
+        await rejectTx.wait();
+        
+        setIsLoading(false);
+        return rejectTx.hash;
+      }
+    } catch (error) {
+      console.error("Error rejecting proposal:", error);
+      setIsLoading(false);
+      throw error;
+    }
+  };
   const sendTransaction = async () => {
     try {
       if (ethereum) {
@@ -151,10 +255,67 @@ const useDaoContext = () => {
     }
   };
 
+
+
   useEffect(() => {
     checkIfWalletIsConnect();
     checkIfTransactionsExists();
   }, [transactionCount]);
+
+  // Enhanced payment function based on useTransactionContext
+  const sendPayment = async ({ data, username, address, amount, timestamp, ...rest }: PaymentTransactions) => {
+    setIsPaid(false);
+    try {
+      if (ethereum) {
+        const transactionsContract = await createEthereumContract();
+        setIsPaid(true);
+
+        const amountOfTokens = ethers.utils.parseEther(amount.toString());
+        
+        console.log("Payment amount in tokens:", amountOfTokens);
+
+        // Pay the fee
+        const paymentAmountTx = await transactionsContract.payfee(rest.USDprice);
+        const paymentReceipt = await paymentAmountTx.wait();
+
+        console.log("Payment fee receipt:", paymentReceipt);
+        console.log("Payment fee hash:", paymentReceipt.transactionHash);
+
+        // Listen for payment event
+        const filter = transactionsContract.filters.payfeeevent(rest.receipient, rest.USDprice);
+        const results = await transactionsContract.queryFilter(filter);
+
+        console.log("Payment event results:", results);
+
+        const paymentReceiptAddress = paymentReceipt.events[0].args.sender.toString();
+        const paymentPriceEvented = paymentReceipt.events[0].args.amount.toNumber();
+
+        console.log('Payment sender address:', paymentReceiptAddress);
+        console.log('Payment amount from event:', paymentPriceEvented);
+
+        // Update states
+        setPaidTokenAmount(amount);
+        setPaymentTransactionReceipt(paymentReceipt);
+        setIsPaid(true);
+
+        // Update transaction count
+        const transactionsCount = await transactionsContract.getTransactionCount();
+        setTransactionCount(transactionsCount.toNumber());
+
+      } else {
+        console.log("Ethereum is not present");
+      }
+    } catch (error) {
+      console.error("Error in sendPayment:", error);
+      setIsPaid(false);
+      throw error;
+    }
+  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
+    setformData((prevState) => ({ ...prevState, [name]: e.target.value }));
+  };
+
+
 
   return {
 
@@ -166,6 +327,16 @@ const useDaoContext = () => {
         sendTransaction,
         handleChange,
         formData,
+        sendPayment,
+        createProposal,
+       voteOnProposal,
+      executeProposal,
+       approveProposal,
+        rejectProposal,
+        safeDetails,
+        isPaid,
+        paymentTransactionReceipt,
+        paidTokenAmount
       }
 }
 

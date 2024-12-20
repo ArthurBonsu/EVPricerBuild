@@ -1,10 +1,11 @@
 // File 9: DAO.tsx
 import React, { useState, useEffect } from 'react';
 import { Button, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from '@chakra-ui/react';
-import useDaoContext from '../hooks/useDaoContext';
-import { useLoadSafe } from '../hooks/useLoadSafe';
-import { useTransactions } from '../hooks/useTransactions';
-import { useSafeDetailsAndSetup } from '../hooks/useSafeDetailsAndSetup';
+import useDaoContext from 'context/useDaoContext';
+import { useLoadSafe } from 'hooks/useLoadSafe';
+
+import { useSafeDetailsAndSetup } from 'hooks/useSafeDetails.ts';
+
 
 interface PaymentTransactions {
   safeTxHash: string;
@@ -19,6 +20,8 @@ interface ExecuteTransferProps {
   safeAddress: string;
   userAddress: string;
 }
+
+
 
 const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAddress, ...rest }) => {
   const { createProposal, voteOnProposal, executeProposal, approveProposal, rejectProposal, sendPayment } = useDaoContext();
@@ -64,9 +67,7 @@ const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAdd
   };
 
   const handleSendPayment = async () => {
-    await sendPayment(paymentAmount, paymentRecipient);
-  };
-
+    await sendPayment( payment.username, , payment.amount,payment.contractaddress,receipient,txhash,owneraddress,USDprice)
   const handleSendTransaction = async () => {
     await sendTransaction();
   };

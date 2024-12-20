@@ -171,13 +171,24 @@ export const useSafeDetailsAndSetup = {
   },
 };
 
+
 //Create Safe
 // Add User
 // Create/ Propose  Transfer 
 // Approve Transfer 
 // Reject Transfer 
 // Check if Transfer  Is Signed
-
+return {
+  setUpMultiSigSafeAddress,
+  addAddressToSafe,
+  getSafeInfo,
+  executeTransaction,
+  getAllTransactions, 
+  isTxnExecutable,
+  proposeTransaction, 
+  approveTransfer, 
+  rejectTransfer
+};
 
 export default useSafeDetailsAndSetup;
 

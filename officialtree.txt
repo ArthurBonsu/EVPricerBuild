@@ -1,0 +1,84 @@
+EVPricerBuild/
+│
+├── app/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── (routes)/
+│   │   ├── dashboard/
+│   │   │   └── page.tsx
+│   │   ├── safe/
+│   │   │   └── [safeAddress]/
+│   │   │       ├── assets/
+│   │   │       │   └── page.tsx
+│   │   │       └── transfers/
+│   │   │           └── page.tsx
+│   │   ├── auth/
+│   │   │   ├── signin/
+│   │   │   │   └── page.tsx
+│   │   │   └── signup/
+│   │   │       └── page.tsx
+│   │   └── transfers/
+│   │       ├── simple/
+│   │       │   └── page.tsx
+│   │       ├── swap/
+│   │       │   └── page.tsx
+│   │       └── propose/
+│   │           └── page.tsx
+│
+├── components/
+│   ├── layout/
+│   │   ├── NavBar.tsx
+│   │   ├── Footer.tsx
+│   │   └── Sidebar.tsx
+│   ├── auth/
+│   │   ├── SignIn.tsx
+│   │   └── SignUp.tsx
+│   ├── safe/
+│   │   ├── CreateSafe.tsx
+│   │   ├── AddSafeOwners.tsx
+│   │   └── SafeTransfer.tsx
+│   ├── transfers/
+│   │   ├── SimpleTransfer.tsx
+│   │   ├── SwapTransfer.tsx
+│   │   └── ProposeTransfer.tsx
+│   └── ui/
+│       ├── Modal.tsx
+│       ├── AlertDialog.tsx
+│       └── Loader.tsx
+│
+├── lib/
+│   ├── auth/
+│   │   └── [...nextauth].ts
+│   └── services/
+│       ├── firebaseConfig.ts
+│       ├── mutations.ts
+│       └── queries.ts
+│
+├── stores/
+│   ├── ethersStore.ts
+│   ├── safeStore.ts
+│   └── ContextStores/
+│       └── useSwapStore.ts
+│
+├── hooks/
+│   └── useSession.ts
+│
+├── types/
+│   ├── ethers.ts
+│   └── index.ts
+│
+├── utils/
+│   ├── authUtils.ts
+│   ├── createSafe.ts
+│   └── helpers.ts
+│
+├── public/
+│   ├── favicon.ico
+│   └── logo.png
+│
+├── styles/
+│   └── globals.css
+│
+├── next.config.js
+├── tailwind.config.js
+└── tsconfig.json

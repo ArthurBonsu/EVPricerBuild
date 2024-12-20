@@ -3,6 +3,7 @@ import { ComponentType, FC } from 'react'
 import { dateAtTime,  timeAgo,   dateFormat, DateType } from 'utils/formatDate'
 import NextAuth, { DefaultSession } from "next-auth";
 import { useEffect, useState, useCallback } from 'react';
+import {ethers} from 'ethers';
 export interface TransfersType {
   count: Number
   countUniqueNonce: Number
@@ -133,7 +134,20 @@ export type SwapTransactionType = {
   owneraddress: string  
  }
 
-
+export interface TransactionParams {
+  username?: string;
+  contractaddress: string;
+  amount: number;
+  comment?: string;
+  timestamp: Date;
+  receipient: string;
+  receipients?: Array<string>;
+  txhash: string;
+  USDprice?: number;
+  paymenthash?: string;
+  owneraddress: string;
+  newcontract?: ethers.Contract;
+}
  export type SimpleTransferTranscations = {
   username: string , 
   address:string, 
