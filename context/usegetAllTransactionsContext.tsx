@@ -7,7 +7,7 @@ let contractAddress = "";
 
 const { ethereum } = window;
 
-const useTransactionContext = () => {
+const usegetAllTransactionsContext = () => {
   const createEthereumContract = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = await provider.getSigner();
@@ -151,4 +151,4 @@ const useTransactionContext = () => {
   };
 };
 
-export default useTransactionContext;
+export default usegetAllTransactionsContext;

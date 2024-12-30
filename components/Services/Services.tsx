@@ -14,7 +14,7 @@ import { useUserStore  } from 'stores/userStore'
 import  useEthers   from 'hooks/useEthers'
 import  useFetch   from 'hooks/useFetch'
 
-import useTransactions   from 'hooks/useTransactions'
+import useTransactions   from 'hooks/useTokenTransactions'
 
 import getSafeInfo from 'hooks/useLoadSafe'
 //Context 
@@ -22,7 +22,7 @@ import  useCrowdsourceContext   from 'context/useCrowdsourceContext'
 import  useDaoContext   from 'context/useDaoContext'
 import  useSwapContext   from 'context/useSwapContext'
 import  useTransactionContext   from 'context/useTransactionContext'
-import useTransferContext   from 'context/useTransferContext'
+import useTransferContext   from 'context/usegetAllTransactionsContext'
 import {ServiceProps} from 'types/ethers'
 import React, { FC, useEffect,  useCallback, useState, useContext } from 'react';
 

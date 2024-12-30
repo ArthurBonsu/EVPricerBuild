@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { BlockchainTransaction } from "types/ethers";
+import { PaymentTransactions } from "types";
 
 const contractABI = "";
 const contractAddress = "";
@@ -35,7 +36,7 @@ const useLandPaymentContext = () => {
       if (ethereum) {
         const landPaymentContract = await createEthereumContract();
         const availableTransactions = await landPaymentContract.getAllTransactions();
-        const structuredTransactions = availableTransactions.map((transaction: BlockchainTransaction) => ({
+        const structuredTransactions = availableTransactions.map((transaction: PaymentTransactions) => ({
           landAddress: transaction.landAddress,
           sender: transaction.sender,
           amount: transaction.amount,
@@ -92,39 +93,62 @@ const useLandPaymentContext = () => {
     }
   };
 
-  const sendTransaction = async () => {
-    try {
-      if (ethereum) {
-        const { landAddress, amount, message } = formData;
-        const landPaymentContract = await createEthereumContract();
-        const parsedAmount = ethers.utils.parseEther(amount);
-        setIsLoading(true);
-        await ethereum.request({
-          method: "eth_sendTransaction",
-          params: [{
-            from: currentAccount,
-            to: landAddress,
-            gas: "0x5208",
-            value: ethers.utils.formatEther(parsedAmount),
-          }],
-        });
-        const transactionHash = await landPaymentContract.payForLand(landAddress, parsedAmount, message);
-        setIsLoading(true);
-        console.log(`Loading - ${transactionHash.hash}`);
-        await transactionHash.wait();
-        console.log(`Success - ${transactionHash.hash}`);
-        setIsLoading(false);
-        const transactionsCount = await landPaymentContract.getTransactionCount();
-        setTransactionCount(transactionsCount.toNumber());
-        window.location.reload();
-      } else {
-        console.log("No ethereum object");
+  const sendTransaction = async (transactionData: PaymentTransactions) => {
+      try {
+        if (ethereum) {
+          const { address, amount, comment, receipient } = transactionData;
+          const transactionsContract = await createEthereumContract();
+          const parsedAmount = ethers.utils.parseEther(amount.toString());
+          // If this is a payment transaction, calculate the total amount to send
+          let totalAmount;
+          const isPayment = true; // assuming this is always true for payment transactions
+          if (isPayment) {
+            const paymentAmount = await transactionsContract.payfee(amount.toString());
+            totalAmount = parsedAmount.add(paymentAmount);
+          } else {
+            totalAmount = parsedAmount;
+          }
+          // Send the transaction to the blockchain
+          await ethereum.request({
+            method: "eth_sendTransaction",
+            params: [
+              {
+                from: currentAccount,
+                to: address,
+                gas: "0x5208",
+                value: ethers.utils.formatEther(totalAmount),
+              },
+            ],
+          });
+          // If this is a payment transaction, listen for payment event and update state
+          if (isPayment) {
+            const filter = transactionsContract.filters.payfeeevent(address, amount.toString());
+            const results = await transactionsContract.queryFilter(filter);
+            console.log("Payment event results:", results);
+          } else {
+            // Add the transaction to the blockchain using the addToBlockchain method
+            const transactionHash = await transactionsContract.addToBlockchain(
+              address,
+              parsedAmount,
+              comment,
+              "" // assuming keyword is not required
+            );
+            console.log(`Loading - ${transactionHash.hash}`);
+            await transactionHash.wait();
+            console.log(`Success - ${transactionHash.hash}`);
+          }
+          // Update transaction count
+          const transactionsCount = await transactionsContract.getTransactionCount();
+          setTransactionCount(transactionsCount.toNumber());
+        } else {
+          console.log("No ethereum object");
+        }
+      } catch (error) {
+        console.log(error);
+        throw new Error("No ethereum object");
       }
-    } catch (error) {
-      console.log(error);
-      throw new Error("No ethereum object");
-    }
-  };
+    };
+    
 
   useEffect(() => {
     checkIfWalletIsConnect();

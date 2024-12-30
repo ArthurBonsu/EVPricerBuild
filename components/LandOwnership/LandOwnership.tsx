@@ -17,7 +17,7 @@ import { useSession, signIn, signOut } from 'next-auth/react';
 import AppModal from '../AppModal/AppModal';
 import useLandOwnershipContext from 'context/useLandOwnership';
 import useLoadSafe from 'hooks/useLoadSafe';
-import useTransactions from 'hooks/useTransactions';
+import useTransactions from 'hooks/useTokenTransactions';
 import useSafeDetailsAndSetup from 'hooks/useSafeDetails.ts';
 
 export interface LandOwnershipProps {
@@ -27,6 +27,26 @@ export interface LandOwnershipProps {
   landSize: number;
   landPrice: number;
 }
+
+
+// Maintaining stores state  here for every page 
+  const chainId = useEthersStore((state) => state.chainId);
+  const walletaddress = useEthersStore((state) => state.setAddress);
+  const safeAddress = useSafeStore((state) => state.safeAddress);
+  const ownersAddress = useSafeStore((state) => state.ownersAddress);
+  const contractAddress = useSafeStore((state) => state.contractAddress);
+  const isPendingSafeCreation = useSafeStore((state) => state.isPendingSafeCreation);
+  const pendingSafeData = useSafeStore((state) => state.pendingSafeData);
+  const isPendingAddOwner = useSafeStore((state) => state.isPendingAddOwner);
+  const pendingAddOwnerData = useSafeStore((state) => state.pendingAddOwnerData);
+  const transaction = useTransactionStore((state) => state.transaction);
+  const txhash = useTransactionStore((state) => state.txhash);
+  const txdata = useTransactionStore((state) => state.txdata);
+  const txamount = useTransactionStore((state) => state.txamount);
+  const txname = useTransactionStore((state) => state.txname);
+  const  isPendingProposal = useTransactionStore((state) => state.isPendingProposal);
+  const pendingProposalData = useTransactionStore((state) => state.pendingProposalData);  
+  
 
 export const LandOwnership: React.FC<LandOwnershipProps> = ({
   landId,

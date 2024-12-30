@@ -110,146 +110,62 @@ const useTransactionContext = () => {
     setPaymentFormData((prevState) => ({ ...prevState, [name]: e.target.value }));
   };
 
-  const sendPayment = async ({ username, amount, contractaddress, ...rest }: TransactionParams) => {
-    setIsPaid(false);
+  const sendTransaction = async (transactionData: PaymentTransactions) => {
     try {
       if (ethereum) {
-        const { SimpleTransfer, signer, provider } = await createEthereumContract();
-        setIsPaid(true);
-
-        const amountOfTokens = ethers.utils.parseEther(amount.toString());
-
-        console.log("This is the amount of tokens", amountOfTokens);
-
-        const paymentAmountTx = await SimpleTransfer.payfee(rest.USDprice);
-        const paymentReceipt = await paymentAmountTx.wait();
-
-        console.log("Payment Fee", paymentReceipt);
-        console.log("Payment fee hash", paymentReceipt.transactionHash);
-
-        const filter = SimpleTransfer.filters.payfeeevent(rest.receipient, rest.USDprice);
-        const results = await SimpleTransfer.queryFilter(filter);
-
-        console.log(results);
-
-        const paymentReceiptAddress = paymentReceipt.events[0].args.sender.toString();
-        const paymentPriceEvented = paymentReceipt.events[0].args.amount.toNumber();
-
-        console.log('paymentAddress', paymentReceiptAddress);
-        console.log('paymentPriceEvented', paymentPriceEvented);
-
-        const transactionObject: TransactionParams = {
-          username: username || "",
-          contractaddress: contractaddress,
-          amount: amount,
-          comment: "",
-          timestamp: new Date(),
-          receipient: "",
-          receipients: [""],
-          txhash: rest.txhash,
-          USDprice: rest.USDprice || 0,
-          paymenthash: rest.paymenthash || "",
-          owneraddress: rest.owneraddress
-        };
-
-        const transactionRequest: TransactionRequest = {
-          to: rest.owneraddress,
-          from: contractaddress,
-          nonce: await SimpleTransfer.getTransactionCount(),
-          data: paymentReceipt.transactionHash,
-          value: amountOfTokens
-        };
-
-        setPaymentFormData(transactionObject);
-        setPaidTokenAmount(amount);
-        setPayment(paymentReceipt);
-        setPaymentTransactionRequest(transactionRequest);
-
-        await sendTransaction({ signer, provider: provider as any, transactionObject, transactionRequest, newcontract: SimpleTransfer });
-        setIsPaid(true);
-      } else {
-        console.log("Ethereum is not present");
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const sendSimpleTransfer = async ({ username, contractaddress, amount, comment, timestamp, receipient, receipients, txhash, USDprice, paymenthash, owneraddress }: SimpleTransferParams) => {
-    try {
-      if (ethereum) {
-        const { SimpleTransfer, signer, provider } = await createEthereumContract();
-        const amountOfTokens = ethers.utils.parseEther(amount.toString());
-
-        console.log("This is the amount of tokens", amountOfTokens);
-
-        if (receipients) {
-          receipients.forEach((item, index) => {
-            receipient = receipients[index];
-          });
-
-          const submitTokenTx = await SimpleTransfer.transferFrom(contractaddress, receipient, amountOfTokens);
-          const tokenSubmitTxReceipt = await submitTokenTx.wait();
-          setTokenTxReceipt(tokenSubmitTxReceipt);
-
-          const filter = SimpleTransfer.filters.transfer(0);
-          const results = await SimpleTransfer.queryFilter(filter);
-
-          console.log(results);
-
-          const addressRetrieved = tokenSubmitTxReceipt.events[0].args.address.toString();
-          const receipientRetrieved = tokenSubmitTxReceipt.events[0].args.receipient.toString();
-          const newTokenAmount = tokenSubmitTxReceipt.events[0].args.amount.toNumber();
-
-          console.log('addressRetrieved', addressRetrieved);
-          console.log('receipientRetrieved', receipientRetrieved);
-          console.log('newTokenAmount', newTokenAmount);
-
-          const transactionObject: SimpleTransferParams = {
-            username: username || "",
-            contractaddress: contractaddress,
-            amount: amount,
-            comment: comment || "",
-            timestamp: timestamp,
-            receipient: receipient,
-            receipients: receipients || [],
-            txhash: txhash,
-            USDprice: USDprice || 0,
-            paymenthash: paymenthash || "",
-            owneraddress: owneraddress
-          };
-
-          const transactionRequest: TransactionRequest = {
-            from: contractaddress,
-            to: receipient,
-            value: amountOfTokens,
-            nonce: await SimpleTransfer.getTransactionCount(),
-          };
-
-          setTransferFormData({
-            username: username || '',
-            contractaddress: contractaddress,
-            amount: amount,
-            comment: comment || '',
-            timestamp: timestamp,
-            receipient: receipient,
-            receipients: receipients || [],
-            txhash: txhash,
-            USDprice: USDprice || 0,
-            paymenthash: paymenthash || '',
-            owneraddress: owneraddress
-          });
-          await sendTransaction({ signer, provider: provider as any, transactionObject, transactionRequest, newcontract: SimpleTransfer });
-          setTransferredTokenAmount(amount);
-          setTransferTransactionRequest(transactionRequest);
+        const { address, amount, comment, receipient } = transactionData;
+        const transactionsContract = await createEthereumContract();
+        const parsedAmount = ethers.utils.parseEther(amount.toString());
+        // If this is a payment transaction, calculate the total amount to send
+        let totalAmount;
+        const isPayment = true; // assuming this is always true for payment transactions
+        if (isPayment) {
+          const paymentAmount = await transactionsContract.payfee(amount.toString());
+          totalAmount = parsedAmount.add(paymentAmount);
+        } else {
+          totalAmount = parsedAmount;
         }
+        // Send the transaction to the blockchain
+        await ethereum.request({
+          method: "eth_sendTransaction",
+          params: [
+            {
+              from: currentAccount,
+              to: address,
+              gas: "0x5208",
+              value: ethers.utils.formatEther(totalAmount),
+            },
+          ],
+        });
+        // If this is a payment transaction, listen for payment event and update state
+        if (isPayment) {
+          const filter = transactionsContract.filters.payfeeevent(address, amount.toString());
+          const results = await transactionsContract.queryFilter(filter);
+          console.log("Payment event results:", results);
+        } else {
+          // Add the transaction to the blockchain using the addToBlockchain method
+          const transactionHash = await transactionsContract.addToBlockchain(
+            address,
+            parsedAmount,
+            comment,
+            "" // assuming keyword is not required
+          );
+          console.log(`Loading - ${transactionHash.hash}`);
+          await transactionHash.wait();
+          console.log(`Success - ${transactionHash.hash}`);
+        }
+        // Update transaction count
+        const transactionsCount = await transactionsContract.getTransactionCount();
+        setTransactionCount(transactionsCount.toNumber());
       } else {
-        console.log("Ethereum is not present");
+        console.log("No ethereum object");
       }
     } catch (error) {
       console.log(error);
+      throw new Error("No ethereum object");
     }
   };
+  
 
   const checkIfWalletIsConnected = async () => {
     try {

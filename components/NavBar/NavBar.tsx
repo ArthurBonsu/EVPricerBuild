@@ -22,14 +22,14 @@ import { useUserStore } from 'stores/userStore';
 import useEthers from 'hooks/useEthers';
 import useFetch from 'hooks/useFetch';
 import useLoadSafe from 'hooks/useLoadSafe';
-import useTransactions from 'hooks/useTransactions';
+import useTransactions from 'hooks/useTokenTransactions';
 
 // Context
 import useCrowdsourceContext from 'context/useCrowdsourceContext';
 import useDaoContext from 'context/useDaoContext';
 import useSwapContext from 'context/useSwapContext';
 import useTransactionContext from 'context/useTransactionContext';
-import useTransferContext from 'context/useTransferContext';
+import useTransferContext from 'context/usegetAllTransactionsContext';
 
 interface NavBarProps {
   title: string;

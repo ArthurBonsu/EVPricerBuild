@@ -43,7 +43,7 @@ interface useTransactionProps {
 }
 
 // useTransactions is for token sending
-const useTransactions = async ({ nonce, amount, tokenname, symbol, logoUri }: SwapTransactionType) => {
+const useTokenTransactions = async ({ nonce, amount, tokenname, symbol, logoUri }: SwapTransactionType) => {
  
   const [tokentxhash, settokentxhash] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -125,4 +125,4 @@ const useTransactions = async ({ nonce, amount, tokenname, symbol, logoUri }: Sw
   };
 };
 
-export default useTransactions;
+export default useTokenTransactions;

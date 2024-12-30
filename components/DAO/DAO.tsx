@@ -1,45 +1,181 @@
-// File 9: DAO.tsx
 import React, { useState, useEffect } from 'react';
 import { Button, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from '@chakra-ui/react';
 import useDaoContext from 'context/useDaoContext';
 import { useLoadSafe } from 'hooks/useLoadSafe';
+import useSafeDetailsAndSetup from 'hooks/useSafeDetails.ts';
+import useTransactionContext from 'context/useTransactionContext';
+import { PaymentTransactions, TransactionParams } from 'types';
+import { useSafeStore } from 'stores/safeStore';
+import { useTransactionStore } from 'stores/transactionStore';
+import { useEthersStore } from 'stores/ethersStore';
 
-import { useSafeDetailsAndSetup } from 'hooks/useSafeDetails.ts';
 
 
-interface PaymentTransactions {
-  safeTxHash: string;
-  safeRejectTxHash: string | null;
-  threshold: string | number | undefined;
-  nonce: number;
-  hashTxn?: string;
+
+// Components
+
+//DAO
+
+/*(alias) type PaymentTransactions = {
+  data: any;
+  username: string;
+  address: string;
+  amount: number;
+  comment: string;
+  timestamp: Date;
+  receipient: string;
+  receipients: Array<string>;
+  txhash: string;
+  USDprice: number;
+  paymenthash: string;
+  owneraddress: string;
+}
+import PaymentTransactions
+*/
+
+
+interface Payment {
+  username: string;
+  amount: string;
+  contractaddress: string;
+  receipient: string;
+  txhash: string;
+  owneraddress: string;
+  USDprice: string;
 }
 
 interface ExecuteTransferProps {
   transaction: PaymentTransactions;
   safeAddress: string;
   userAddress: string;
+  receipients: Array<string>;
 }
 
 
-
-const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAddress, ...rest }) => {
-  const { createProposal, voteOnProposal, executeProposal, approveProposal, rejectProposal, sendPayment } = useDaoContext();
-  const { safeDetails } = useSafeDetailsAndSetup();
-  const { transactions, sendTransaction } = useTransactions();
+const DAO: React.FC<PaymentTransactions> = ({  ...rest }) => {
+  const { createProposal, voteOnProposal, executeProposal, approveProposal, rejectProposal, sendDaoTransaction } = useDaoContext();
+  const { getSafeInfo, addAddressToSafe,setUpMultiSigSafeAddress, isTxnExecutable,proposeTransaction,approveTransfer,rejectTransfer } = useSafeDetailsAndSetup();
+  const { transferTransaction, sendTransaction } = useTransactionContext();
 
   const [proposalTitle, setProposalTitle] = useState('');
   const [proposalDescription, setProposalDescription] = useState('');
-  const [vote, setVote] = useState('');
+  
   const [executionTxHash, setExecutionTxHash] = useState('');
+  const [vote, setVote] = useState('');
   const [isApproving, setIsApproving] = useState(false);
-  const [isRejecting, setIsRejecting] = useState(false);
-  const [paymentAmount, setPaymentAmount] = useState('');
-  const [paymentRecipient, setPaymentRecipient] = useState('');
+  const [isRejecting, setIsRejecting] = useState(false);   
+  const [isModalOpen, setIsModalOpen] = useState(false);  
+  const  [receipients, setReceipients] = useState<Array<string>>([]);
+  const [receipient, setReceipient] = useState<string>('');
+  const [paymenthash, setPaymentHash] = useState<string>('');
+  const [USDprice, setUSDprice] = useState<string>('');
+  const  [comment, setComment] = useState<string>('');
+  const  [amount, setAmount] = useState<string>('');
+  const  [timestamp, setTimestamp] = useState<Date>(new Date());
+  const [isConnected, setIsConnected] = useState(false);
+  
+ 
+  
+ 
+//useEther
+// Maintaining stores state  here for every page 
+  const chainId = useEthersStore((state) => state.chainId);
+  const walletaddress = useEthersStore((state) => state.setAddress);
+  const safeAddress = useSafeStore((state) => state.safeAddress);
+  const ownersAddress = useSafeStore((state) => state.ownersAddress);
+  const contractAddress = useSafeStore((state) => state.contractAddress);
+  const isPendingSafeCreation = useSafeStore((state) => state.isPendingSafeCreation);
+  const pendingSafeData = useSafeStore((state) => state.pendingSafeData);
+  const isPendingAddOwner = useSafeStore((state) => state.isPendingAddOwner);
+  const pendingAddOwnerData = useSafeStore((state) => state.pendingAddOwnerData);
+  const transaction = useTransactionStore((state) => state.transaction);
+  const txhash = useTransactionStore((state) => state.txhash);
+  const txdata = useTransactionStore((state) => state.txdata);
+  const txamount = useTransactionStore((state) => state.txamount);
+  const txname = useTransactionStore((state) => state.txname);
+  const  isPendingProposal = useTransactionStore((state) => state.isPendingProposal);
+  const pendingProposalData = useTransactionStore((state) => state.pendingProposalData);  
+  
+  /*
+//useTransactionStore
+transaction: PaymentTransactions;
+txhash: string | null;
+txdata: string | null;
+txamount: number | null;
+txname: string | null;
+txsymbol: string | null;
+txsigner: string | null;
+txlogoUri: string | null;
+isPendingProposal: boolean;
+pendingProposalData: any;
 
-  useEffect(() => {
-    console.log('Safe details:', safeDetails);
-  }, [safeDetails]);
+
+//useSafeStore
+safeAddress: string;
+ownersAddress: string[];
+contractAddress: string;
+isPendingSafeCreation: boolean;
+pendingSafeData: any; // or a more specific type if needed
+isPendingAddOwner: boolean;
+pendingAddOwnerData: any; // or a more specific type if needed
+
+
+//useTransactionStore
+transaction: PaymentTransactions;
+txhash: string | null;
+txdata: string | null;
+txamount: number | null;
+txname: string | null;
+txsymbol: string | null;
+txsigner: string | null;
+txlogoUri: string | null;
+isPendingProposal: boolean;
+pendingProposalData: any;
+
+//useUserStore
+hasMetamask: boolean
+isLoggedIn: boolean
+address: string | null
+setHasMetamask: (val: boolean) => void
+setIsLoggedIn: (val: boolean) => void
+setAddress: (val: string | null) => void
+
+  
+   transaction = useTransactionStore(state => state.transaction);
+  const address = useEthersStore(state => state.address);
+  const contractaddress: string;
+  const username?: string;
+  const comment?  //providers
+  const timestamp
+  const receipient
+  const receipients
+  const txhash
+  const USDprice
+  const setPaymenthash 
+  const owneraddress
+  const signers
+  const providers 
+  
+  //signers 
+ //contractaddress
+ //safeaddress
+ //useraddress
+ //paymenthash 
+ //USDprice
+
+       username?: string;
+      contractaddress: string;
+      amount: number;
+      comment?: string;
+      timestamp: Date;
+      receipient: string;
+      receipients?: Array<string>;
+      txhash: string;
+      USDprice?: number;
+      paymenthash?: string;
+      owneraddress: string;
+      newcontract?: ethers.Contract;
+ */
 
   const handleCreateProposal = async () => {
     await createProposal(proposalTitle, proposalDescription);
@@ -66,10 +202,54 @@ const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAdd
     setIsRejecting(false);
   };
 
-  const handleSendPayment = async () => {
-    await sendPayment( payment.username, , payment.amount,payment.contractaddress,receipient,txhash,owneraddress,USDprice)
-  const handleSendTransaction = async () => {
-    await sendTransaction();
+/*
+ const  sendPayment = async ({ username, amount, amount, ...rest }: TransactionParams
+
+
+      username?: string;
+      contractaddress: string;
+      amount: number;
+      comment?: string;
+      timestamp: Date;
+      receipient: string;
+      receipients?: Array<string>;
+      txhash: string;
+      USDprice?: number;
+      paymenthash?: string;
+      owneraddress: string;
+      newcontract?: ethers.Contract;
+
+
+*/
+   
+   const handleAddedReceipients= async () => {
+        setReceipients(receipients);
+   }
+   const handleSendDaoTransaction = async () => {
+    const transactionData: PaymentTransactions = {
+      data: null,
+      username: currentAccount,
+      address: receipient,
+      amount: parseFloat(amount),
+      comment: comment,
+      timestamp: new Date(),
+      receipient: receipient,
+      receipients: [],
+      txhash: '',
+      USDprice: 0,
+      paymenthash: '',
+      owneraddress: currentAccount,
+    };
+    const daoData = {
+      title: proposalTitle,
+      description: proposalDescription,
+      personName: currentAccount,
+    };
+    await sendDaoTransaction(transactionData, daoData);
+  };
+  
+  const onCloseModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -77,7 +257,7 @@ const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAdd
       <h1>DAO Service</h1>
   
       {/* Create Proposal Modal */}
-      <Modal isOpen={true} onClose={() => {}}>
+      <Modal isOpen={isModalOpen} onClose={onCloseModal}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Create Proposal</ModalHeader>
@@ -105,7 +285,7 @@ const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAdd
       </Modal>
   
       {/* Vote on Proposal Modal */}
-      <Modal isOpen={true} onClose={() => {}}>
+      <Modal isOpen={isModalOpen} onClose={onCloseModal}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Vote on Proposal</ModalHeader>
@@ -127,7 +307,7 @@ const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAdd
       </Modal>
   
       {/* Execute Proposal Modal */}
-      <Modal isOpen={true} onClose={() => {}}>
+      <Modal isOpen={isModalOpen} onClose={onCloseModal}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Execute Proposal</ModalHeader>
@@ -144,7 +324,7 @@ const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAdd
       </Modal>
   
       {/* Approve Proposal Modal */}
-      <Modal isOpen={true} onClose={() => {}}>
+      <Modal isOpen={isModalOpen} onClose={onCloseModal}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Approve Proposal</ModalHeader>
@@ -161,7 +341,7 @@ const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAdd
       </Modal>
   
       {/* Reject Proposal Modal */}
-      <Modal isOpen={true} onClose={() => {}}>
+      <Modal isOpen={isModalOpen} onClose={onCloseModal}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Reject Proposal</ModalHeader>
@@ -178,7 +358,7 @@ const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAdd
       </Modal>
   
       {/* Send Payment Modal */}
-      <Modal isOpen={true} onClose={() => {}}>
+      <Modal isOpen={isModalOpen} onClose={onCloseModal}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Send Payment</ModalHeader>
@@ -186,8 +366,8 @@ const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAdd
           <ModalBody>
             <Input
               type="number"
-              value={paymentAmount}
-              onChange={(e) => setPaymentAmount(e.target.value)}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
               placeholder="Payment amount"
             />
             <Input
@@ -195,6 +375,20 @@ const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAdd
               value={paymentRecipient}
               onChange={(e) => setPaymentRecipient(e.target.value)}
               placeholder="Payment recipient"
+            />
+
+             <Input
+              type="text"
+              value={receipients}
+              onChange={(e) => setReceipients(e.target.value)}
+              placeholder="Add extra Payment recipients"
+            />
+
+              <Input
+              type="text"
+              value={comment}
+              onChange={(e) => setComment(e.target.value[])}
+              placeholder="Add extra Payment recipients"
             />
           </ModalBody>
           <ModalFooter>
@@ -206,7 +400,7 @@ const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAdd
       </Modal>
   
       {/* Send Transaction Modal */}
-      <Modal isOpen={true} onClose={() => {}}>
+      <Modal isOpen={isModalOpen} onClose={onCloseModal}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Send Transaction</ModalHeader>
@@ -223,25 +417,26 @@ const DAO: React.FC<ExecuteTransferProps> = ({ transaction, safeAddress, userAdd
       </Modal>
   
       {/* Transaction History Modal */}
-      <Modal isOpen={true} onClose={() => {}}>
+      <Modal isOpen={isModalOpen} onClose={onCloseModal}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Transaction History</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <p>Transaction history:</p>
-            {transactions.map((transaction: { hash: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.PromiseLikeOfReactNode | null | undefined; }, index: React.Key | null | undefined) => (
+            {transferTransaction.map((transaction: { hash: string }, index: number) => (
               <p key={index}>{transaction.hash}</p>
             ))}
-             </ModalBody>
-      <ModalFooter>
-        <Button colorScheme="blue">Close</Button>
-      </ModalFooter>
-    </ModalContent>
-  </Modal>
-</div>
-
-);
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={onCloseModal}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </div>
+  );
 };
 
 export default DAO;

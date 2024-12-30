@@ -127,7 +127,7 @@ export type SwapTransactionType = {
   comment:string ,
   timestamp:Date, 
   receipient:string ,
-  receipients: Array<string> ,
+  receipients?: Array<string> ,
   txhash:string , 
   USDprice:number,
   paymenthash: string,

@@ -36,7 +36,7 @@ import  useFetch   from 'hooks/useFetch'
 import  useLoadSafe   from 'hooks/useLoadSafe'
 
 
-import useTransactions   from 'hooks/useTransactions'
+import useTransactions   from 'hooks/useTokenTransactions'
 
 import getSafeInfo from 'hooks/useLoadSafe'
 //Context 
@@ -44,7 +44,7 @@ import  useCrowdsourceContext   from 'context/useCrowdsourceContext'
 import  useDaoContext   from 'context/useDaoContext'
 import  useSwapContext   from 'context/useSwapContext'
 import  useTransactionContext   from 'context/useTransactionContext'
-import useTransferContext   from 'context/useTransferContext'
+import useTransferContext   from 'context/usegetAllTransactionsContext'
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 

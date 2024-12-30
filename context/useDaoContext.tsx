@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import   { TransactionRequest }  from "@ethersproject/abstract-provider";
 import { BlockchainTransaction } from "types/ethers";
-import {PaymentTransactions} from 'types/index'
+import {PaymentTransactions, SafeInfoType} from 'types/index'
 
 //import { contractABI, contractAddress } from '../constants/constants';
 
@@ -14,9 +14,78 @@ const contractAddress = "";
 const { ethereum } = window;
 
 
+ //ethersstore
+/*
+  safeAddress: string;
+  ownersAddress: string[];
+  contractAddress: string;
+  isPendingSafeCreation: boolean;
+  pendingSafeData: any; // or a more specific type if needed
+  isPendingAddOwner: boolean;
+  pendingAddOwnerData: any; // or a more specific type if needed
+  setSafeAddress: (safeAddress: SafeStore['safeAddress']) => void;
+  setOwnersAddress: (ownersAddress: SafeStore['ownersAddress']) => void;
+  setContractAddress: (contractAddress: SafeStore['contractAddress']) => void;
+  setIsPendingSafeCreation: (isPendingSafeCreation: SafeStore['isPendingSafeCreation']) => void;
+  setPendingSafeData: (pendingSafeData: SafeStore['pendingSafeData']) => void;
+  setIsPendingAddOwner: (isPendingAddOwner: SafeStore['isPendingAddOwner']) => void;
+  setPendingAddOwnerData: (pendingAddOwnerData: SafeStore['pendingAddOwnerData']) => void;
+  setSafeStore: (values: { safeAddress: string; contractAddress: string }) => void;
+}
 
 
+// useSwapStores
+    account: string
+  accounts: Array<String> 
+  provider: Web3Provider | null 
+  swaphash: SwapNewTokenTransaction['swaphash']
+  setAccount: (account: SwapStore['account']) => void
+  setProvider: (provider: SwapStore['provider']) => void
+  setAccounts: (accounts: SwapStore['accounts']) => void
+  setSwapTransactionHash: (swaptransaction: SwapStore['swaphash']) => void
+  setSwapStore: (values: Omit<SwapStore, 'setProvider' | 'setAccount' | 'setProvider' | 'setSwapTransactionHash' | 'setSwapStore' >) => void
+  
+  //transactionstore 
 
+transaction: PaymentTransactions;
+txhash: string | null;
+txdata: string | null;
+txamount: number | null;
+txname: string | null;
+txsymbol: string | null;
+txsigner: string | null;
+txlogoUri: string | null;
+isPendingProposal: boolean;
+pendingProposalData: any;
+
+//userstores 
+hasMetamask: boolean
+  isLoggedIn: boolean
+  address: string | null
+  setHasMetamask: (val: boolean) => void
+  setIsLoggedIn: (val: boolean) => void
+  setAddress: (val: string | null) => void
+
+// safestores
+safeAddress: string;
+ownersAddress: string[];
+contractAddress: string;
+isPendingSafeCreation: boolean;
+pendingSafeData: any; // or a more specific type if needed
+isPendingAddOwner: boolean;
+pendingAddOwnerData: any; // or a more specific type if needed
+setSafeAddress: (safeAddress: SafeStore['safeAddress']) => void;
+setOwnersAddress: (ownersAddress: SafeStore['ownersAddress']) => void;
+setContractAddress: (contractAddress: SafeStore['contractAddress']) => void;
+setIsPendingSafeCreation: (isPendingSafeCreation: SafeStore['isPendingSafeCreation']) => void;
+setPendingSafeData: (pendingSafeData: SafeStore['pendingSafeData']) => void;
+setIsPendingAddOwner: (isPendingAddOwner: SafeStore['isPendingAddOwner']) => void;
+setPendingAddOwnerData: (pendingAddOwnerData: SafeStore['pendingAddOwnerData']) => void;
+setSafeStore: (values: { safeAddress: string; contractAddress: string }) => void;
+}
+
+
+*/
 
 const useDaoContext = () => {
     
@@ -216,101 +285,100 @@ const useDaoContext = () => {
       throw error;
     }
   };
-  const sendTransaction = async () => {
+  const sendDaoTransaction = async (
+    transactionData: PaymentTransactions,
+    daoData: {
+      title: string;
+      description: string;
+      personName: string;
+    },
+    safeInfo: SafeInfoType: {
+     
+        address: string
+        nonce: number
+        threshold: number
+        owners: string[]
+        masterCopy: string
+        modules: string[]
+        fallbackHandler: string
+        guard: string
+        version: string
+      
+    }
+  ) => {
     try {
       if (ethereum) {
-        const { addressTo, amount, keyword, message } = formData;
+        const {
+          address,
+          amount,
+          comment,
+          receipient,
+          timestamp,
+          USDprice,
+          paymenthash,
+          owneraddress,
+        } = transactionData;
+        const { title, description, personName } = daoData;
+        const { address, ownersAddress, contractAddress } = safeInfo;
+  
         const transactionsContract = await createEthereumContract();
-        const parsedAmount = ethers.utils.parseEther(amount);
-
+        const parsedAmount = ethers.utils.parseEther(amount.toString());
+  
+        // If this is a payment transaction, calculate the total amount to send
+        let totalAmount;
+        const isPayment = true; // assuming this is always true for payment transactions
+        if (isPayment) {
+          const paymentAmount = await transactionsContract.payfee(amount.toString());
+          totalAmount = parsedAmount.add(paymentAmount);
+        } else {
+          totalAmount = parsedAmount;
+        }
+  
+        // Send the transaction to the blockchain
         await ethereum.request({
           method: "eth_sendTransaction",
-          params: [{
-            from: currentAccount,
-            to: addressTo,
-            gas: "0x5208",
-            value: ethers.utils.formatEther(parsedAmount),
-          }],
+          params: [
+            {
+              from: currentAccount,
+              to: address,
+              gas: "0x5208",
+              value: ethers.utils.formatEther(totalAmount),
+            },
+          ],
         });
-
-        const transactionHash = await transactionsContract.addToBlockchain(addressTo, parsedAmount, message, keyword);
-
-        setIsLoading(true);
+  
+        // Add the transaction to the blockchain using the addToBlockchain method
+        const transactionHash = await transactionsContract.addToBlockchain(
+          address,
+          parsedAmount,
+          comment,
+          title,
+          description,
+          personName,
+          safeAddress,
+          ownersAddress,
+          contractAddress,
+          timestamp,
+          USDprice,
+          paymenthash,
+          owneraddress
+        );
         console.log(`Loading - ${transactionHash.hash}`);
         await transactionHash.wait();
         console.log(`Success - ${transactionHash.hash}`);
-        setIsLoading(false);
-
+  
+        // Update transaction count
         const transactionsCount = await transactionsContract.getTransactionCount();
-
         setTransactionCount(transactionsCount.toNumber());
-        window.location.reload();
       } else {
         console.log("No ethereum object");
       }
     } catch (error) {
       console.log(error);
-
       throw new Error("No ethereum object");
     }
   };
-
-
-
-  useEffect(() => {
-    checkIfWalletIsConnect();
-    checkIfTransactionsExists();
-  }, [transactionCount]);
-
-  // Enhanced payment function based on useTransactionContext
-  const sendPayment = async ({ data, username, address, amount, timestamp, ...rest }: PaymentTransactions) => {
-    setIsPaid(false);
-    try {
-      if (ethereum) {
-        const transactionsContract = await createEthereumContract();
-        setIsPaid(true);
-
-        const amountOfTokens = ethers.utils.parseEther(amount.toString());
-        
-        console.log("Payment amount in tokens:", amountOfTokens);
-
-        // Pay the fee
-        const paymentAmountTx = await transactionsContract.payfee(rest.USDprice);
-        const paymentReceipt = await paymentAmountTx.wait();
-
-        console.log("Payment fee receipt:", paymentReceipt);
-        console.log("Payment fee hash:", paymentReceipt.transactionHash);
-
-        // Listen for payment event
-        const filter = transactionsContract.filters.payfeeevent(rest.receipient, rest.USDprice);
-        const results = await transactionsContract.queryFilter(filter);
-
-        console.log("Payment event results:", results);
-
-        const paymentReceiptAddress = paymentReceipt.events[0].args.sender.toString();
-        const paymentPriceEvented = paymentReceipt.events[0].args.amount.toNumber();
-
-        console.log('Payment sender address:', paymentReceiptAddress);
-        console.log('Payment amount from event:', paymentPriceEvented);
-
-        // Update states
-        setPaidTokenAmount(amount);
-        setPaymentTransactionReceipt(paymentReceipt);
-        setIsPaid(true);
-
-        // Update transaction count
-        const transactionsCount = await transactionsContract.getTransactionCount();
-        setTransactionCount(transactionsCount.toNumber());
-
-      } else {
-        console.log("Ethereum is not present");
-      }
-    } catch (error) {
-      console.error("Error in sendPayment:", error);
-      setIsPaid(false);
-      throw error;
-    }
-  };
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
     setformData((prevState) => ({ ...prevState, [name]: e.target.value }));
   };
@@ -324,10 +392,10 @@ const useDaoContext = () => {
         transactions,
         currentAccount,
         isLoading,
-        sendTransaction,
+        sendDaoTransaction,
         handleChange,
         formData,
-        sendPayment,
+     
         createProposal,
        voteOnProposal,
       executeProposal,
