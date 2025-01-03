@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract Safe is ReentrancyGuard {
+contract SafeAdmin is ReentrancyGuard {
     using SafeMath for uint256;
 
     // Enhanced owner structure

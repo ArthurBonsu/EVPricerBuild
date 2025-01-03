@@ -12,45 +12,6 @@ import { useEthersStore } from 'stores/ethersStore';
 
 
 
-// Components
-
-//DAO
-
-/*(alias) type PaymentTransactions = {
-  data: any;
-  username: string;
-  address: string;
-  amount: number;
-  comment: string;
-  timestamp: Date;
-  receipient: string;
-  receipients: Array<string>;
-  txhash: string;
-  USDprice: number;
-  paymenthash: string;
-  owneraddress: string;
-}
-import PaymentTransactions
-*/
-
-
-interface Payment {
-  username: string;
-  amount: string;
-  contractaddress: string;
-  receipient: string;
-  txhash: string;
-  owneraddress: string;
-  USDprice: string;
-}
-
-interface ExecuteTransferProps {
-  transaction: PaymentTransactions;
-  safeAddress: string;
-  userAddress: string;
-  receipients: Array<string>;
-}
-
 
 const DAO: React.FC<PaymentTransactions> = ({  ...rest }) => {
   const { createProposal, voteOnProposal, executeProposal, approveProposal, rejectProposal, sendDaoTransaction } = useDaoContext();
@@ -59,28 +20,26 @@ const DAO: React.FC<PaymentTransactions> = ({  ...rest }) => {
 
   const [proposalTitle, setProposalTitle] = useState('');
   const [proposalDescription, setProposalDescription] = useState('');
-  
   const [executionTxHash, setExecutionTxHash] = useState('');
   const [vote, setVote] = useState('');
   const [isApproving, setIsApproving] = useState(false);
-  const [isRejecting, setIsRejecting] = useState(false);   
-  const [isModalOpen, setIsModalOpen] = useState(false);  
-  const  [receipients, setReceipients] = useState<Array<string>>([]);
+  const [isRejecting, setIsRejecting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [receipients, setReceipients] = useState<Array<string>>([]);
   const [receipient, setReceipient] = useState<string>('');
   const [paymenthash, setPaymentHash] = useState<string>('');
   const [USDprice, setUSDprice] = useState<string>('');
-  const  [comment, setComment] = useState<string>('');
-  const  [amount, setAmount] = useState<string>('');
-  const  [timestamp, setTimestamp] = useState<Date>(new Date());
+  const [comment, setComment] = useState<string>('');
+  const [amount, setAmount] = useState<string>('');
+  const [timestamp, setTimestamp] = useState<Date>(new Date());
   const [isConnected, setIsConnected] = useState(false);
-  
  
   
  
 //useEther
 // Maintaining stores state  here for every page 
   const chainId = useEthersStore((state) => state.chainId);
-  const walletaddress = useEthersStore((state) => state.setAddress);
+  const address = useEthersStore((state) => state.setAddress);
   const safeAddress = useSafeStore((state) => state.safeAddress);
   const ownersAddress = useSafeStore((state) => state.ownersAddress);
   const contractAddress = useSafeStore((state) => state.contractAddress);
@@ -96,6 +55,8 @@ const DAO: React.FC<PaymentTransactions> = ({  ...rest }) => {
   const  isPendingProposal = useTransactionStore((state) => state.isPendingProposal);
   const pendingProposalData = useTransactionStore((state) => state.pendingProposalData);  
   
+  
+
   /*
 //useTransactionStore
 transaction: PaymentTransactions;
@@ -202,33 +163,11 @@ setAddress: (val: string | null) => void
     setIsRejecting(false);
   };
 
-/*
- const  sendPayment = async ({ username, amount, amount, ...rest }: TransactionParams
 
-
-      username?: string;
-      contractaddress: string;
-      amount: number;
-      comment?: string;
-      timestamp: Date;
-      receipient: string;
-      receipients?: Array<string>;
-      txhash: string;
-      USDprice?: number;
-      paymenthash?: string;
-      owneraddress: string;
-      newcontract?: ethers.Contract;
-
-
-*/
-   
-   const handleAddedReceipients= async () => {
-        setReceipients(receipients);
-   }
-   const handleSendDaoTransaction = async () => {
+  const handleSendDaoTransaction = async () => {
     const transactionData: PaymentTransactions = {
       data: null,
-      username: currentAccount,
+      username: ownersAddress,
       address: receipient,
       amount: parseFloat(amount),
       comment: comment,
@@ -238,14 +177,19 @@ setAddress: (val: string | null) => void
       txhash: '',
       USDprice: 0,
       paymenthash: '',
-      owneraddress: currentAccount,
+      owneraddress: ownersAddress,
     };
     const daoData = {
       title: proposalTitle,
       description: proposalDescription,
-      personName: currentAccount,
+      personName: ownersAddress,
     };
-    await sendDaoTransaction(transactionData, daoData);
+    const safeInfo = {
+      safeAddress,
+      ownersAddress,
+      contractAddress,
+    };
+    await sendDaoTransaction(transactionData, daoData, safeInfo);
   };
   
   const onCloseModal = () => {
