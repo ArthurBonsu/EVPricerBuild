@@ -101,3 +101,4 @@ export interface SignInProviders {
   credentials?:string
   secret?:string 
 }
+

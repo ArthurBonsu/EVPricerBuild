@@ -363,3 +363,59 @@ export type SafeTransacTransactionData = {
 
    }
   }
+  export interface SafeInfoParam {
+    safeAddress: string;
+    ownersAddress: string[];
+    safeContractAddress: string;
+    threshold: number;
+    ownerInfo: any[];
+    isPendingSafeCreation?: boolean;
+    pendingSafeData?: any;
+    isPendingAddOwner?: boolean;
+    pendingAddOwnerData?: any;
+  }
+  
+  export interface executeTransParam {
+    safeAddress: string;
+    provider: ethers.providers.Web3Provider;
+    signer: ethers.Signer;
+    transaction: PaymentTransactions;
+    hashtxn: string;
+    ownersAddress: string[];
+    safeContractAddress: string;
+    threshold: number;
+    ownerInfo: any[];
+    isPendingSafeCreation?: boolean;
+    pendingSafeData?: any;
+    isPendingAddOwner?: boolean;
+    pendingAddOwnerData?: any;
+  }
+
+  export interface SafeDetails {
+    setUpMultiSigSafeAddress: (address: string) => Promise<string>;
+    addAddressToSafe: (safeAddress: string, newAddress: string) => Promise<string[]>;
+    getSafeInfo: (param: SafeInfoParam) => Promise<any>;
+    executeTransaction: (param: executeTransParam) => Promise<any>;
+    getAllTransactions: (param: SafeInfoParam) => Promise<any>;
+    isTxnExecutable: (param: executeTransParam) => Promise<any>;
+    proposeTransaction: (param: executeTransParam) => Promise<any>;
+    approveTransfer: (param: executeTransParam) => Promise<any>;
+    rejectTransfer: (param: executeTransParam) => Promise<any>;
+    transactionPull: PaymentTransactions[];
+    removeOwner: (param: { safeAddress: string; owner: string }) => Promise<any>;
+    updateThreshold: (param: { safeAddress: string; threshold: number }) => Promise<any>;
+    getOwners: (param: { safeAddress: string }) => Promise<any>;
+    getOwnerDetails: (param: { safeAddress: string; owner: string }) => Promise<any>;
+    getTransactionCount: (param: { safeAddress: string }) => Promise<any>;
+    getUserTransactions: (param: { safeAddress: string; user: string }) => Promise<any>;
+    setPendingAddOwnerData: (param: { safeAddress: string; owner: string; timestamp: number }) => Promise<any>;
+    setIsPendingAddOwner: (param: { safeAddress: string; owner: string; status: boolean }) => Promise<any>;
+    userAddToSafe: (param: { safeAddress: string; user: string }) => Promise<any>;
+    updateTransactionStatus: (param: { safeAddress: string; transactionHash: string; status: string }) => Promise<any>;
+    getSafeInfoUsed: (param: { safeAddress: string }) => Promise<any>;
+    getSafeOwners: (param: { safeAddress: string }) => Promise<any>;
+    getTransactionDetails: (param: { safeAddress: string; transactionId: number }) => Promise<any>;
+    isOwnerAddress: (param: { safeAddress: string; owner: string }) => Promise<any>;
+    getTotalWeight: (param: { safeAddress: string }) => Promise<any>;
+    getThreshold: (param: { safeAddress: string }) => Promise<any>;
+  }
