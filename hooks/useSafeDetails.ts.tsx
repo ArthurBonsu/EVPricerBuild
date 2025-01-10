@@ -18,6 +18,8 @@ export interface executeTransParam {
   hashtxn?: string;
 }
 
+
+
 const useSafeDetailsAndSetup = () => {
   // Define the provider
   const provider: Web3Provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -117,12 +119,13 @@ const useSafeDetailsAndSetup = () => {
     return tx;
   };
 
-  const updateTransactionStatus = async ({ safeAddress, transactionHash, status }: { safeAddress: string; transactionHash: string; status: string }) => {
-    const safeContract = new ethers.Contract(safeAddress, contractAbi, provider);
-    const tx = await safeContract.functions.updateTransactionStatus(transactionHash, status);
+  const updateTransactionStatus = async (transaction: PaymentTransactions, status: string) => {
+    const safeContract = new ethers.Contract(transaction.safeAddress, contractAbi, provider);
+    const tx = await safeContract.functions.updateTransactionStatus(transaction.txhash, status);
     await tx.wait();
     return tx;
   };
+  
 
   const getSafeInfoUsed = async ({ safeAddress }: { safeAddress: string }) => {
     const safeContract = new ethers.Contract(safeAddress, contractAbi, provider);
@@ -187,7 +190,7 @@ const useSafeDetailsAndSetup = () => {
     return executable;
   };
 
-  const proposeTransaction = async ({ safeAddress, transaction }: executeTransParam) => {
+  const proposeTransaction = async (safeAddress: string, transaction: PaymentTransactions, { safeAddress, transaction }: executeTransParam) => {
     const safeContract = new ethers.Contract(safeAddress, contractAbi, provider);
     const tx = await safeContract.functions.proposeTransaction(transaction);
     await tx.wait();

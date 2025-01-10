@@ -4,7 +4,7 @@ import { FC, useEffect,  useCallback, useState, useContext } from 'react'
 import { shortenAddress } from "../../constants/shortenAddress";
 import dummyData from "../../constants/dummyData"
 //STORES
-import { useSwapStore  } from 'stores/ContextStores/useSwapStore'
+import { useSwapStore  } from 'stores/ContextStores/walletStore'
 import { useEthersStore  } from 'stores/ethersStore'
 import { useSafeStore  } from 'stores/safeStore'
 import { useTransactionStore } from 'stores/transactionStore';

@@ -6,12 +6,20 @@ import Web3 from 'web3';
 import useSafeDetailsAndSetup from 'hooks/useSafeDetails.ts';
 import { SafeInfoParam, executeTransParam } from "types/index";
 import { PaymentTransactions } from "types/index";
+import { useWalletStore } from 'stores/ContextStores/walletStore'
+import { Web3Provider } from '@ethersproject/providers';
 
-interface UseSafeProps {
+export interface UseSafeProps {
   safeAddress: string;
   userAddress: string;
 }
 
+const signer = useWalletStore((state) => state.signer);
+  const accounts = useWalletStore((state) => state.accounts);
+  const provider = useWalletStore((state) => state.provider);
+  const hasMetamask = useWalletStore((state) => state.hasMetamask);
+  const isLoggedIn = useWalletStore((state) => state.isLoggedIn);
+  const address = useWalletStore((state) => state.address);
 const {
   setUpMultiSigSafeAddress,
   addAddressToSafe,
@@ -31,7 +39,7 @@ const {
   setPendingAddOwnerData,
   setIsPendingAddOwner,
   userAddToSafe,
-  updateTransactionStatus,
+  updateTransactionStatusHere,
   getSafeInfoUsed,
   getSafeOwners,
   getTransactionDetails,
@@ -80,7 +88,13 @@ export const useLoadSafe = ({ safeAddress, userAddress }: UseSafeProps) => {
   const getSafeInfoUsed = useCallback(async () => {
     setIsLoading(true);
     if (safeAddress) {
-      const safeInfoParam: SafeInfoParam = { safeAddress };
+      const safeInfoParam: SafeInfoParam = {
+        ownersAddress: ['ownerAddress'],
+        safeContractAddress: 'safeContractAddress',
+        threshold: 1,
+        ownerInfo: [],
+        safeAddress: safeAddress,
+      };
       const safeInfo = await getSafeInfo(safeInfoParam);
       setSafe(safeInfo);
     }
@@ -89,7 +103,13 @@ export const useLoadSafe = ({ safeAddress, userAddress }: UseSafeProps) => {
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      const safeInfoParam: SafeInfoParam = { safeAddress };
+      const safeInfoParam: SafeInfoParam = {
+        ownersAddress: ['ownerAddress'],
+        safeContractAddress: 'safeContractAddress',
+        threshold: 1,
+        ownerInfo: [],
+        safeAddress: safeAddress,
+      };
       const txs = await getAllTransactions(safeInfoParam);
       setTransactions(txs);
     };
@@ -98,7 +118,13 @@ export const useLoadSafe = ({ safeAddress, userAddress }: UseSafeProps) => {
 
   const checkIsSigned = useCallback(async (transactionHash: string) => {
     setIsLoading(true);
-    const safeInfoParam: SafeInfoParam = { safeAddress };
+    const safeInfoParam: SafeInfoParam = {
+      ownersAddress: ['ownerAddress'],
+      safeContractAddress: 'safeContractAddress',
+      threshold: 1,
+      ownerInfo: [],
+      safeAddress: safeAddress,
+    };
     const txs = await getAllTransactions(safeInfoParam);
     const retrievedTransaction = txs.results.find((tx: any) => tx.data.hash === transactionHash);
     const isSigned = retrievedTransaction?.isSigned;
@@ -123,6 +149,7 @@ export const useLoadSafe = ({ safeAddress, userAddress }: UseSafeProps) => {
     checkIsSigned('0x...transactionHash...');
   }, [checkIsSigned, safeAddress]);
 
+
   const checkIfTxnExecutable = async (transaction: any) => {
     setTransaction(transaction);
     const executable = await isTxnExecutable({ safeAddress, transaction });
@@ -141,32 +168,47 @@ export const useLoadSafe = ({ safeAddress, userAddress }: UseSafeProps) => {
     return rejectedTxn;
   };
 
+
+  
   const executeSafeTransaction = async (transaction: PaymentTransactions) => {
     setIsLoading(true);
     const executable = await checkIfTxnExecutable(transaction);
     setTransaction(transaction);
     if (executable) {
-      const proposedTxn = await proposeTxn(transaction);
-      const approvedTxn = await approveTxn(transaction);
-      const executeTransParam: executeTransParam = {
-        safeAddress,
-        provider: provider,
-        signer: owner._address,
-        transaction: transaction,
-        hashtxn: transaction.txhash,
-      };
-      const response = await executeTransaction(executeTransParam);
-      setTransactionStatus((prevStatus) => ({ ...prevStatus, [transaction.txhash]: 'complete' }));
-      setIsLoading(false);
-      return response;
+      const proposedTxn = await proposeTransaction(safeAddress, transaction, { safeAddress, transaction });
+      const approvedTxn = await approveTransfer({ safeAddress, transaction });
+      if (provider !== null) {
+        const signerAddress = signer ? await signer : undefined;
+        const executeTransParam: executeTransParam = {
+          safeAddress,
+          provider: provider as Web3Provider | undefined,
+          signer: signerAddress,
+          transaction,
+          hashtxn: transaction.txhash,
+          ownersAddress: [],
+          safeContractAddress: '',
+          threshold: 0,
+          ownerInfo: []
+        };
+        const response = await executeTransaction(executeTransParam);
+        setTransactionStatus((prevStatus) => ({ ...prevStatus, [transaction.txhash]: 'complete' }));
+        setIsLoading(false);
+        return response;
+      } else {
+        // Handle the case where provider is null
+        console.error('Provider is null');
+        setIsLoading(false);
+        return null;
+      }
     } else {
-      const rejectedTxn = await rejectTxn(transaction.txhash);
+      const rejectedTxn = await rejectTransfer({ safeAddress, transaction });
       setTransactionStatus((prevStatus) => ({ ...prevStatus, [transaction.txhash]: 'rejected' }));
       setIsLoading(false);
       return rejectedTxn;
     }
   };
-
+  
+  
   const removeOwnerFromSafe = async (owner: string) => {
     setIsLoading(true);
     const result = await removeOwner({ safeAddress, owner });
@@ -230,12 +272,17 @@ export const useLoadSafe = ({ safeAddress, userAddress }: UseSafeProps) => {
     return result;
   };
 
-  const updateTransactionStatusInSafe = async (transactionHash: string, status: string) => {
+  const updateTransactionStatusInSafe = async (safeAddress: string, transactionHash: string, status: string) => {
     setIsLoading(true);
-    const result = await updateTransactionStatus({ safeAddress, transactionHash, status });
+    const result = await updateTransactionStatusHere({ 
+      safeAddress, 
+      transactionHash, 
+      status 
+    });
     setIsLoading(false);
     return result;
   };
+  
 
   const getSafeInfoUsedOfSafe = async () => {
     setIsLoading(true);
@@ -298,7 +345,7 @@ export const useLoadSafe = ({ safeAddress, userAddress }: UseSafeProps) => {
     userAddToSafe,
     executeSafeTransaction,
     getSafeInfoUsed,
-    proposeTransaction: proposeTxn,
+    proposeTransaction,
     approveTransfer: approveTxn,
     rejectTransfer: rejectTxn,
     updateTransactionStatus,
@@ -322,3 +369,7 @@ export const useLoadSafe = ({ safeAddress, userAddress }: UseSafeProps) => {
 };
 
 export default useLoadSafe;
+
+function setIsLoading(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}

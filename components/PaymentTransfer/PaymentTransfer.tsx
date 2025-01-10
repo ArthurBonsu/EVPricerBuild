@@ -20,7 +20,7 @@ import { useFormContext, useFieldArray ,useForm, Controller} from 'react-hook-fo
 import { CreateSwapTransferInput, CreateTransferInput, SimpleTokenList } from 'types'
 import supportedNetworkOptions from 'constants/supportedNetworkOptions'
 //STORES
-import { useSwapStore  } from 'stores/ContextStores/useSwapStore'
+import { useSwapStore  } from 'stores/ContextStores/walletStore'
 import { useEthersStore  } from 'stores/ethersStore'
 import { useSafeStore  } from 'stores/safeStore'
 import { useTransactionStore } from 'stores/transactionStore';

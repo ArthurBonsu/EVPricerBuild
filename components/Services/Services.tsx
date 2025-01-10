@@ -4,7 +4,7 @@ import { BiSearchAlt } from "react-icons/bi";
 import { RiHeart2Fill } from "react-icons/ri";
 
 //STORES
-import { useSwapStore  } from 'stores/ContextStores/useSwapStore'
+import { useSwapStore  } from 'stores/ContextStores/walletStore'
 import { useEthersStore  } from 'stores/ethersStore'
 import { useSafeStore  } from 'stores/safeStore'
 import { useTransactionStore } from 'stores/transactionStore';

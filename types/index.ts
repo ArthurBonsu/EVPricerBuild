@@ -377,20 +377,16 @@ export type SafeTransacTransactionData = {
   
   export interface executeTransParam {
     safeAddress: string;
-    provider: ethers.providers.Web3Provider;
-    signer: ethers.Signer;
+    provider: ethers.providers.Web3Provider | undefined;
+    signer:  string | undefined
     transaction: PaymentTransactions;
     hashtxn: string;
     ownersAddress: string[];
     safeContractAddress: string;
     threshold: number;
     ownerInfo: any[];
-    isPendingSafeCreation?: boolean;
-    pendingSafeData?: any;
-    isPendingAddOwner?: boolean;
-    pendingAddOwnerData?: any;
   }
-
+  
   export interface SafeDetails {
     setUpMultiSigSafeAddress: (address: string) => Promise<string>;
     addAddressToSafe: (safeAddress: string, newAddress: string) => Promise<string[]>;
